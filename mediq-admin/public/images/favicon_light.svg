@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <title>MediQ</title>
+  <rect width="32" height="32" rx="6" fill="#2563EB"/>
+  <!-- Thick Q ring -->
+  <path d="M16 4C9.37 4 4 9.37 4 16s5.37 12 12 12 12-5.37 12-12S22.63 4 16 4Zm0 4.7c3.9 0 7.3 3.4 7.3 7.3s-3.4 7.3-7.3 7.3-7.3-3.4-7.3-7.3 3.4-7.3 7.3-7.3Z" fill="#ffffff"/>
+  <!-- Thick medical cross -->
+  <rect x="14" y="11" width="4" height="10" rx="0.6" fill="#ffffff"/>
+  <rect x="11" y="14" width="10" height="4" rx="0.6" fill="#ffffff"/>
+  <!-- Thick diagonal tail -->
+  <path d="M20.5 20.5L27 27" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/>
+</svg>
