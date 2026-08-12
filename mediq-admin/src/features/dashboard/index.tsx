@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useMemo } from 'react'
 import {
   Bar,
   BarChart,
@@ -18,10 +18,18 @@ import {
   Users,
   CheckCircle2,
   Stethoscope,
+  Activity,
 } from 'lucide-react'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
-import { RecentCheckIns } from './components/recent-check-ins'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
@@ -29,11 +37,137 @@ import { TopNav } from '@/components/layout/top-nav'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
+import { useAuthStore } from '@/stores/auth-store'
+import { useAppointments, useDoctors, useQueue } from '@/data/hooks'
+import { minutesBetween } from '@/features/queue/data'
+import { queueStatusBadge, type QueueEntry } from '@/features/queue/schema'
+
+const HOURS = ['9AM', '10AM', '11AM', '12PM', '1PM', '2PM', '3PM', '4PM', '5PM']
 
 export function Dashboard() {
+  const user = useAuthStore((state) => state.auth.user)
+  const appointmentsQuery = useAppointments()
+  const queueQuery = useQueue()
+  const doctorsQuery = useDoctors()
+
+  const isPending =
+    appointmentsQuery.isPending || queueQuery.isPending || doctorsQuery.isPending
+
+  const appointments = appointmentsQuery.data ?? []
+  const queue = queueQuery.data ?? []
+  const doctors = doctorsQuery.data ?? []
+
+  /**
+   * Doctor view is scoped to their own work: appointments and queue entries
+   * matching the doctor account tied to their email. A real backend must
+   * enforce this server-side (types/domain.ts); this is the UI mirror.
+   */
+  const isDoctor = user?.role.includes('doctor')
+  const doctor = isDoctor ? doctors.find((d) => d.email === user?.email) : undefined
+  const ownAppointments = useMemo(
+    () =>
+      doctor
+        ? appointments.filter((a) => a.doctorId === doctor.id)
+        : appointments,
+    [appointments, doctor]
+  )
+
+  const now = new Date().toISOString()
+  const waitingCount = queue.filter((e) => e.status === 'waiting').length
+  const servedCount = queue.filter((e) => e.status === 'done').length
+  const slowWaiting = queue.filter(
+    (e) => e.status === 'waiting' && minutesBetween(e.checkedInAt, now) > 15
+  ).length
+  const activeDoctors = doctors.filter((d) => d.status === 'active').length
+  const completedToday = ownAppointments.filter(
+    (a) => a.status === 'completed'
+  ).length
+  const inProgress = ownAppointments.filter(
+    (a) => a.status === 'in_progress'
+  ).length
+  const myWaiting = queue.filter(
+    (e) => e.status === 'waiting' && e.doctorName === doctor?.name
+  ).length
+
+  const stats = doctor
+    ? [
+        {
+          label: 'My appointments',
+          value: ownAppointments.length,
+          subtext: 'scheduled today',
+          icon: CalendarDays,
+        },
+        {
+          label: 'Waiting for me',
+          value: myWaiting,
+          subtext: 'patients in the queue',
+          icon: Users,
+        },
+        {
+          label: 'In progress',
+          value: inProgress,
+          subtext: 'visits right now',
+          icon: Activity,
+        },
+        {
+          label: 'Completed',
+          value: completedToday,
+          subtext: 'visits today',
+          icon: CheckCircle2,
+        },
+      ]
+    : [
+        {
+          label: 'Appointments',
+          value: appointments.length,
+          subtext: 'scheduled today',
+          icon: CalendarDays,
+        },
+        {
+          label: 'In queue',
+          value: waitingCount,
+          subtext: `${slowWaiting} waiting > 15 min`,
+          icon: Users,
+        },
+        {
+          label: 'Served today',
+          value: servedCount,
+          subtext: 'check-ins completed',
+          icon: CheckCircle2,
+        },
+        {
+          label: 'Active doctors',
+          value: `${activeDoctors} / ${doctors.length}`,
+          subtext: 'on duty now',
+          icon: Stethoscope,
+        },
+      ]
+
+  const hourlyData = useMemo(
+    () =>
+      HOURS.map((hour, index) => ({
+        hour,
+        appointments: ownAppointments.filter(
+          (a) => new Date(a.scheduledFor).getHours() === 9 + index
+        ).length,
+      })),
+    [ownAppointments]
+  )
+
+  const recentCheckIns = useMemo(
+    () =>
+      queue
+        .filter((entry) => entry.status !== 'left')
+        .sort(
+          (a, b) =>
+            new Date(b.checkedInAt).getTime() - new Date(a.checkedInAt).getTime()
+        )
+        .slice(0, 5),
+    [queue]
+  )
+
   return (
     <>
-      {/* ===== Top Heading ===== */}
       <Header>
         <TopNav links={topNav} className='me-auto' />
         <Search />
@@ -42,27 +176,20 @@ export function Dashboard() {
         <ProfileDropdown />
       </Header>
 
-      {/* ===== Main ===== */}
-      <Main>
+      <Main className='flex flex-1 flex-col gap-4 sm:gap-6'>
         <div className='mb-2 flex items-center justify-between space-y-2'>
           <div className='space-y-1'>
             <h1 className='text-2xl font-bold tracking-tight'>Dashboard</h1>
             <p className='text-sm text-muted-foreground'>Today's overview</p>
           </div>
         </div>
-        <Tabs
-          orientation='vertical'
-          defaultValue='overview'
-          className='space-y-4'
-        >
-          <div className='w-full overflow-x-auto pb-2'>
-            <TabsList>
-              <TabsTrigger value='overview'>Overview</TabsTrigger>
-            </TabsList>
-          </div>
-          <TabsContent value='overview' className='space-y-4'>
+
+        {isPending ? (
+          <DashboardSkeleton />
+        ) : (
+          <div className='space-y-4'>
             <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
-              {statCards.map((stat) => (
+              {stats.map((stat) => (
                 <Card key={stat.label}>
                   <CardContent className='pt-6'>
                     <div className='flex items-center gap-2'>
@@ -81,112 +208,151 @@ export function Dashboard() {
                 </Card>
               ))}
             </div>
+
             <div className='grid grid-cols-1 gap-4 lg:grid-cols-2'>
               <Card>
                 <CardHeader>
                   <CardTitle>Appointments Today</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <AppointmentsChart />
+                  <div className='h-64 w-full'>
+                    <ResponsiveContainer width='100%' height='100%'>
+                      <BarChart
+                        data={hourlyData}
+                        margin={{ top: 4, right: 4, bottom: 0, left: -20 }}
+                      >
+                        <XAxis
+                          dataKey='hour'
+                          tickLine={false}
+                          axisLine={false}
+                          tickMargin={8}
+                          tick={{ fontSize: 12 }}
+                          stroke='var(--muted-foreground)'
+                        />
+                        <YAxis
+                          allowDecimals={false}
+                          tickLine={false}
+                          axisLine={false}
+                          tickMargin={4}
+                          tick={{ fontSize: 12 }}
+                          stroke='var(--muted-foreground)'
+                          width={28}
+                        />
+                        <Tooltip
+                          cursor={{ fill: 'var(--muted)', opacity: 0.4 }}
+                          contentStyle={{
+                            borderRadius: 8,
+                            border: '1px solid var(--border)',
+                            background: 'var(--card)',
+                            fontSize: 12,
+                          }}
+                          labelStyle={{
+                            color: 'var(--foreground)',
+                            fontWeight: 600,
+                          }}
+                        />
+                        <Bar
+                          dataKey='appointments'
+                          className='fill-primary'
+                          radius={[4, 4, 0, 0]}
+                          maxBarSize={48}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
                 </CardContent>
               </Card>
+
               <Card>
                 <CardHeader>
                   <CardTitle>Recent Check-ins</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <RecentCheckIns />
+                  {recentCheckIns.length === 0 ? (
+                    <p className='py-10 text-center text-sm text-muted-foreground'>
+                      No check-ins yet today.
+                    </p>
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Patient</TableHead>
+                          <TableHead>Check-in</TableHead>
+                          <TableHead className='hidden sm:table-cell'>
+                            Doctor
+                          </TableHead>
+                          <TableHead>Status</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {recentCheckIns.map((entry) => (
+                          <CheckInRow key={entry.id} entry={entry} />
+                        ))}
+                      </TableBody>
+                    </Table>
+                  )}
                 </CardContent>
               </Card>
             </div>
-          </TabsContent>
-        </Tabs>
+          </div>
+        )}
       </Main>
     </>
   )
 }
 
-const statCards = [
-  { label: 'Appointments', value: '24', subtext: '+3 from yesterday', icon: CalendarDays },
-  { label: 'In Queue', value: '8', subtext: '3 waiting > 15 min', icon: Users },
-  { label: 'Completed', value: '12', subtext: '50% completion rate', icon: CheckCircle2 },
-  { label: 'Active Doctors', value: '6 / 8', subtext: 'out of 8 total', icon: Stethoscope },
-]
+function CheckInRow({ entry }: { entry: QueueEntry }) {
+  return (
+    <TableRow>
+      <TableCell className='font-medium'>{entry.patientName}</TableCell>
+      <TableCell className='text-muted-foreground'>
+        {new Date(entry.checkedInAt).toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+        })}
+      </TableCell>
+      <TableCell className='hidden text-muted-foreground sm:table-cell'>
+        {entry.doctorName}
+      </TableCell>
+      <TableCell>
+        <Badge variant='outline' className={queueStatusBadge[entry.status]}>
+          {entry.status.replace('_', ' ')}
+        </Badge>
+      </TableCell>
+    </TableRow>
+  )
+}
 
-const hourlyData = [
-  { hour: '9AM', appointments: 3 },
-  { hour: '10AM', appointments: 5 },
-  { hour: '11AM', appointments: 7 },
-  { hour: '12PM', appointments: 4 },
-  { hour: '1PM', appointments: 6 },
-  { hour: '2PM', appointments: 8 },
-  { hour: '3PM', appointments: 5 },
-  { hour: '4PM', appointments: 3 },
-  { hour: '5PM', appointments: 1 },
-]
-
-function AppointmentsChart() {
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 800)
-    return () => clearTimeout(timer)
-  }, [])
-
-  if (loading) {
-    // Skeleton that mimics the bar chart shape
-    return (
-      <div className='flex h-64 w-full items-end justify-between gap-2' aria-label='Loading chart'>
-        {hourlyData.map((d) => (
-          <Skeleton
-            key={d.hour}
-            className='w-full animate-pulse rounded-t-md'
-            style={{ height: `${d.appointments * 10}%` }}
-          />
+function DashboardSkeleton() {
+  return (
+    <div className='space-y-4' aria-label='Loading dashboard'>
+      <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
+        {Array.from({ length: 4 }).map((_, index) => (
+          <Card key={index}>
+            <CardContent className='space-y-2 pt-6'>
+              <Skeleton className='h-4 w-24' />
+              <Skeleton className='h-8 w-16' />
+              <Skeleton className='h-3 w-20' />
+            </CardContent>
+          </Card>
         ))}
       </div>
-    )
-  }
-
-  return (
-    <div className='h-64 w-full'>
-      <ResponsiveContainer width='100%' height='100%'>
-        <BarChart data={hourlyData} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
-          <XAxis
-            dataKey='hour'
-            tickLine={false}
-            axisLine={false}
-            tickMargin={8}
-            tick={{ fontSize: 12 }}
-            stroke='var(--muted-foreground)'
-          />
-          <YAxis
-            allowDecimals={false}
-            tickLine={false}
-            axisLine={false}
-            tickMargin={4}
-            tick={{ fontSize: 12 }}
-            stroke='var(--muted-foreground)'
-            width={28}
-          />
-          <Tooltip
-            cursor={{ fill: 'var(--muted)', opacity: 0.4 }}
-            contentStyle={{
-              borderRadius: 8,
-              border: '1px solid var(--border)',
-              background: 'var(--card)',
-              fontSize: 12,
-            }}
-            labelStyle={{ color: 'var(--foreground)', fontWeight: 600 }}
-          />
-          <Bar
-            dataKey='appointments'
-            className='fill-primary'
-            radius={[4, 4, 0, 0]}
-            maxBarSize={48}
-          />
-        </BarChart>
-      </ResponsiveContainer>
+      <div className='grid grid-cols-1 gap-4 lg:grid-cols-2'>
+        <Card>
+          <CardContent className='space-y-2 pt-6'>
+            <Skeleton className='h-4 w-40' />
+            <Skeleton className='h-52 w-full' />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className='space-y-3 pt-6'>
+            <Skeleton className='h-4 w-40' />
+            {Array.from({ length: 5 }).map((_, index) => (
+              <Skeleton key={index} className='h-8 w-full' />
+            ))}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }
@@ -209,11 +375,5 @@ const topNav = [
     href: '/admin/queue',
     isActive: false,
     disabled: false,
-  },
-  {
-    title: 'Reports',
-    href: '/admin/reports',
-    isActive: false,
-    disabled: true,
   },
 ]

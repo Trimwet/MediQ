@@ -1,9 +1,10 @@
 import { type LinkProps } from '@tanstack/react-router'
+import { type Role } from '@/config/rbac'
 
 type User = {
   name: string
   email: string
-  avatar: string
+  avatar?: string
 }
 
 type Team = {
@@ -16,6 +17,8 @@ type BaseNavItem = {
   title: string
   badge?: string
   icon?: React.ElementType
+  /** Roles allowed to see this item. Omitted = visible to every signed-in role. */
+  roles?: Role[]
 }
 
 type NavLink = BaseNavItem & {

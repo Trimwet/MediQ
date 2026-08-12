@@ -2,12 +2,24 @@ import { create } from 'zustand'
 import { getCookie, setCookie, removeCookie } from '@/lib/cookies'
 
 const ACCESS_TOKEN = 'thisisjustarandomstring'
+// Mock-only: without a backend, the signed-in user is persisted here so the
+// session (and its role) survives a reload, like a real token restore would.
+const USER_COOKIE = 'mediq_user'
 
 interface AuthUser {
   accountNo: string
   email: string
   role: string[]
   exp: number
+}
+
+function safeJsonParse(value: string | undefined): unknown {
+  if (!value) return null
+  try {
+    return JSON.parse(value)
+  } catch {
+    return null
+  }
 }
 
 interface AuthState {
@@ -24,11 +36,20 @@ interface AuthState {
 export const useAuthStore = create<AuthState>()((set) => {
   const cookieState = getCookie(ACCESS_TOKEN)
   const initToken = cookieState ? JSON.parse(cookieState) : ''
+  const userState = getCookie(USER_COOKIE)
+  const initUser = (safeJsonParse(userState) as AuthUser | null) ?? null
   return {
     auth: {
-      user: null,
+      user: initUser,
       setUser: (user) =>
-        set((state) => ({ ...state, auth: { ...state.auth, user } })),
+        set((state) => {
+          if (user) {
+            setCookie(USER_COOKIE, JSON.stringify(user))
+          } else {
+            removeCookie(USER_COOKIE)
+          }
+          return { ...state, auth: { ...state.auth, user } }
+        }),
       accessToken: initToken,
       setAccessToken: (accessToken) =>
         set((state) => {
@@ -43,6 +64,7 @@ export const useAuthStore = create<AuthState>()((set) => {
       reset: () =>
         set((state) => {
           removeCookie(ACCESS_TOKEN)
+          removeCookie(USER_COOKIE)
           return {
             ...state,
             auth: { ...state.auth, user: null, accessToken: '' },

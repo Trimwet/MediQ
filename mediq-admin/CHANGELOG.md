@@ -1,3 +1,24 @@
+# MediQ Changelog
+
+MediQ is built on top of the shadcn-admin template. Entries above the divider document MediQ-specific work; everything below the divider is the inherited template history from upstream.
+
+## Unreleased
+
+### Feat
+
+- add clinic domain features: appointments, live queue, patients, doctors, staff, and rooms directories
+- add RBAC config (`src/config/rbac.ts`) with `admin`, `front_desk`, and `doctor` roles and permission-based route guarding
+- add mock data layer (`src/data/repos.ts` + `src/data/mock/`) behind repository interfaces, so the backend can be swapped in without UI changes
+- add mock auth store (`src/stores/auth-store.ts`) to persist session/role across reloads ahead of a real backend
+
+### Known issues
+
+- OTP input on the two-factor auth screen overflows its container on narrower widths
+
+---
+
+## Upstream template history (shadcn-admin)
+
 ## v2.2.1 (2025-11-06)
 
 ### Fix
