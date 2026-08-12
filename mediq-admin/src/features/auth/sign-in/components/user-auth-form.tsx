@@ -7,6 +7,7 @@ import { Loader2, LogIn } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { useAuthStore } from '@/stores/auth-store'
+import { roleLabels, ROLES } from '@/config/rbac'
 import { sleep, cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -19,6 +20,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/password-input'
+import { SelectDropdown } from '@/components/select-dropdown'
 
 const formSchema = z.object({
   email: z.email({
@@ -28,6 +30,9 @@ const formSchema = z.object({
     .string()
     .min(1, 'Please enter your password.')
     .min(7, 'Password must be at least 7 characters long.'),
+  // Demo-only: with no backend yet, the signed-in role is chosen here.
+  // Hidden in production builds; the field still carries its default value.
+  role: z.enum(ROLES),
 })
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLFormElement> {
@@ -48,6 +53,7 @@ export function UserAuthForm({
     defaultValues: {
       email: '',
       password: '',
+      role: 'admin',
     },
   })
 
@@ -63,7 +69,7 @@ export function UserAuthForm({
         const mockUser = {
           accountNo: 'ACC001',
           email: data.email,
-          role: ['user'],
+          role: [data.role],
           exp: Date.now() + 24 * 60 * 60 * 1000, // 24 hours from now
         }
 
@@ -108,7 +114,7 @@ export function UserAuthForm({
             <FormItem className='relative'>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <PasswordInput placeholder='********' {...field} />
+                <PasswordInput placeholder='••••••••' {...field} />
               </FormControl>
               <FormMessage />
               <Link
@@ -120,12 +126,31 @@ export function UserAuthForm({
             </FormItem>
           )}
         />
+        {import.meta.env.DEV && (
+          <FormField
+            control={form.control}
+            name='role'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Role</FormLabel>
+                <SelectDropdown
+                  defaultValue={field.value}
+                  onValueChange={field.onChange}
+                  className='w-full'
+                  items={ROLES.map((role) => ({
+                    label: roleLabels[role],
+                    value: role,
+                  }))}
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
         <Button className='mt-2' disabled={isLoading}>
           {isLoading ? <Loader2 className='animate-spin' /> : <LogIn />}
           Sign in
         </Button>
-
-
       </form>
     </Form>
   )

@@ -1,0 +1,89 @@
+import { useState } from 'react'
+import { UserCog } from 'lucide-react'
+import { toast } from 'sonner'
+import { Button } from '@/components/ui/button'
+import { ConfigDrawer } from '@/components/config-drawer'
+import { Header } from '@/components/layout/header'
+import { Main } from '@/components/layout/main'
+import { TopNav } from '@/components/layout/top-nav'
+import { ProfileDropdown } from '@/components/profile-dropdown'
+import { Search } from '@/components/search'
+import { ThemeSwitch } from '@/components/theme-switch'
+import { useRbac } from '@/hooks/use-rbac'
+import { useCreateStaff, useStaff } from '@/data/hooks'
+import { StaffDialog } from './components/staff-dialog'
+import { StaffTable } from './components/staff-table'
+import { type Staff } from './schema'
+
+export function Staff() {
+  const { can } = useRbac()
+  const canManage = can('staff:manage')
+
+  const staffQuery = useStaff()
+  const createStaff = useCreateStaff()
+  const [dialogOpen, setDialogOpen] = useState(false)
+
+  function handleCreated(member: Omit<Staff, 'id'>) {
+    createStaff.mutate(member, {
+      onSuccess: (created) => toast.success(`${created.name} added to staff`),
+    })
+  }
+
+  return (
+    <>
+      <Header>
+        <TopNav links={topNav} className='me-auto' />
+        <Search />
+        <ThemeSwitch />
+        <ConfigDrawer />
+        <ProfileDropdown />
+      </Header>
+
+      <Main className='flex flex-1 flex-col gap-4 sm:gap-6'>
+        <div className='flex flex-wrap items-end justify-between gap-2'>
+          <div className='space-y-1'>
+            <h1 className='text-2xl font-bold tracking-tight'>Staff</h1>
+            <p className='text-sm text-muted-foreground'>
+              Clinic staff directory
+            </p>
+          </div>
+          {canManage && (
+            <Button onClick={() => setDialogOpen(true)}>
+              <UserCog />
+              Add staff
+            </Button>
+          )}
+        </div>
+
+        <StaffTable data={staffQuery.data ?? []} loading={staffQuery.isPending} />
+      </Main>
+
+      <StaffDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        onCreated={handleCreated}
+      />
+    </>
+  )
+}
+
+const topNav = [
+  {
+    title: 'Overview',
+    href: '/admin/dashboard',
+    isActive: false,
+    disabled: false,
+  },
+  {
+    title: 'Appointments',
+    href: '/admin/appointments',
+    isActive: false,
+    disabled: false,
+  },
+  {
+    title: 'Queue',
+    href: '/admin/queue',
+    isActive: false,
+    disabled: false,
+  },
+]

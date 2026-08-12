@@ -1,0 +1,171 @@
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query'
+import {
+  type Appointment,
+  type AppointmentStatus,
+} from '@/features/appointments/schema'
+import { type Patient } from '@/features/patients/schema'
+import { type Doctor, type DoctorStatus } from '@/features/doctors/schema'
+import { type Staff } from '@/features/staff/schema'
+import { type Room, type RoomStatus } from '@/features/rooms/schema'
+import {
+  appointmentsRepository,
+  doctorsRepository,
+  patientsRepository,
+  queueRepository,
+  roomsRepository,
+  staffRepository,
+} from './index'
+
+// ---- Appointments ----
+
+export function useAppointments() {
+  return useQuery({
+    queryKey: ['appointments'],
+    queryFn: () => appointmentsRepository.list(),
+  })
+}
+
+export function useCreateAppointment() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (input: Omit<Appointment, 'id' | 'status'>) =>
+      appointmentsRepository.create(input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['appointments'] }),
+  })
+}
+
+export function useUpdateAppointmentStatus() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, status }: { id: string; status: AppointmentStatus }) =>
+      appointmentsRepository.updateStatus(id, status),
+    // Check-in also affects the queue (see mock store).
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appointments'] })
+      queryClient.invalidateQueries({ queryKey: ['queue'] })
+    },
+  })
+}
+
+// ---- Queue ----
+
+export function useQueue() {
+  return useQuery({
+    queryKey: ['queue'],
+    queryFn: () => queueRepository.list(),
+  })
+}
+
+export function useQueueActions() {
+  const queryClient = useQueryClient()
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['queue'] })
+
+  const callNext = useMutation({
+    mutationFn: () => queueRepository.callNext(),
+    onSuccess: invalidate,
+  })
+  const startVisit = useMutation({
+    mutationFn: (id: string) => queueRepository.startVisit(id),
+    onSuccess: invalidate,
+  })
+  const complete = useMutation({
+    mutationFn: (id: string) => queueRepository.complete(id),
+    onSuccess: invalidate,
+  })
+  const markLeft = useMutation({
+    mutationFn: (id: string) => queueRepository.markLeft(id),
+    onSuccess: invalidate,
+  })
+
+  return { callNext, startVisit, complete, markLeft }
+}
+
+// ---- Patients ----
+
+export function usePatients() {
+  return useQuery({
+    queryKey: ['patients'],
+    queryFn: () => patientsRepository.list(),
+  })
+}
+
+export function useCreatePatient() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (input: Omit<Patient, 'id'>) => patientsRepository.create(input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['patients'] }),
+  })
+}
+
+// ---- Doctors ----
+
+export function useDoctors() {
+  return useQuery({
+    queryKey: ['doctors'],
+    queryFn: () => doctorsRepository.list(),
+  })
+}
+
+export function useCreateDoctor() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (input: Omit<Doctor, 'id'>) => doctorsRepository.create(input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['doctors'] }),
+  })
+}
+
+export function useUpdateDoctorStatus() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, status }: { id: string; status: DoctorStatus }) =>
+      doctorsRepository.updateStatus(id, status),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['doctors'] }),
+  })
+}
+
+// ---- Staff ----
+
+export function useStaff() {
+  return useQuery({
+    queryKey: ['staff'],
+    queryFn: () => staffRepository.list(),
+  })
+}
+
+export function useCreateStaff() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (input: Omit<Staff, 'id'>) => staffRepository.create(input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['staff'] }),
+  })
+}
+
+// ---- Rooms ----
+
+export function useRooms() {
+  return useQuery({
+    queryKey: ['rooms'],
+    queryFn: () => roomsRepository.list(),
+  })
+}
+
+export function useCreateRoom() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (input: Omit<Room, 'id'>) => roomsRepository.create(input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['rooms'] }),
+  })
+}
+
+export function useUpdateRoomStatus() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, status }: { id: string; status: RoomStatus }) =>
+      roomsRepository.updateStatus(id, status),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['rooms'] }),
+  })
+}

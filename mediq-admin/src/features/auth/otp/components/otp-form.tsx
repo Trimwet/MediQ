@@ -69,7 +69,10 @@ export function OtpForm({ className, ...props }: OtpFormProps) {
                 <InputOTP
                   maxLength={6}
                   {...field}
-                  containerClassName='justify-between sm:[&>[data-slot="input-otp-group"]>div]:w-12'
+                  // The 384px card leaves 336px of content width; 48px slots
+                  // (6×48 + separators + gaps ≈ 376px) overflow the card at sm+.
+                  // 40px slots fit exactly within the card.
+                  containerClassName='justify-between sm:[&>[data-slot="input-otp-group"]>div]:w-10'
                 >
                   <InputOTPGroup>
                     <InputOTPSlot index={0} />

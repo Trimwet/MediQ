@@ -1,18 +1,16 @@
+import { useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
-import { CaretSortIcon, CheckIcon } from '@radix-ui/react-icons'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { showSubmittedData } from '@/lib/show-submitted-data'
-import { cn } from '@/lib/utils'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from '@/components/ui/command'
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import {
   Form,
   FormControl,
@@ -23,151 +21,217 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
-import { DatePicker } from '@/components/date-picker'
+import { Label } from '@/components/ui/label'
+import { Separator } from '@/components/ui/separator'
+import { Switch } from '@/components/ui/switch'
+import { PasswordInput } from '@/components/password-input'
 
-const languages = [
-  { label: 'English', value: 'en' },
-  { label: 'French', value: 'fr' },
-  { label: 'German', value: 'de' },
-  { label: 'Spanish', value: 'es' },
-  { label: 'Portuguese', value: 'pt' },
-  { label: 'Russian', value: 'ru' },
-  { label: 'Japanese', value: 'ja' },
-  { label: 'Korean', value: 'ko' },
-  { label: 'Chinese', value: 'zh' },
-] as const
-
-const accountFormSchema = z.object({
-  name: z
-    .string()
-    .min(1, 'Please enter your name.')
-    .min(2, 'Name must be at least 2 characters.')
-    .max(30, 'Name must not be longer than 30 characters.'),
-  dob: z.date('Please select your date of birth.'),
-  language: z.string('Please select a language.'),
-})
-
-type AccountFormValues = z.infer<typeof accountFormSchema>
-
-// This can come from your database or API.
-const defaultValues: Partial<AccountFormValues> = {
-  name: '',
-}
-
-export function AccountForm() {
-  const form = useForm<AccountFormValues>({
-    resolver: zodResolver(accountFormSchema),
-    defaultValues,
+const passwordFormSchema = z
+  .object({
+    currentPassword: z.string().min(1, 'Please enter your current password.'),
+    newPassword: z
+      .string()
+      .min(7, 'Password must be at least 7 characters long.'),
+    confirmPassword: z.string().min(1, 'Please confirm your new password.'),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: 'Passwords do not match.',
+    path: ['confirmPassword'],
   })
 
-  function onSubmit(data: AccountFormValues) {
-    showSubmittedData(data)
+type PasswordFormValues = z.infer<typeof passwordFormSchema>
+
+export function AccountForm() {
+  const [marketingEmails, setMarketingEmails] = useState(true)
+  const [securityEmails, setSecurityEmails] = useState(true)
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false)
+  const [confirmText, setConfirmText] = useState('')
+
+  const passwordForm = useForm<PasswordFormValues>({
+    resolver: zodResolver(passwordFormSchema),
+    defaultValues: {
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+    },
+  })
+
+  const handleDeleteAccount = () => {
+    if (confirmText !== 'delete') return
+    setConfirmText('')
+    toast.success('Your account has been deleted.')
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
-        <FormField
-          control={form.control}
-          name='name'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Name</FormLabel>
-              <FormControl>
-                <Input placeholder='Your name' {...field} />
-              </FormControl>
-              <FormDescription>
-                This is the name that will be displayed on your profile and in
-                emails.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name='dob'
-          render={({ field }) => (
-            <FormItem className='flex flex-col'>
-              <FormLabel>Date of birth</FormLabel>
-              <DatePicker selected={field.value} onSelect={field.onChange} />
-              <FormDescription>
-                Your date of birth is used to calculate your age.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name='language'
-          render={({ field }) => (
-            <FormItem className='flex flex-col'>
-              <FormLabel>Language</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant='outline'
-                      role='combobox'
-                      className={cn(
-                        'w-50 justify-between',
-                        !field.value && 'text-muted-foreground'
-                      )}
-                    >
-                      {field.value
-                        ? languages.find(
-                            (language) => language.value === field.value
-                          )?.label
-                        : 'Select language'}
-                      <CaretSortIcon className='ms-2 h-4 w-4 shrink-0 opacity-50' />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className='w-50 p-0'>
-                  <Command>
-                    <CommandInput placeholder='Search language...' />
-                    <CommandEmpty>No language found.</CommandEmpty>
-                    <CommandGroup>
-                      <CommandList>
-                        {languages.map((language) => (
-                          <CommandItem
-                            value={language.label}
-                            key={language.value}
-                            onSelect={() => {
-                              form.setValue('language', language.value)
-                            }}
-                          >
-                            <CheckIcon
-                              className={cn(
-                                'size-4',
-                                language.value === field.value
-                                  ? 'opacity-100'
-                                  : 'opacity-0'
-                              )}
-                            />
-                            {language.label}
-                          </CommandItem>
-                        ))}
-                      </CommandList>
-                    </CommandGroup>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-              <FormDescription>
-                This is the language that will be used in the dashboard.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type='submit'>Update account</Button>
-      </form>
-    </Form>
+    <div className='space-y-8'>
+      <Card>
+        <CardHeader>
+          <CardTitle>Change Password</CardTitle>
+          <CardDescription>
+            Update your password to keep your account secure.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form {...passwordForm}>
+            <form
+              onSubmit={passwordForm.handleSubmit(() => {
+                passwordForm.reset()
+                toast.success('Password updated')
+              })}
+              className='space-y-6'
+            >
+              <FormField
+                control={passwordForm.control}
+                name='currentPassword'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Current password</FormLabel>
+                    <FormControl>
+                      <PasswordInput
+                        placeholder='Enter your current password'
+                        autoComplete='current-password'
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={passwordForm.control}
+                name='newPassword'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>New password</FormLabel>
+                    <FormControl>
+                      <PasswordInput
+                        placeholder='Enter a new password'
+                        autoComplete='new-password'
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      At least 7 characters long.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={passwordForm.control}
+                name='confirmPassword'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirm new password</FormLabel>
+                    <FormControl>
+                      <PasswordInput
+                        placeholder='Re-enter your new password'
+                        autoComplete='new-password'
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type='submit'>Change password</Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Email Preferences</CardTitle>
+          <CardDescription>
+            Choose what emails you receive from us.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className='flex flex-row items-center justify-between rounded-lg border p-4'>
+            <div className='space-y-0.5'>
+              <Label className='text-base'>Marketing emails</Label>
+              <p className='text-sm text-muted-foreground'>
+                Receive emails about new products, features, and more.
+              </p>
+            </div>
+            <Switch
+              checked={marketingEmails}
+              onCheckedChange={setMarketingEmails}
+            />
+          </div>
+          <Separator className='my-4' />
+          <div className='flex flex-row items-center justify-between rounded-lg border p-4'>
+            <div className='space-y-0.5'>
+              <Label className='text-base'>Security emails</Label>
+              <p className='text-sm text-muted-foreground'>
+                Receive emails about your account activity and security.
+              </p>
+            </div>
+            <Switch
+              checked={securityEmails}
+              onCheckedChange={setSecurityEmails}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Two-Factor Authentication</CardTitle>
+          <CardDescription>
+            Add an extra layer of security to your account.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className='flex flex-row items-center justify-between rounded-lg border p-4'>
+            <div className='space-y-0.5'>
+              <Label className='text-base'>Require a one-time code</Label>
+              <p className='text-sm text-muted-foreground'>
+                Get a verification code via authenticator app when signing in.
+              </p>
+            </div>
+            <Switch
+              checked={twoFactorEnabled}
+              onCheckedChange={setTwoFactorEnabled}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className='border-destructive/50'>
+        <CardHeader>
+          <CardTitle className='text-destructive'>Delete Account</CardTitle>
+          <CardDescription>
+            Permanently remove your account and all associated data.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className='text-sm text-muted-foreground'>
+            This action cannot be undone. All of your data will be permanently
+            deleted from our servers.
+          </p>
+          <Separator className='my-4' />
+          <div className='space-y-3'>
+            <Label htmlFor='delete-account-confirm'>
+              Type <span className='font-semibold'>delete</span> to confirm
+            </Label>
+            <Input
+              id='delete-account-confirm'
+              value={confirmText}
+              onChange={(e) => setConfirmText(e.target.value)}
+              placeholder='Type delete to confirm'
+            />
+            <Button
+              variant='destructive'
+              disabled={confirmText !== 'delete'}
+              onClick={handleDeleteAccount}
+            >
+              Delete account
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   )
 }

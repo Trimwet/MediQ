@@ -3,6 +3,7 @@ import {
   DoorOpen,
   LayoutDashboard,
   Settings,
+  ShieldCheck,
   Stethoscope,
   User,
   UserCog,
@@ -15,7 +16,6 @@ export const sidebarData: SidebarData = {
   user: {
     name: 'Admin',
     email: 'admin@mediq.ng',
-    avatar: '/avatars/shadcn.jpg',
   },
   teams: [
     {
@@ -57,16 +57,25 @@ export const sidebarData: SidebarData = {
           title: 'Doctors',
           url: '/admin/doctors',
           icon: Stethoscope,
+          roles: ['admin'],
         },
         {
           title: 'Staff',
           url: '/admin/staff',
           icon: UserCog,
+          roles: ['admin'],
         },
         {
           title: 'Rooms',
           url: '/admin/rooms',
           icon: DoorOpen,
+          roles: ['admin'],
+        },
+        {
+          title: 'Users & Roles',
+          url: '/users',
+          icon: ShieldCheck,
+          roles: ['admin'],
         },
       ],
     },
@@ -76,6 +85,7 @@ export const sidebarData: SidebarData = {
         {
           title: 'Settings',
           icon: Settings,
+          roles: ['admin'],
           items: [
             {
               title: 'Profile',
