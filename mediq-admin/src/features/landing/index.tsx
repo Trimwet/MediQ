@@ -27,7 +27,7 @@ const heroStats = [
 
 function Hero() {
   return (
-    <section className='relative isolate'>
+    <section className='relative isolate min-h-[calc(100svh-4rem)]'>
       <div
         aria-hidden
         className='absolute inset-0 -z-10 bg-cover bg-center'
@@ -40,7 +40,7 @@ function Hero() {
         aria-hidden
         className='absolute inset-0 -z-10 bg-slate-950/70 dark:bg-slate-950/80'
       />
-      <div className='mx-auto flex max-w-6xl flex-col items-center px-4 pt-24 pb-32 text-center sm:px-6 sm:pt-32'>
+      <div className='mx-auto flex max-w-6xl flex-col items-center px-4 pt-24 pb-40 text-center sm:px-6 sm:pt-32'>
         <h1 className='font-manrope max-w-2xl text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl'>
           End Wait-Time Uncertainty in Healthcare
         </h1>
