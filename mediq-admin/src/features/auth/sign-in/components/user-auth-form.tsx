@@ -32,7 +32,6 @@ const formSchema = z.object({
     .min(1, 'Please enter your password.')
     .min(7, 'Password must be at least 7 characters long.'),
   // Demo-only: with no backend yet, the signed-in role is chosen here.
-  // Hidden in production builds; the field still carries its default value.
   role: z.enum(ROLES),
 })
 
@@ -147,27 +146,25 @@ export function UserAuthForm({
             </FormItem>
           )}
         />
-        {import.meta.env.DEV && (
-          <FormField
-            control={form.control}
-            name='role'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Role</FormLabel>
-                <SelectDropdown
-                  defaultValue={field.value}
-                  onValueChange={field.onChange}
-                  className='w-full'
-                  items={ROLES.map((role) => ({
-                    label: roleLabels[role],
-                    value: role,
-                  }))}
-                />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
+        <FormField
+          control={form.control}
+          name='role'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Role</FormLabel>
+              <SelectDropdown
+                defaultValue={field.value}
+                onValueChange={field.onChange}
+                className='w-full'
+                items={ROLES.map((role) => ({
+                  label: roleLabels[role],
+                  value: role,
+                }))}
+              />
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <Button className='mt-2' disabled={isLoading}>
           {isLoading ? <Loader2 className='animate-spin' /> : <LogIn />}
           Sign in
