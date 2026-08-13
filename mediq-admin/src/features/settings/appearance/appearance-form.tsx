@@ -40,9 +40,7 @@ export function AppearanceForm() {
   })
 
   useEffect(() => {
-    const root = document.documentElement
-    root.style.setProperty('--primary', accent)
-    root.style.setProperty('--ring', accent)
+    document.documentElement.style.setProperty('--user-accent', accent)
     setCookie(ACCENT_COOKIE, accent, YEAR)
   }, [accent])
 

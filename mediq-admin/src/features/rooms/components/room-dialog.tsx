@@ -48,6 +48,7 @@ export function RoomDialog({ open, onOpenChange, onCreated }: RoomDialogProps) {
   const form = useForm<RoomForm>({
     resolver: zodResolver(createFormSchema(roomLabel)),
     defaultValues: { number: '', type: '' },
+    mode: 'onTouched',
   })
 
   function onSubmit(values: RoomForm) {
@@ -121,7 +122,11 @@ export function RoomDialog({ open, onOpenChange, onCreated }: RoomDialogProps) {
           <DialogClose asChild>
             <Button variant='outline'>Cancel</Button>
           </DialogClose>
-          <Button type='submit' form='room-form'>
+          <Button
+            type='submit'
+            form='room-form'
+            disabled={form.formState.isSubmitting || (form.formState.isDirty && !form.formState.isValid)}
+          >
             Add {noun}
           </Button>
         </DialogFooter>

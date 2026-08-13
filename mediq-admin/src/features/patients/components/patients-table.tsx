@@ -73,6 +73,8 @@ export function PatientsTable({ data, loading = false }: PatientsTableProps) {
       data={data}
       loading={loading}
       searchPlaceholder='Search patients...'
+      emptyMessage='No patients registered yet.'
+      emptyDescription='Patients will appear here once they are checked in.'
     />
   )
 }

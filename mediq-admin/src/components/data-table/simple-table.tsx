@@ -1,4 +1,4 @@
-import { useState, type ComponentType } from 'react'
+import { useState, type ComponentType, type ReactNode } from 'react'
 import {
   type ColumnDef,
   type ColumnFiltersState,
@@ -13,6 +13,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
+import { SearchX } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
   Table,
@@ -40,6 +41,8 @@ type SimpleDataTableProps<TData> = {
     }[]
   }[]
   emptyMessage?: string
+  emptyDescription?: string
+  emptyAction?: ReactNode
 }
 
 /**
@@ -53,12 +56,15 @@ export function SimpleDataTable<TData>({
   searchPlaceholder = 'Filter...',
   loading = false,
   filters,
-  emptyMessage = 'No results.',
+  emptyMessage = 'No results found.',
+  emptyDescription,
+  emptyAction,
 }: SimpleDataTableProps<TData>) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [globalFilter, setGlobalFilter] = useState('')
+  const hasFilters = globalFilter.length > 0 || columnFilters.length > 0
 
   const table = useReactTable({
     data,
@@ -143,9 +149,20 @@ export function SimpleDataTable<TData>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className='h-24 text-center'
+                  className='h-48 text-center'
                 >
-                  {emptyMessage}
+                  <div className='flex flex-col items-center gap-2 text-muted-foreground'>
+                    <SearchX className='size-8 opacity-40' />
+                    <p className='text-sm font-medium'>
+                      {hasFilters
+                        ? 'No results match your filters.'
+                        : emptyMessage}
+                    </p>
+                    {emptyDescription && (
+                      <p className='text-xs'>{emptyDescription}</p>
+                    )}
+                    {emptyAction}
+                  </div>
                 </TableCell>
               </TableRow>
             )}

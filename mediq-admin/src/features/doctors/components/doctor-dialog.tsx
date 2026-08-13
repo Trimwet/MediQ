@@ -49,6 +49,7 @@ export function DoctorDialog({
   const form = useForm<DoctorForm>({
     resolver: zodResolver(formSchema),
     defaultValues: { name: '', specialization: '', email: '' },
+    mode: 'onTouched',
   })
 
   function onSubmit(values: DoctorForm) {
@@ -141,7 +142,11 @@ export function DoctorDialog({
           <DialogClose asChild>
             <Button variant='outline'>Cancel</Button>
           </DialogClose>
-          <Button type='submit' form='doctor-form'>
+          <Button
+            type='submit'
+            form='doctor-form'
+            disabled={form.formState.isSubmitting || (form.formState.isDirty && !form.formState.isValid)}
+          >
             Add doctor
           </Button>
         </DialogFooter>

@@ -1,4 +1,12 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
+import {
+  eachDayOfInterval,
+  endOfDay,
+  format,
+  isSameDay,
+  startOfDay,
+  subDays,
+} from 'date-fns'
 import { useAppointments, useDoctors, useQueue } from '@/data/hooks'
 import {
   CalendarDays,
@@ -29,14 +37,18 @@ import {
 } from '@/components/ui/table'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
+import { HeaderNav } from '@/components/layout/header-nav'
 import { Main } from '@/components/layout/main'
-import { TopNav } from '@/components/layout/top-nav'
 import { NotificationBell } from '@/components/notification-bell'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { minutesBetween } from '@/features/queue/data'
 import { queueStatusBadge, type QueueEntry } from '@/features/queue/schema'
+import {
+  DashboardDateRange,
+  type DashboardRange,
+} from './components/date-range'
 
 const HOURS = ['9AM', '10AM', '11AM', '12PM', '1PM', '2PM', '3PM', '4PM', '5PM']
 
@@ -45,6 +57,10 @@ export function Dashboard() {
   const appointmentsQuery = useAppointments()
   const queueQuery = useQueue()
   const doctorsQuery = useDoctors()
+
+  const [range, setRange] = useState<DashboardRange>('today')
+  const [customFrom, setCustomFrom] = useState<Date>()
+  const [customTo, setCustomTo] = useState<Date>()
 
   const isPending =
     appointmentsQuery.isPending ||
@@ -72,17 +88,60 @@ export function Dashboard() {
     [appointments, doctor]
   )
 
-  const now = new Date().toISOString()
+  const bounds = useMemo(() => {
+    const now = new Date()
+    if (range === 'custom') {
+      if (!customFrom || !customTo) {
+        return { start: startOfDay(now), end: endOfDay(now), label: 'today' }
+      }
+      let start = startOfDay(customFrom)
+      let end = endOfDay(customTo)
+      if (start.getTime() > end.getTime()) {
+        ;[start, end] = [end, start]
+      }
+      return {
+        start,
+        end,
+        label: `${format(start, 'MMM d')} – ${format(end, 'MMM d')}`,
+      }
+    }
+    if (range === '7d') {
+      return {
+        start: startOfDay(subDays(now, 6)),
+        end: endOfDay(now),
+        label: 'last 7 days',
+      }
+    }
+    if (range === '30d') {
+      return {
+        start: startOfDay(subDays(now, 29)),
+        end: endOfDay(now),
+        label: 'last 30 days',
+      }
+    }
+    return { start: startOfDay(now), end: endOfDay(now), label: 'today' }
+  }, [range, customFrom, customTo])
+
+  const inRangeAppointments = useMemo(() => {
+    const start = bounds.start.getTime()
+    const end = bounds.end.getTime()
+    return ownAppointments.filter((appointment) => {
+      const time = new Date(appointment.scheduledFor).getTime()
+      return time >= start && time <= end
+    })
+  }, [ownAppointments, bounds])
+
+  const nowIso = new Date().toISOString()
   const waitingCount = queue.filter((e) => e.status === 'waiting').length
   const servedCount = queue.filter((e) => e.status === 'done').length
   const slowWaiting = queue.filter(
-    (e) => e.status === 'waiting' && minutesBetween(e.checkedInAt, now) > 15
+    (e) => e.status === 'waiting' && minutesBetween(e.checkedInAt, nowIso) > 15
   ).length
   const activeDoctors = doctors.filter((d) => d.status === 'active').length
-  const completedToday = ownAppointments.filter(
+  const completedToday = inRangeAppointments.filter(
     (a) => a.status === 'completed'
   ).length
-  const inProgress = ownAppointments.filter(
+  const inProgress = inRangeAppointments.filter(
     (a) => a.status === 'in_progress'
   ).length
   const myWaiting = queue.filter(
@@ -93,8 +152,8 @@ export function Dashboard() {
     ? [
         {
           label: 'My appointments',
-          value: ownAppointments.length,
-          subtext: 'scheduled today',
+          value: inRangeAppointments.length,
+          subtext: bounds.label,
           icon: CalendarDays,
         },
         {
@@ -112,15 +171,15 @@ export function Dashboard() {
         {
           label: 'Completed',
           value: completedToday,
-          subtext: 'visits today',
+          subtext: 'in this period',
           icon: CheckCircle2,
         },
       ]
     : [
         {
           label: 'Appointments',
-          value: appointments.length,
-          subtext: 'scheduled today',
+          value: inRangeAppointments.length,
+          subtext: bounds.label,
           icon: CalendarDays,
         },
         {
@@ -130,7 +189,7 @@ export function Dashboard() {
           icon: Users,
         },
         {
-          label: 'Served today',
+          label: 'Served',
           value: servedCount,
           subtext: 'check-ins completed',
           icon: CheckCircle2,
@@ -143,34 +202,56 @@ export function Dashboard() {
         },
       ]
 
-  const hourlyData = useMemo(
-    () =>
-      HOURS.map((hour, index) => ({
-        hour,
-        appointments: ownAppointments.filter(
+  const chartData = useMemo(() => {
+    if (range === 'today') {
+      return HOURS.map((hour, index) => ({
+        label: hour,
+        appointments: inRangeAppointments.filter(
           (a) => new Date(a.scheduledFor).getHours() === 9 + index
         ).length,
-      })),
-    [ownAppointments]
-  )
+      }))
+    }
+    return eachDayOfInterval({
+      start: bounds.start,
+      end: bounds.end,
+    }).map((day) => ({
+      label: format(day, 'MMM d'),
+      appointments: inRangeAppointments.filter((a) =>
+        isSameDay(new Date(a.scheduledFor), day)
+      ).length,
+    }))
+  }, [range, inRangeAppointments, bounds])
 
-  const recentCheckIns = useMemo(
-    () =>
-      queue
-        .filter((entry) => entry.status !== 'left')
-        .sort(
-          (a, b) =>
-            new Date(b.checkedInAt).getTime() -
-            new Date(a.checkedInAt).getTime()
-        )
-        .slice(0, 5),
-    [queue]
-  )
+  const recentCheckIns = useMemo(() => {
+    const start = bounds.start.getTime()
+    const end = bounds.end.getTime()
+    return queue
+      .filter((entry) => entry.status !== 'left')
+      .filter((entry) => {
+        const time = new Date(entry.checkedInAt).getTime()
+        return time >= start && time <= end
+      })
+      .sort(
+        (a, b) =>
+          new Date(b.checkedInAt).getTime() -
+          new Date(a.checkedInAt).getTime()
+      )
+      .slice(0, 5)
+  }, [queue, bounds])
+
+  function handleRangeChange(next: DashboardRange) {
+    setRange(next)
+    if (next === 'custom' && (!customFrom || !customTo)) {
+      const today = new Date()
+      setCustomFrom(startOfDay(subDays(today, 6)))
+      setCustomTo(endOfDay(today))
+    }
+  }
 
   return (
     <>
       <Header>
-        <TopNav links={topNav} className='me-auto' />
+        <HeaderNav active='overview' />
         <Search />
         <NotificationBell />
         <ThemeSwitch />
@@ -179,11 +260,19 @@ export function Dashboard() {
       </Header>
 
       <Main className='flex flex-1 flex-col gap-4 sm:gap-6'>
-        <div className='mb-2 flex items-center justify-between space-y-2'>
+        <div className='mb-2 flex flex-wrap items-end justify-between gap-3'>
           <div className='space-y-1'>
             <h1 className='text-2xl font-bold tracking-tight'>Dashboard</h1>
             <p className='text-sm text-muted-foreground'>Today's overview</p>
           </div>
+          <DashboardDateRange
+            range={range}
+            onRangeChange={handleRangeChange}
+            from={customFrom}
+            to={customTo}
+            onFromChange={setCustomFrom}
+            onToChange={setCustomTo}
+          />
         </div>
 
         {isPending ? (
@@ -214,22 +303,29 @@ export function Dashboard() {
             <div className='grid grid-cols-1 gap-4 lg:grid-cols-2'>
               <Card>
                 <CardHeader>
-                  <CardTitle>Appointments Today</CardTitle>
+                  <CardTitle>
+                    Appointments
+                    <span className='ms-2 text-sm font-normal text-muted-foreground'>
+                      {bounds.label}
+                    </span>
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className='h-64 w-full'>
                     <ResponsiveContainer width='100%' height='100%'>
                       <BarChart
-                        data={hourlyData}
+                        data={chartData}
                         margin={{ top: 4, right: 4, bottom: 0, left: -20 }}
                       >
                         <XAxis
-                          dataKey='hour'
+                          dataKey='label'
                           tickLine={false}
                           axisLine={false}
                           tickMargin={8}
                           tick={{ fontSize: 12 }}
                           stroke='var(--muted-foreground)'
+                          interval='preserveStartEnd'
+                          minTickGap={24}
                         />
                         <YAxis
                           allowDecimals={false}
@@ -272,7 +368,7 @@ export function Dashboard() {
                 <CardContent>
                   {recentCheckIns.length === 0 ? (
                     <p className='py-10 text-center text-sm text-muted-foreground'>
-                      No check-ins yet today.
+                      No check-ins in this period.
                     </p>
                   ) : (
                     <Table>
@@ -358,24 +454,3 @@ function DashboardSkeleton() {
     </div>
   )
 }
-
-const topNav = [
-  {
-    title: 'Overview',
-    href: '/admin/dashboard',
-    isActive: true,
-    disabled: false,
-  },
-  {
-    title: 'Appointments',
-    href: '/admin/appointments',
-    isActive: false,
-    disabled: false,
-  },
-  {
-    title: 'Queue',
-    href: '/admin/queue',
-    isActive: false,
-    disabled: false,
-  },
-]

@@ -106,6 +106,8 @@ export function AppointmentsTable({
       data={data}
       loading={loading}
       searchPlaceholder='Search patients, doctors...'
+      emptyMessage='No appointments scheduled.'
+      emptyDescription='Book an appointment to get started.'
       filters={[
         {
           columnId: 'status',

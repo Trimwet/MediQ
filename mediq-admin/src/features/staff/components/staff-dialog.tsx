@@ -45,6 +45,7 @@ export function StaffDialog({ open, onOpenChange, onCreated }: StaffDialogProps)
   const form = useForm<StaffForm>({
     resolver: zodResolver(formSchema),
     defaultValues: { name: '', role: '', phone: '', email: '' },
+    mode: 'onTouched',
   })
 
   function onSubmit(values: StaffForm) {
@@ -156,7 +157,11 @@ export function StaffDialog({ open, onOpenChange, onCreated }: StaffDialogProps)
           <DialogClose asChild>
             <Button variant='outline'>Cancel</Button>
           </DialogClose>
-          <Button type='submit' form='staff-form'>
+          <Button
+            type='submit'
+            form='staff-form'
+            disabled={form.formState.isSubmitting || (form.formState.isDirty && !form.formState.isValid)}
+          >
             Add staff
           </Button>
         </DialogFooter>

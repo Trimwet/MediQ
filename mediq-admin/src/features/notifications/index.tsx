@@ -26,7 +26,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
-import { TopNav } from '@/components/layout/top-nav'
+import { HeaderNav } from '@/components/layout/header-nav'
 import { NotificationBell } from '@/components/notification-bell'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
@@ -95,7 +95,7 @@ export function Notifications() {
   return (
     <>
       <Header>
-        <TopNav links={topNav} className='me-auto' />
+        <HeaderNav />
         <Search />
         <NotificationBell />
         <ThemeSwitch />
@@ -300,24 +300,3 @@ function NotificationsSkeleton() {
     </div>
   )
 }
-
-const topNav = [
-  {
-    title: 'Overview',
-    href: '/admin/dashboard',
-    isActive: false,
-    disabled: false,
-  },
-  {
-    title: 'Appointments',
-    href: '/admin/appointments',
-    isActive: false,
-    disabled: false,
-  },
-  {
-    title: 'Queue',
-    href: '/admin/queue',
-    isActive: false,
-    disabled: false,
-  },
-]

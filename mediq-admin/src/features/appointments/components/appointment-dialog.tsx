@@ -58,6 +58,7 @@ export function AppointmentDialog({
       time: '',
       reason: '',
     },
+    mode: 'onTouched',
   })
 
   function onSubmit(values: AppointmentForm) {
@@ -189,7 +190,11 @@ export function AppointmentDialog({
           <DialogClose asChild>
             <Button variant='outline'>Cancel</Button>
           </DialogClose>
-          <Button type='submit' form='appointment-form'>
+          <Button
+            type='submit'
+            form='appointment-form'
+            disabled={form.formState.isSubmitting || (form.formState.isDirty && !form.formState.isValid)}
+          >
             Book appointment
           </Button>
         </DialogFooter>

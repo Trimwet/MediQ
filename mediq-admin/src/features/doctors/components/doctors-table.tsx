@@ -110,6 +110,8 @@ export function DoctorsTable({
       data={data}
       loading={loading}
       searchPlaceholder='Search doctors...'
+      emptyMessage='No doctors found.'
+      emptyDescription='Add a doctor to get started with scheduling.'
       filters={[
         {
           columnId: 'status',

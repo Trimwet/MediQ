@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
-import { TopNav } from '@/components/layout/top-nav'
+import { HeaderNav } from '@/components/layout/header-nav'
 import { NotificationBell } from '@/components/notification-bell'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
@@ -69,7 +69,7 @@ export function Appointments() {
   return (
     <>
       <Header>
-        <TopNav links={topNav} className='me-auto' />
+        <HeaderNav active='appointments' />
         <Search />
         <NotificationBell />
         <ThemeSwitch />
@@ -109,24 +109,3 @@ export function Appointments() {
     </>
   )
 }
-
-const topNav = [
-  {
-    title: 'Overview',
-    href: '/admin/dashboard',
-    isActive: false,
-    disabled: false,
-  },
-  {
-    title: 'Appointments',
-    href: '/admin/appointments',
-    isActive: true,
-    disabled: false,
-  },
-  {
-    title: 'Queue',
-    href: '/admin/queue',
-    isActive: false,
-    disabled: false,
-  },
-]

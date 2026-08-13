@@ -83,6 +83,8 @@ export function StaffTable({ data, loading = false }: StaffTableProps) {
       data={data}
       loading={loading}
       searchPlaceholder='Search staff...'
+      emptyMessage='No staff members found.'
+      emptyDescription='Add staff to manage team roles and access.'
       filters={[
         {
           columnId: 'role',

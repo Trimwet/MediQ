@@ -1,6 +1,15 @@
 import React from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { ArrowRight, ChevronRight, Laptop, Moon, Sun } from 'lucide-react'
+import {
+  ArrowRight,
+  CalendarPlus,
+  ChevronRight,
+  DoorOpen,
+  Laptop,
+  Moon,
+  Sun,
+  UserPlus,
+} from 'lucide-react'
 import { useSearch } from '@/context/search-provider'
 import { useTheme } from '@/context/theme-provider'
 import {
@@ -33,22 +42,24 @@ export function CommandMenu() {
       <CommandInput placeholder='Type a command or search...' />
       <CommandList>
         <ScrollArea type='hover' className='h-72 pe-1'>
-          <CommandEmpty>No results found.</CommandEmpty>
-          {sidebarData.navGroups.map((group) => (
+          <CommandEmpty>No results found.</CommandEmpty>          {sidebarData.navGroups.map((group) => (
             <CommandGroup key={group.title} heading={group.title}>
               {group.items.map((navItem, i) => {
                 if (navItem.url)
                   return (
                     <CommandItem
                       key={`${navItem.url}-${i}`}
-                      value={navItem.title}
+                      value={`Navigate to ${navItem.title}`}
                       onSelect={() => {
                         runCommand(() => navigate({ to: navItem.url }))
                       }}
                     >
-                      <div className='flex size-4 items-center justify-center'>
-                        <ArrowRight className='size-2 text-muted-foreground/80' />
-                      </div>
+                      {navItem.icon && (
+                        <navItem.icon className='size-4 text-muted-foreground' />
+                      )}
+                      {!navItem.icon && (
+                        <ArrowRight className='size-3 text-muted-foreground/60' />
+                      )}
                       {navItem.title}
                     </CommandItem>
                   )
@@ -56,14 +67,12 @@ export function CommandMenu() {
                 return navItem.items?.map((subItem, i) => (
                   <CommandItem
                     key={`${navItem.title}-${subItem.url}-${i}`}
-                    value={`${navItem.title}-${subItem.url}`}
+                    value={`Navigate to ${navItem.title} ${subItem.title}`}
                     onSelect={() => {
                       runCommand(() => navigate({ to: subItem.url }))
                     }}
                   >
-                    <div className='flex size-4 items-center justify-center'>
-                      <ArrowRight className='size-2 text-muted-foreground/80' />
-                    </div>
+                    <ChevronRight className='size-3 text-muted-foreground/60' />
                     {navItem.title} <ChevronRight /> {subItem.title}
                   </CommandItem>
                 ))
@@ -71,6 +80,35 @@ export function CommandMenu() {
             </CommandGroup>
           ))}
           <CommandSeparator />
+          <CommandGroup heading='Quick Actions'>
+            <CommandItem
+              value='Book appointment'
+              onSelect={() =>
+                runCommand(() => navigate({ to: '/admin/appointments' }))
+              }
+            >
+              <CalendarPlus className='size-4 text-muted-foreground' />
+              <span>Book appointment</span>
+            </CommandItem>
+            <CommandItem
+              value='Add patient'
+              onSelect={() =>
+                runCommand(() => navigate({ to: '/admin/patients' }))
+              }
+            >
+              <UserPlus className='size-4 text-muted-foreground' />
+              <span>Add patient</span>
+            </CommandItem>
+            <CommandItem
+              value='Manage rooms'
+              onSelect={() =>
+                runCommand(() => navigate({ to: '/admin/rooms' }))
+              }
+            >
+              <DoorOpen className='size-4 text-muted-foreground' />
+              <span>Manage rooms</span>
+            </CommandItem>
+          </CommandGroup>
           <CommandGroup heading='Theme'>
             <CommandItem onSelect={() => runCommand(() => setTheme('light'))}>
               <Sun /> <span>Light</span>
