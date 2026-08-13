@@ -1,21 +1,32 @@
 import { useState } from 'react'
 import { Link, useMatchRoute } from '@tanstack/react-router'
-import { CalendarCheck, Menu, X } from 'lucide-react'
+import { CalendarCheck, ChevronDown, Menu, X } from 'lucide-react'
 import { Logo } from '@/assets/logo'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
 
-const navLinks = [
+const primaryLinks = [
   { to: '/', label: 'Home' },
   { to: '/departments', label: 'Departments' },
   { to: '/doctors', label: 'Doctors' },
   { to: '/services', label: 'Services' },
+]
+
+const secondaryLinks = [
   { to: '/about', label: 'About' },
   { to: '/gallery', label: 'Gallery' },
   { to: '/faq', label: 'FAQ' },
   { to: '/contact', label: 'Contact' },
 ]
+
+const allLinks = [...primaryLinks, ...secondaryLinks]
 
 export function NavBar() {
   const [open, setOpen] = useState(false)
@@ -29,7 +40,7 @@ export function NavBar() {
         </Link>
 
         <div className='hidden items-center gap-1 text-sm font-medium md:flex'>
-          {navLinks.map((link) => (
+          {primaryLinks.map((link) => (
             <Link
               key={link.to}
               to={link.to}
@@ -43,6 +54,40 @@ export function NavBar() {
               {link.label}
             </Link>
           ))}
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                className={cn(
+                  'flex items-center gap-0.5 rounded-md px-3 py-1.5 transition-colors hover:text-foreground',
+                  secondaryLinks.some((link) =>
+                    matchRoute({ to: link.to, fuzzy: true }),
+                  )
+                    ? 'text-foreground bg-accent'
+                    : 'text-muted-foreground',
+                )}
+              >
+                More
+                <ChevronDown className='size-3.5' />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align='start' sideOffset={4}>
+              {secondaryLinks.map((link) => (
+                <DropdownMenuItem key={link.to} asChild>
+                  <Link
+                    to={link.to}
+                    className={cn(
+                      matchRoute({ to: link.to, fuzzy: true })
+                        ? 'text-foreground bg-accent'
+                        : '',
+                    )}
+                  >
+                    {link.label}
+                  </Link>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         <div className='flex items-center gap-2'>
@@ -71,7 +116,7 @@ export function NavBar() {
       {open && (
         <div className='border-t border-border px-4 py-3 md:hidden'>
           <div className='flex flex-col gap-1'>
-            {navLinks.map((link) => (
+            {allLinks.map((link) => (
               <Link
                 key={link.to}
                 to={link.to}

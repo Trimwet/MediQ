@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState } from 'react'
-import { Search, HelpCircle, ChevronDown } from 'lucide-react'
+import { Search, SearchX, ChevronDown } from 'lucide-react'
 import { faqs } from '@/data/landing/faq'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -23,11 +23,11 @@ function FAQItem({
     <div className='border-b border-border last:border-0'>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className='w-full py-6 flex items-center justify-between text-left group'
+        className='w-full py-5 flex items-center justify-between gap-4 text-left group'
       >
         <span
           className={cn(
-            'text-lg font-semibold transition-colors',
+            'text-base font-medium transition-colors',
             isOpen ? 'text-primary' : 'text-foreground group-hover:text-primary',
           )}
         >
@@ -46,7 +46,7 @@ function FAQItem({
           isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0',
         )}
       >
-        <p className='pb-6 text-muted-foreground leading-relaxed'>{answer}</p>
+        <p className='pb-5 text-sm md:text-base text-muted-foreground leading-relaxed'>{answer}</p>
       </div>
     </div>
   )
@@ -67,13 +67,12 @@ function FAQPage() {
   return (
     <div className='pb-24'>
       {/* Header */}
-      <section className='bg-primary/10 py-24 text-center relative overflow-hidden'>
-        <div className='absolute top-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2' />
-        <div className='relative z-10 mx-auto max-w-6xl px-4 sm:px-6'>
-          <div className='mx-auto mb-6 flex size-16 items-center justify-center rounded-2xl bg-primary/20 backdrop-blur-md'>
-            <HelpCircle className='size-8 text-primary' />
-          </div>
-          <h1 className='font-manrope text-4xl font-bold tracking-tight mb-6 sm:text-5xl'>
+      <section className='bg-muted/40 py-20 text-center'>
+        <div className='mx-auto max-w-6xl px-4 sm:px-6'>
+          <p className='mb-4 text-xs font-semibold uppercase tracking-widest text-primary'>
+            Support
+          </p>
+          <h1 className='font-manrope text-4xl sm:text-5xl font-bold tracking-tight mb-4'>
             Frequently Asked Questions
           </h1>
           <p className='mx-auto max-w-2xl text-lg text-muted-foreground'>
@@ -85,18 +84,20 @@ function FAQPage() {
 
       <div className='mx-auto max-w-3xl px-4 sm:px-6 py-20'>
         {/* Search */}
-        <div className='relative mb-12'>
-          <Search className='absolute left-4 top-1/2 -translate-y-1/2 size-5 text-muted-foreground' />
-          <Input
-            placeholder='Search for questions...'
-            className='pl-12 py-4 rounded-xl bg-card shadow-lg border-border'
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+        <div className='mx-auto max-w-3xl mb-12'>
+          <div className='relative'>
+            <Search className='absolute left-5 top-1/2 -translate-y-1/2 size-6 text-muted-foreground' />
+            <Input
+              placeholder='Search for questions...'
+              className='pl-14 py-5 text-base rounded-xl bg-card shadow-sm border-border'
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
         </div>
 
         {/* FAQ List */}
-        <div className='rounded-xl border border-border bg-card p-8 shadow-sm md:p-12'>
+        <div className='rounded-2xl border border-border bg-card p-6 md:p-8 shadow-sm'>
           {filtered.length > 0 ? (
             <div>
               {filtered.map((faq, i) => (
@@ -104,15 +105,19 @@ function FAQPage() {
               ))}
             </div>
           ) : (
-            <div className='py-10 text-center'>
-              <p className='text-muted-foreground'>No matching questions found.</p>
+            <div className='py-12 text-center'>
+              <div className='mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-muted'>
+                <SearchX className='size-6 text-muted-foreground' />
+              </div>
+              <p className='font-medium'>No matching questions</p>
+              <p className='text-sm text-muted-foreground'>Try a different keyword.</p>
             </div>
           )}
         </div>
 
         {/* Still have questions? */}
-        <div className='mt-16 text-center'>
-          <h3 className='font-manrope text-xl font-bold tracking-tight mb-4'>
+        <div className='mt-12 rounded-2xl border border-border bg-muted/50 p-10 text-center'>
+          <h3 className='font-manrope text-xl font-semibold tracking-tight mb-4'>
             Still have questions?
           </h3>
           <p className='text-muted-foreground mb-8'>
