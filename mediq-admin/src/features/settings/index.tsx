@@ -1,9 +1,10 @@
 import { Outlet } from '@tanstack/react-router'
-import { Bell, Monitor, Palette, User, UserCog } from 'lucide-react'
+import { Bell, Building2, Monitor, Palette, User, UserCog } from 'lucide-react'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { TopNav } from '@/components/layout/top-nav'
+import { NotificationBell } from '@/components/notification-bell'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
@@ -35,6 +36,11 @@ const navItems = [
     title: 'Display',
     icon: <Monitor className='size-4' />,
   },
+  {
+    href: '/admin/settings/facility',
+    title: 'Facility',
+    icon: <Building2 className='size-4' />,
+  },
 ]
 
 export function SettingsLayout() {
@@ -43,6 +49,7 @@ export function SettingsLayout() {
       <Header>
         <TopNav links={topNav} className='me-auto' />
         <Search />
+        <NotificationBell />
         <ThemeSwitch />
         <ConfigDrawer />
         <ProfileDropdown />

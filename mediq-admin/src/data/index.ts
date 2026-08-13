@@ -9,6 +9,7 @@
 export {
   appointmentsRepository,
   doctorsRepository,
+  notificationsRepository,
   patientsRepository,
   queueRepository,
   roomsRepository,
@@ -17,6 +18,7 @@ export {
 export type {
   AppointmentsRepository,
   DoctorsRepository,
+  NotificationsRepository,
   PatientsRepository,
   QueueRepository,
   RoomsRepository,

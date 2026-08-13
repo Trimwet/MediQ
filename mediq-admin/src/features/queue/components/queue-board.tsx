@@ -1,5 +1,10 @@
+import { Fragment } from 'react'
 import { CheckCircle2, Clock, DoorOpen, LogIn, Users } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
+import {
+  formatRoom,
+  inStageLabel,
+  useFacilityStore,
+} from '@/stores/facility-store'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { formatDuration, minutesBetween } from '../data'
@@ -26,6 +31,8 @@ export function QueueBoard({
   onDone,
   onLeft,
 }: QueueBoardProps) {
+  const { trackRooms, roomLabel } = useFacilityStore()
+
   const stats = [
     { label: 'Waiting', value: waitingCount, icon: Users },
     { label: 'Now serving', value: serving.length, icon: Clock },
@@ -56,9 +63,7 @@ export function QueueBoard({
       </div>
 
       <div>
-        <h2 className='text-lg font-semibold tracking-tight'>
-          Now serving
-        </h2>
+        <h2 className='text-lg font-semibold tracking-tight'>Now serving</h2>
         {serving.length === 0 ? (
           <Card className='mt-3'>
             <CardContent className='flex items-center justify-center py-10 text-sm text-muted-foreground'>
@@ -68,65 +73,98 @@ export function QueueBoard({
         ) : (
           <div className='mt-3 grid gap-4 sm:grid-cols-2'>
             {serving.map((entry) => (
-              <Card
-                key={entry.id}
-                className='border-primary/25 bg-primary/[0.03]'
-              >
-                <CardContent className='pt-6'>
-                  <div className='flex items-start justify-between gap-2'>
-                    <div>
-                      <p className='font-semibold'>{entry.patientName}</p>
-                      <p className='text-sm text-muted-foreground'>
-                        {entry.doctorName}
-                      </p>
-                    </div>
-                    <Badge variant='outline' className='shrink-0'>
-                      {entry.status === 'in_room' ? 'In room' : 'Called'}
-                    </Badge>
-                  </div>
-                  <div className='mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground'>
-                    <span className='inline-flex items-center gap-1.5'>
-                      <Clock className='size-3.5' />
-                      {entry.calledAt
-                        ? `Called ${formatDuration(minutesBetween(entry.calledAt, new Date().toISOString()))} ago`
-                        : 'Called'}
-                    </span>
+              <div key={entry.id} className='serving-card'>
+                <p className='serving-card-name'>{entry.patientName}</p>
+                <p className='serving-card-sub'>{entry.doctorName}</p>
+                <ServingProgress
+                  status={entry.status}
+                  trackRooms={trackRooms}
+                  roomLabel={roomLabel}
+                />
+                <div className='serving-card-meta'>
+                  <span className='inline-flex items-center gap-1.5'>
+                    <Clock className='size-3.5' />
+                    {entry.calledAt
+                      ? `Called ${formatDuration(minutesBetween(entry.calledAt, new Date().toISOString()))} ago`
+                      : 'Called'}
+                  </span>
+                  {trackRooms && (
                     <span className='inline-flex items-center gap-1.5'>
                       <DoorOpen className='size-3.5' />
-                      {entry.room ?? 'Room not set'}
+                      {formatRoom(entry.room, roomLabel)}
                     </span>
-                  </div>
-                  {canManage && (
-                    <div className='mt-4 flex flex-wrap gap-2'>
-                      {entry.status === 'called' && (
-                        <Button size='sm' onClick={() => onInRoom(entry)}>
-                          <DoorOpen />
-                          Start visit
-                        </Button>
-                      )}
-                      <Button
-                        size='sm'
-                        variant='outline'
-                        onClick={() => onDone(entry)}
-                      >
-                        <CheckCircle2 />
-                        Complete
-                      </Button>
-                      <Button
-                        size='sm'
-                        variant='ghost'
-                        onClick={() => onLeft(entry)}
-                      >
-                        Mark left
-                      </Button>
-                    </div>
                   )}
-                </CardContent>
-              </Card>
+                </div>
+                {canManage && (
+                  <div className='serving-card-actions'>
+                    {entry.status === 'called' && (
+                      <Button size='sm' onClick={() => onInRoom(entry)}>
+                        <DoorOpen />
+                        Start visit
+                      </Button>
+                    )}
+                    <Button
+                      size='sm'
+                      variant='outline'
+                      onClick={() => onDone(entry)}
+                    >
+                      <CheckCircle2 />
+                      Complete
+                    </Button>
+                    <Button
+                      size='sm'
+                      variant='ghost'
+                      onClick={() => onLeft(entry)}
+                    >
+                      Mark left
+                    </Button>
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         )}
       </div>
+    </div>
+  )
+}
+
+function ServingProgress({
+  status,
+  trackRooms,
+  roomLabel,
+}: {
+  status: QueueEntry['status']
+  trackRooms: boolean
+  roomLabel: string
+}) {
+  const isInRoom = status === 'in_room'
+  const roomStage = inStageLabel(trackRooms, roomLabel)
+  const steps = [
+    { label: 'Called', state: isInRoom ? 'done' : 'active' },
+    { label: roomStage, state: isInRoom ? 'active' : 'pending' },
+    { label: 'Done', state: 'pending' },
+  ] as const
+
+  return (
+    <div
+      className={`serving-card-progress ${isInRoom ? 'serving-card-progress--room' : 'serving-card-progress--called'}`}
+      role='img'
+      aria-label={`Status: ${isInRoom ? roomStage : 'Called'}`}
+    >
+      {steps.map((step, index) => (
+        <Fragment key={step.label}>
+          {index > 0 && (
+            <span className='serving-card-progress-line' aria-hidden='true' />
+          )}
+          <span
+            className={`serving-card-progress-step serving-card-progress-step--${step.state}`}
+          >
+            <span className='serving-card-progress-dot' aria-hidden='true' />
+            {step.label}
+          </span>
+        </Fragment>
+      ))}
     </div>
   )
 }

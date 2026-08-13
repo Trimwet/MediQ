@@ -1,22 +1,23 @@
 import { useMemo, useState } from 'react'
-import { CalendarPlus } from 'lucide-react'
-import { toast } from 'sonner'
-import { Button } from '@/components/ui/button'
-import { ConfigDrawer } from '@/components/config-drawer'
-import { Header } from '@/components/layout/header'
-import { Main } from '@/components/layout/main'
-import { TopNav } from '@/components/layout/top-nav'
-import { ProfileDropdown } from '@/components/profile-dropdown'
-import { Search } from '@/components/search'
-import { ThemeSwitch } from '@/components/theme-switch'
-import { useRbac } from '@/hooks/use-rbac'
-import { useAuthStore } from '@/stores/auth-store'
 import {
   useAppointments,
   useCreateAppointment,
   useDoctors,
   useUpdateAppointmentStatus,
 } from '@/data/hooks'
+import { CalendarPlus } from 'lucide-react'
+import { toast } from 'sonner'
+import { useAuthStore } from '@/stores/auth-store'
+import { useRbac } from '@/hooks/use-rbac'
+import { Button } from '@/components/ui/button'
+import { ConfigDrawer } from '@/components/config-drawer'
+import { Header } from '@/components/layout/header'
+import { Main } from '@/components/layout/main'
+import { TopNav } from '@/components/layout/top-nav'
+import { NotificationBell } from '@/components/notification-bell'
+import { ProfileDropdown } from '@/components/profile-dropdown'
+import { Search } from '@/components/search'
+import { ThemeSwitch } from '@/components/theme-switch'
 import { AppointmentDialog } from './components/appointment-dialog'
 import { AppointmentsTable } from './components/appointments-table'
 import { type Appointment, type AppointmentStatus } from './schema'
@@ -70,6 +71,7 @@ export function Appointments() {
       <Header>
         <TopNav links={topNav} className='me-auto' />
         <Search />
+        <NotificationBell />
         <ThemeSwitch />
         <ConfigDrawer />
         <ProfileDropdown />

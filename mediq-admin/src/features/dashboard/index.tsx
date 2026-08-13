@@ -1,4 +1,12 @@
 import { useMemo } from 'react'
+import { useAppointments, useDoctors, useQueue } from '@/data/hooks'
+import {
+  CalendarDays,
+  Users,
+  CheckCircle2,
+  Stethoscope,
+  Activity,
+} from 'lucide-react'
 import {
   Bar,
   BarChart,
@@ -7,20 +15,9 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import {
-  CalendarDays,
-  Users,
-  CheckCircle2,
-  Stethoscope,
-  Activity,
-} from 'lucide-react'
+import { useAuthStore } from '@/stores/auth-store'
 import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
   Table,
@@ -34,11 +31,10 @@ import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { TopNav } from '@/components/layout/top-nav'
+import { NotificationBell } from '@/components/notification-bell'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
-import { useAuthStore } from '@/stores/auth-store'
-import { useAppointments, useDoctors, useQueue } from '@/data/hooks'
 import { minutesBetween } from '@/features/queue/data'
 import { queueStatusBadge, type QueueEntry } from '@/features/queue/schema'
 
@@ -51,7 +47,9 @@ export function Dashboard() {
   const doctorsQuery = useDoctors()
 
   const isPending =
-    appointmentsQuery.isPending || queueQuery.isPending || doctorsQuery.isPending
+    appointmentsQuery.isPending ||
+    queueQuery.isPending ||
+    doctorsQuery.isPending
 
   const appointments = appointmentsQuery.data ?? []
   const queue = queueQuery.data ?? []
@@ -63,7 +61,9 @@ export function Dashboard() {
    * enforce this server-side (types/domain.ts); this is the UI mirror.
    */
   const isDoctor = user?.role.includes('doctor')
-  const doctor = isDoctor ? doctors.find((d) => d.email === user?.email) : undefined
+  const doctor = isDoctor
+    ? doctors.find((d) => d.email === user?.email)
+    : undefined
   const ownAppointments = useMemo(
     () =>
       doctor
@@ -160,7 +160,8 @@ export function Dashboard() {
         .filter((entry) => entry.status !== 'left')
         .sort(
           (a, b) =>
-            new Date(b.checkedInAt).getTime() - new Date(a.checkedInAt).getTime()
+            new Date(b.checkedInAt).getTime() -
+            new Date(a.checkedInAt).getTime()
         )
         .slice(0, 5),
     [queue]
@@ -171,6 +172,7 @@ export function Dashboard() {
       <Header>
         <TopNav links={topNav} className='me-auto' />
         <Search />
+        <NotificationBell />
         <ThemeSwitch />
         <ConfigDrawer />
         <ProfileDropdown />

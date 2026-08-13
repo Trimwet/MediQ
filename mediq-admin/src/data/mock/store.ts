@@ -1,20 +1,27 @@
 import { create } from 'zustand'
-import { type Appointment, type AppointmentStatus } from '@/features/appointments/schema'
-import { type QueueEntry, type QueueStatus } from '@/features/queue/schema'
-import { type Patient } from '@/features/patients/schema'
+import {
+  type Appointment,
+  type AppointmentStatus,
+} from '@/features/appointments/schema'
 import { type Doctor, type DoctorStatus } from '@/features/doctors/schema'
-import { type Staff } from '@/features/staff/schema'
+import { type AppNotification } from '@/features/notifications/schema'
+import { type Patient } from '@/features/patients/schema'
+import { type QueueEntry, type QueueStatus } from '@/features/queue/schema'
 import { type Room, type RoomStatus } from '@/features/rooms/schema'
+import { type Staff } from '@/features/staff/schema'
 import {
   seedAppointments,
   seedDoctors,
+  seedNotifications,
   seedPatients,
   seedQueue,
   seedRooms,
   seedStaff,
 } from './seeds'
 
-export const queueRooms = ['Room 1', 'Room 2', 'Room 3', 'Room 4'] as const
+// Bare identifiers — the facility label ('Room', 'Office', ...) is applied
+// at render time via the facility store.
+export const queueRooms = ['1', '2', '3', '4'] as const
 
 type DataState = {
   appointments: Appointment[]
@@ -24,6 +31,7 @@ type DataState = {
   staff: Staff[]
   rooms: Room[]
   roomCursor: number
+  notifications: AppNotification[]
 
   addAppointment: (input: Omit<Appointment, 'id' | 'status'>) => Appointment
   updateAppointmentStatus: (id: string, status: AppointmentStatus) => void
@@ -45,6 +53,8 @@ type DataState = {
   addStaff: (input: Omit<Staff, 'id'>) => Staff
   addRoom: (input: Omit<Room, 'id'>) => Room
   setRoomStatus: (id: string, status: RoomStatus) => void
+  markNotificationRead: (id: string) => void
+  markAllNotificationsRead: () => void
 }
 
 export const useDataStore = create<DataState>()((set) => ({
@@ -55,9 +65,14 @@ export const useDataStore = create<DataState>()((set) => ({
   staff: seedStaff,
   rooms: seedRooms,
   roomCursor: 0,
+  notifications: seedNotifications,
 
   addAppointment: (input) => {
-    const appointment: Appointment = { ...input, id: `apt-${Date.now()}`, status: 'booked' }
+    const appointment: Appointment = {
+      ...input,
+      id: `apt-${Date.now()}`,
+      status: 'booked',
+    }
     set((state) => ({ appointments: [appointment, ...state.appointments] }))
     return appointment
   },
@@ -88,7 +103,12 @@ export const useDataStore = create<DataState>()((set) => ({
       return { appointments }
     }),
 
-  addQueueEntry: ({ appointmentId, patientName, doctorName, appointmentTime }) =>
+  addQueueEntry: ({
+    appointmentId,
+    patientName,
+    doctorName,
+    appointmentTime,
+  }) =>
     set((state) => ({
       queue: [
         ...state.queue,
@@ -110,14 +130,19 @@ export const useDataStore = create<DataState>()((set) => ({
         .filter((e) => e.status === 'waiting')
         .sort(
           (a, b) =>
-            new Date(a.checkedInAt).getTime() - new Date(b.checkedInAt).getTime()
+            new Date(a.checkedInAt).getTime() -
+            new Date(b.checkedInAt).getTime()
         )
       const next = waiting[0]
       if (!next) return state
       return {
         queue: state.queue.map((e) =>
           e.id === next.id
-            ? { ...e, status: 'called' as QueueStatus, calledAt: new Date().toISOString() }
+            ? {
+                ...e,
+                status: 'called' as QueueStatus,
+                calledAt: new Date().toISOString(),
+              }
             : e
         ),
       }
@@ -129,9 +154,7 @@ export const useDataStore = create<DataState>()((set) => ({
       return {
         roomCursor: state.roomCursor + 1,
         queue: state.queue.map((e) =>
-          e.id === id
-            ? { ...e, status: 'in_room' as QueueStatus, room }
-            : e
+          e.id === id ? { ...e, status: 'in_room' as QueueStatus, room } : e
         ),
       }
     }),
@@ -182,5 +205,17 @@ export const useDataStore = create<DataState>()((set) => ({
   setRoomStatus: (id, status) =>
     set((state) => ({
       rooms: state.rooms.map((r) => (r.id === id ? { ...r, status } : r)),
+    })),
+
+  markNotificationRead: (id) =>
+    set((state) => ({
+      notifications: state.notifications.map((n) =>
+        n.id === id ? { ...n, read: true } : n
+      ),
+    })),
+
+  markAllNotificationsRead: () =>
+    set((state) => ({
+      notifications: state.notifications.map((n) => ({ ...n, read: true })),
     })),
 }))

@@ -1,16 +1,17 @@
 import { useState } from 'react'
+import { useCreateStaff, useStaff } from '@/data/hooks'
 import { UserCog } from 'lucide-react'
 import { toast } from 'sonner'
+import { useRbac } from '@/hooks/use-rbac'
 import { Button } from '@/components/ui/button'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { TopNav } from '@/components/layout/top-nav'
+import { NotificationBell } from '@/components/notification-bell'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
-import { useRbac } from '@/hooks/use-rbac'
-import { useCreateStaff, useStaff } from '@/data/hooks'
 import { StaffDialog } from './components/staff-dialog'
 import { StaffTable } from './components/staff-table'
 import { type Staff } from './schema'
@@ -34,6 +35,7 @@ export function Staff() {
       <Header>
         <TopNav links={topNav} className='me-auto' />
         <Search />
+        <NotificationBell />
         <ThemeSwitch />
         <ConfigDrawer />
         <ProfileDropdown />
@@ -55,7 +57,10 @@ export function Staff() {
           )}
         </div>
 
-        <StaffTable data={staffQuery.data ?? []} loading={staffQuery.isPending} />
+        <StaffTable
+          data={staffQuery.data ?? []}
+          loading={staffQuery.isPending}
+        />
       </Main>
 
       <StaffDialog

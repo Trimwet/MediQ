@@ -33,3 +33,9 @@ playwright-report/
 
 # Misc
 *.tsbuildinfo
+
+# Freebuff local state
+.freebuff/
+
+# TanStack Router tmp
+.tanstack/

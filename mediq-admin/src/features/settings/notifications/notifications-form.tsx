@@ -1,15 +1,9 @@
+import { type ReactNode } from 'react'
 import { z } from 'zod'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch, type UseFormReturn } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
 import {
   Form,
   FormControl,
@@ -60,6 +54,14 @@ const notificationsFormSchema = z
 
 type NotificationsFormValues = z.infer<typeof notificationsFormSchema>
 
+type SwitchFieldName =
+  | 'emailAppointmentReminders'
+  | 'emailQueueUpdates'
+  | 'emailDailySummary'
+  | 'pushNotifications'
+  | 'smsNotifications'
+  | 'quietHoursEnabled'
+
 // This can come from your database or API.
 const defaultValues: Partial<NotificationsFormValues> = {
   emailAppointmentReminders: true,
@@ -80,163 +82,78 @@ export function NotificationsForm() {
     mode: 'onChange',
   })
 
-  const quietHoursEnabled = form.watch('quietHoursEnabled')
+  const quietHoursEnabled = useWatch({
+    control: form.control,
+    name: 'quietHoursEnabled',
+  })
 
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(() => toast.success('Notification preferences saved'))}
+        onSubmit={form.handleSubmit(() =>
+          toast.success('Notification preferences saved')
+        )}
         className='space-y-8'
       >
-        <Card>
-          <CardHeader>
-            <CardTitle>Email notifications</CardTitle>
-            <CardDescription>
-              Choose what you receive by email.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className='space-y-4'>
-            <FormField
-              control={form.control}
+        <div className='overflow-hidden rounded-xl border bg-card'>
+          <SettingsGroup
+            title='Email notifications'
+            desc='Choose what you receive by email.'
+          >
+            <SwitchRow
+              form={form}
               name='emailAppointmentReminders'
-              render={({ field }) => (
-                <FormItem className='flex flex-row items-center justify-between gap-4'>
-                  <div className='space-y-0.5'>
-                    <FormLabel className='text-base'>
-                      Appointment reminders
-                    </FormLabel>
-                    <FormDescription>
-                      Email me when an appointment is coming up.
-                    </FormDescription>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
+              label='Appointment reminders'
+              desc='Email me when an appointment is coming up.'
             />
-            <Separator />
-            <FormField
-              control={form.control}
+            <SwitchRow
+              form={form}
               name='emailQueueUpdates'
-              render={({ field }) => (
-                <FormItem className='flex flex-row items-center justify-between gap-4'>
-                  <div className='space-y-0.5'>
-                    <FormLabel className='text-base'>Queue updates</FormLabel>
-                    <FormDescription>
-                      Email me about changes to my queue position and status.
-                    </FormDescription>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
+              label='Queue updates'
+              desc='Email me about changes to my queue position and status.'
             />
-            <Separator />
-            <FormField
-              control={form.control}
+            <SwitchRow
+              form={form}
               name='emailDailySummary'
-              render={({ field }) => (
-                <FormItem className='flex flex-row items-center justify-between gap-4'>
-                  <div className='space-y-0.5'>
-                    <FormLabel className='text-base'>Daily summary</FormLabel>
-                    <FormDescription>
-                      Email me a summary of the day's activity.
-                    </FormDescription>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
+              label='Daily summary'
+              desc="Email me a summary of the day's activity."
             />
-          </CardContent>
-        </Card>
+          </SettingsGroup>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Push notifications</CardTitle>
-            <CardDescription>
-              Real-time alerts delivered to this device.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <FormField
-              control={form.control}
+          <Separator />
+
+          <SettingsGroup
+            title='Push notifications'
+            desc='Real-time alerts delivered to this device.'
+          >
+            <SwitchRow
+              form={form}
               name='pushNotifications'
-              render={({ field }) => (
-                <FormItem className='flex flex-row items-center justify-between gap-4'>
-                  <div className='space-y-0.5'>
-                    <FormLabel className='text-base'>
-                      Enable push notifications
-                    </FormLabel>
-                    <FormDescription>
-                      Receive instant alerts on this device.
-                    </FormDescription>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
+              label='Enable push notifications'
+              desc='Receive instant alerts on this device.'
             />
-          </CardContent>
-        </Card>
+          </SettingsGroup>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>SMS notifications</CardTitle>
-            <CardDescription>
-              Text message alerts sent to your phone.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <FormField
-              control={form.control}
+          <Separator />
+
+          <SettingsGroup
+            title='SMS notifications'
+            desc='Text message alerts sent to your phone.'
+          >
+            <SwitchRow
+              form={form}
               name='smsNotifications'
-              render={({ field }) => (
-                <FormItem className='flex flex-row items-center justify-between gap-4'>
-                  <div className='space-y-0.5'>
-                    <FormLabel className='text-base'>
-                      Enable SMS notifications
-                    </FormLabel>
-                    <FormDescription>
-                      Receive text messages about your appointments and queue.
-                    </FormDescription>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
+              label='Enable SMS notifications'
+              desc='Receive text messages about your appointments and queue.'
             />
-          </CardContent>
-        </Card>
+          </SettingsGroup>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Notification frequency</CardTitle>
-            <CardDescription>
-              How often you want to receive digest notifications.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+          <Separator />
+
+          <SettingsGroup
+            title='Notification frequency'
+            desc='How often you want to receive digest notifications.'
+          >
             <FormField
               control={form.control}
               name='frequency'
@@ -259,49 +176,29 @@ export function NotificationsForm() {
                     </SelectContent>
                   </Select>
                   <FormDescription>
-                    Digests batch non-urgent updates and are sent at a
-                    scheduled time.
+                    Digests batch non-urgent updates and are sent at a scheduled
+                    time.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
-          </CardContent>
-        </Card>
+          </SettingsGroup>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Quiet hours</CardTitle>
-            <CardDescription>
-              Mute non-urgent notifications during a set time range.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className='space-y-4'>
-            <FormField
-              control={form.control}
-              name='quietHoursEnabled'
-              render={({ field }) => (
-                <FormItem className='flex flex-row items-center justify-between gap-4'>
-                  <div className='space-y-0.5'>
-                    <FormLabel className='text-base'>
-                      Enable quiet hours
-                    </FormLabel>
-                    <FormDescription>
-                      Suppress notifications between the times below.
-                    </FormDescription>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            {quietHoursEnabled && (
-              <>
-                <Separator />
+          <Separator />
+
+          <SettingsGroup
+            title='Quiet hours'
+            desc='Mute non-urgent notifications during a set time range.'
+          >
+            <div className='space-y-4'>
+              <SwitchRow
+                form={form}
+                name='quietHoursEnabled'
+                label='Enable quiet hours'
+                desc='Suppress notifications between the times below.'
+              />
+              {quietHoursEnabled && (
                 <div className='flex flex-col gap-4 sm:flex-row'>
                   <FormField
                     control={form.control}
@@ -330,13 +227,61 @@ export function NotificationsForm() {
                     )}
                   />
                 </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
+              )}
+            </div>
+          </SettingsGroup>
+        </div>
 
         <Button type='submit'>Save notifications</Button>
       </form>
     </Form>
+  )
+}
+
+function SettingsGroup({
+  title,
+  desc,
+  children,
+}: {
+  title: string
+  desc: string
+  children: ReactNode
+}) {
+  return (
+    <section className='px-5 py-4'>
+      <h3 className='text-sm font-semibold tracking-tight'>{title}</h3>
+      <p className='mt-0.5 text-sm text-muted-foreground'>{desc}</p>
+      <div className='mt-4 space-y-4'>{children}</div>
+    </section>
+  )
+}
+
+function SwitchRow({
+  form,
+  name,
+  label,
+  desc,
+}: {
+  form: UseFormReturn<NotificationsFormValues>
+  name: SwitchFieldName
+  label: string
+  desc: string
+}) {
+  return (
+    <FormField
+      control={form.control}
+      name={name}
+      render={({ field }) => (
+        <FormItem className='flex flex-row items-center justify-between gap-4'>
+          <div className='space-y-0.5'>
+            <FormLabel className='text-sm'>{label}</FormLabel>
+            <FormDescription>{desc}</FormDescription>
+          </div>
+          <FormControl>
+            <Switch checked={field.value} onCheckedChange={field.onChange} />
+          </FormControl>
+        </FormItem>
+      )}
+    />
   )
 }

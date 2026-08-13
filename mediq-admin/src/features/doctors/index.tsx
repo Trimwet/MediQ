@@ -1,20 +1,21 @@
 import { useState } from 'react'
-import { Stethoscope } from 'lucide-react'
-import { toast } from 'sonner'
-import { Button } from '@/components/ui/button'
-import { ConfigDrawer } from '@/components/config-drawer'
-import { Header } from '@/components/layout/header'
-import { Main } from '@/components/layout/main'
-import { TopNav } from '@/components/layout/top-nav'
-import { ProfileDropdown } from '@/components/profile-dropdown'
-import { Search } from '@/components/search'
-import { ThemeSwitch } from '@/components/theme-switch'
-import { useRbac } from '@/hooks/use-rbac'
 import {
   useCreateDoctor,
   useDoctors,
   useUpdateDoctorStatus,
 } from '@/data/hooks'
+import { Stethoscope } from 'lucide-react'
+import { toast } from 'sonner'
+import { useRbac } from '@/hooks/use-rbac'
+import { Button } from '@/components/ui/button'
+import { ConfigDrawer } from '@/components/config-drawer'
+import { Header } from '@/components/layout/header'
+import { Main } from '@/components/layout/main'
+import { TopNav } from '@/components/layout/top-nav'
+import { NotificationBell } from '@/components/notification-bell'
+import { ProfileDropdown } from '@/components/profile-dropdown'
+import { Search } from '@/components/search'
+import { ThemeSwitch } from '@/components/theme-switch'
 import { DoctorDialog } from './components/doctor-dialog'
 import { DoctorsTable } from './components/doctors-table'
 import { type Doctor, type DoctorStatus } from './schema'
@@ -48,6 +49,7 @@ export function Doctors() {
       <Header>
         <TopNav links={topNav} className='me-auto' />
         <Search />
+        <NotificationBell />
         <ThemeSwitch />
         <ConfigDrawer />
         <ProfileDropdown />

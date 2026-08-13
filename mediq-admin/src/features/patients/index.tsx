@@ -1,16 +1,17 @@
 import { useState } from 'react'
+import { useCreatePatient, usePatients } from '@/data/hooks'
 import { UserPlus } from 'lucide-react'
 import { toast } from 'sonner'
+import { useRbac } from '@/hooks/use-rbac'
 import { Button } from '@/components/ui/button'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { TopNav } from '@/components/layout/top-nav'
+import { NotificationBell } from '@/components/notification-bell'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
-import { useRbac } from '@/hooks/use-rbac'
-import { useCreatePatient, usePatients } from '@/data/hooks'
 import { PatientDialog } from './components/patient-dialog'
 import { PatientsTable } from './components/patients-table'
 import { type Patient } from './schema'
@@ -35,6 +36,7 @@ export function Patients() {
       <Header>
         <TopNav links={topNav} className='me-auto' />
         <Search />
+        <NotificationBell />
         <ThemeSwitch />
         <ConfigDrawer />
         <ProfileDropdown />

@@ -10,11 +10,12 @@ import {
   type Appointment,
   type AppointmentStatus,
 } from '@/features/appointments/schema'
-import { type QueueEntry } from '@/features/queue/schema'
-import { type Patient } from '@/features/patients/schema'
 import { type Doctor, type DoctorStatus } from '@/features/doctors/schema'
-import { type Staff } from '@/features/staff/schema'
+import { type AppNotification } from '@/features/notifications/schema'
+import { type Patient } from '@/features/patients/schema'
+import { type QueueEntry } from '@/features/queue/schema'
 import { type Room, type RoomStatus } from '@/features/rooms/schema'
+import { type Staff } from '@/features/staff/schema'
 import { useDataStore } from './mock/store'
 
 // Simulated network latency so loading states are visible and real.
@@ -54,6 +55,12 @@ export interface RoomsRepository {
   list: () => Promise<Room[]>
   create: (input: Omit<Room, 'id'>) => Promise<Room>
   updateStatus: (id: string, status: RoomStatus) => Promise<void>
+}
+
+export interface NotificationsRepository {
+  list: () => Promise<AppNotification[]>
+  markRead: (id: string) => Promise<void>
+  markAllRead: () => Promise<void>
 }
 
 export const appointmentsRepository: AppointmentsRepository = {
@@ -143,5 +150,20 @@ export const roomsRepository: RoomsRepository = {
   async updateStatus(id, status) {
     await delay(150)
     useDataStore.getState().setRoomStatus(id, status)
+  },
+}
+
+export const notificationsRepository: NotificationsRepository = {
+  async list() {
+    await delay()
+    return useDataStore.getState().notifications
+  },
+  async markRead(id) {
+    await delay(150)
+    useDataStore.getState().markNotificationRead(id)
+  },
+  async markAllRead() {
+    await delay(150)
+    useDataStore.getState().markAllNotificationsRead()
   },
 }

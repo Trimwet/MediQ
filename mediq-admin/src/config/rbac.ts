@@ -34,6 +34,7 @@ export const PERMISSIONS = [
   'staff:manage',
   'rooms:view',
   'rooms:manage',
+  'notifications:view',
   'settings:view',
   'users:view',
   'users:manage',
@@ -55,6 +56,7 @@ export const rolePermissions: Record<Role, readonly Permission[]> = {
     'queue:manage',
     'patients:view',
     'patients:manage',
+    'notifications:view',
   ],
   // Clinician: sees their own work, cannot book or administer
   doctor: [
@@ -62,13 +64,11 @@ export const rolePermissions: Record<Role, readonly Permission[]> = {
     'appointments:view',
     'queue:view',
     'patients:view',
+    'notifications:view',
   ],
 }
 
-export function can(
-  roles: readonly string[],
-  permission: Permission
-): boolean {
+export function can(roles: readonly string[], permission: Permission): boolean {
   return roles.some((role) =>
     (rolePermissions[role as Role] ?? []).includes(permission)
   )
@@ -90,6 +90,7 @@ export const routePermissions: Record<string, Permission> = {
   '/admin/doctors': 'doctors:view',
   '/admin/staff': 'staff:view',
   '/admin/rooms': 'rooms:view',
+  '/admin/notifications': 'notifications:view',
   '/admin/settings': 'settings:view',
   '/users': 'users:view',
 }
@@ -104,9 +105,7 @@ export function requiredPermissionFor(
   pathname: string
 ): Permission | undefined {
   const match = Object.entries(routePermissions)
-    .filter(
-      ([path]) => pathname === path || pathname.startsWith(`${path}/`)
-    )
+    .filter(([path]) => pathname === path || pathname.startsWith(`${path}/`))
     .sort(([a], [b]) => b.length - a.length)[0]
   return match?.[1]
 }

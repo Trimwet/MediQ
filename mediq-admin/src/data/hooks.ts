@@ -1,19 +1,16 @@
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   type Appointment,
   type AppointmentStatus,
 } from '@/features/appointments/schema'
-import { type Patient } from '@/features/patients/schema'
 import { type Doctor, type DoctorStatus } from '@/features/doctors/schema'
-import { type Staff } from '@/features/staff/schema'
+import { type Patient } from '@/features/patients/schema'
 import { type Room, type RoomStatus } from '@/features/rooms/schema'
+import { type Staff } from '@/features/staff/schema'
 import {
   appointmentsRepository,
   doctorsRepository,
+  notificationsRepository,
   patientsRepository,
   queueRepository,
   roomsRepository,
@@ -34,7 +31,8 @@ export function useCreateAppointment() {
   return useMutation({
     mutationFn: (input: Omit<Appointment, 'id' | 'status'>) =>
       appointmentsRepository.create(input),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['appointments'] }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ['appointments'] }),
   })
 }
 
@@ -62,7 +60,8 @@ export function useQueue() {
 
 export function useQueueActions() {
   const queryClient = useQueryClient()
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['queue'] })
+  const invalidate = () =>
+    queryClient.invalidateQueries({ queryKey: ['queue'] })
 
   const callNext = useMutation({
     mutationFn: () => queueRepository.callNext(),
@@ -96,7 +95,8 @@ export function usePatients() {
 export function useCreatePatient() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (input: Omit<Patient, 'id'>) => patientsRepository.create(input),
+    mutationFn: (input: Omit<Patient, 'id'>) =>
+      patientsRepository.create(input),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['patients'] }),
   })
 }
@@ -167,5 +167,32 @@ export function useUpdateRoomStatus() {
     mutationFn: ({ id, status }: { id: string; status: RoomStatus }) =>
       roomsRepository.updateStatus(id, status),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['rooms'] }),
+  })
+}
+
+// ---- Notifications ----
+
+export function useNotifications() {
+  return useQuery({
+    queryKey: ['notifications'],
+    queryFn: () => notificationsRepository.list(),
+  })
+}
+
+export function useMarkNotificationRead() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => notificationsRepository.markRead(id),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ['notifications'] }),
+  })
+}
+
+export function useMarkAllNotificationsRead() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: () => notificationsRepository.markAllRead(),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ['notifications'] }),
   })
 }

@@ -1,7 +1,8 @@
-import { useLayout } from '@/context/layout-provider'
 import { type Permission, type Role, routePermissions } from '@/config/rbac'
-import { useRbac } from '@/hooks/use-rbac'
 import { useAuthStore } from '@/stores/auth-store'
+import { useFacilityStore } from '@/stores/facility-store'
+import { useLayout } from '@/context/layout-provider'
+import { useRbac } from '@/hooks/use-rbac'
 import {
   Sidebar,
   SidebarContent,
@@ -19,17 +20,25 @@ export function AppSidebar() {
   const { collapsible, variant } = useLayout()
   const { can, hasRole } = useRbac()
   const user = useAuthStore((state) => state.auth.user)
+  const { trackRooms, roomLabel } = useFacilityStore()
+
+  // Hides the Rooms module entirely when the facility does not track rooms,
+  // and renames it to match the configured label (e.g. "Offices").
+  const isVisible = (item: NavItem) =>
+    keepItem(item, can, hasRole) &&
+    (item.url === '/admin/rooms' ? trackRooms : true)
 
   const navGroups = sidebarData.navGroups
     .map((group) => ({
       ...group,
-      items: group.items
-        .filter((item) => keepItem(item, can, hasRole))
-        .map((item) =>
-          item.items
-            ? { ...item, items: item.items.filter((sub) => keepItem(sub, can, hasRole)) }
-            : item
-        ),
+      items: group.items.filter(isVisible).map((item) => {
+        const next = item.items
+          ? { ...item, items: item.items.filter(isVisible) }
+          : item
+        return next.url === '/admin/rooms' && trackRooms
+          ? { ...next, title: `${roomLabel}s` }
+          : next
+      }),
     }))
     .filter((group) => group.items.length > 0)
 

@@ -1,18 +1,19 @@
 import { useMemo } from 'react'
+import { useQueue, useQueueActions } from '@/data/hooks'
 import { Megaphone } from 'lucide-react'
 import { toast } from 'sonner'
+import { useRbac } from '@/hooks/use-rbac'
 import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { TopNav } from '@/components/layout/top-nav'
+import { NotificationBell } from '@/components/notification-bell'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
-import { useRbac } from '@/hooks/use-rbac'
-import { useQueue, useQueueActions } from '@/data/hooks'
 import { QueueBoard } from './components/queue-board'
 import { QueueTable } from './components/queue-table'
 import { minutesBetween } from './data'
@@ -35,12 +36,14 @@ export function Queue() {
         .filter((entry) => entry.status === 'waiting')
         .sort(
           (a, b) =>
-            new Date(a.checkedInAt).getTime() - new Date(b.checkedInAt).getTime()
+            new Date(a.checkedInAt).getTime() -
+            new Date(b.checkedInAt).getTime()
         ),
     [entries]
   )
   const serving = useMemo(
-    () => entries.filter((e) => e.status === 'called' || e.status === 'in_room'),
+    () =>
+      entries.filter((e) => e.status === 'called' || e.status === 'in_room'),
     [entries]
   )
   const doneCount = entries.filter((entry) => entry.status === 'done').length
@@ -58,13 +61,15 @@ export function Queue() {
     const next = waiting[0]
     if (!canManage || !next) return
     actions.callNext.mutate(undefined, {
-      onSuccess: () => toast.success(`${next.patientName} called for ${next.doctorName}`),
+      onSuccess: () =>
+        toast.success(`${next.patientName} called for ${next.doctorName}`),
     })
   }
 
   function handleStartVisit(entry: QueueEntry) {
     actions.startVisit.mutate(entry.id, {
-      onSuccess: () => toast.success(`${entry.patientName} started their visit`),
+      onSuccess: () =>
+        toast.success(`${entry.patientName} started their visit`),
     })
   }
 
@@ -85,6 +90,7 @@ export function Queue() {
       <Header>
         <TopNav links={topNav} className='me-auto' />
         <Search />
+        <NotificationBell />
         <ThemeSwitch />
         <ConfigDrawer />
         <ProfileDropdown />

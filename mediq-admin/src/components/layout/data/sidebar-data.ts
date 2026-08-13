@@ -1,4 +1,5 @@
 import {
+  Bell,
   Calendar,
   DoorOpen,
   LayoutDashboard,
@@ -83,6 +84,11 @@ export const sidebarData: SidebarData = {
       title: 'Other',
       items: [
         {
+          title: 'Notifications',
+          url: '/admin/notifications',
+          icon: Bell,
+        },
+        {
           title: 'Settings',
           icon: Settings,
           roles: ['admin'],
@@ -107,6 +113,10 @@ export const sidebarData: SidebarData = {
             {
               title: 'Display',
               url: '/admin/settings/display',
+            },
+            {
+              title: 'Facility',
+              url: '/admin/settings/facility',
             },
           ],
         },

@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { DoorOpen } from 'lucide-react'
+import { useFacilityStore } from '@/stores/facility-store'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -24,12 +25,16 @@ import { Input } from '@/components/ui/input'
 import { SelectDropdown } from '@/components/select-dropdown'
 import { roomTypeLabel, roomTypes, type Room } from '../schema'
 
-const formSchema = z.object({
-  number: z.string().min(1, 'Please enter a room number.'),
-  type: z.string().min(1, 'Please choose a room type.'),
-})
+function createFormSchema(roomLabel: string) {
+  const noun = roomLabel.toLowerCase()
+  return z.object({
+    number: z.string().min(1, `Please enter a ${noun} number.`),
+    type: z.string().min(1, 'Please choose a type.'),
+  })
+}
 
-type RoomForm = z.infer<typeof formSchema>
+type RoomFormSchema = ReturnType<typeof createFormSchema>
+type RoomForm = z.infer<RoomFormSchema>
 
 type RoomDialogProps = {
   open: boolean
@@ -38,8 +43,10 @@ type RoomDialogProps = {
 }
 
 export function RoomDialog({ open, onOpenChange, onCreated }: RoomDialogProps) {
+  const roomLabel = useFacilityStore((s) => s.roomLabel)
+  const noun = roomLabel.toLowerCase()
   const form = useForm<RoomForm>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(createFormSchema(roomLabel)),
     defaultValues: { number: '', type: '' },
   })
 
@@ -64,10 +71,10 @@ export function RoomDialog({ open, onOpenChange, onCreated }: RoomDialogProps) {
       <DialogContent className='sm:max-w-md'>
         <DialogHeader className='text-start'>
           <DialogTitle className='flex items-center gap-2'>
-            <DoorOpen /> Add room
+            <DoorOpen /> Add {noun}
           </DialogTitle>
           <DialogDescription>
-            Add a room to the clinic and set its type.
+            Add a {noun} to the clinic and set its type.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -81,9 +88,9 @@ export function RoomDialog({ open, onOpenChange, onCreated }: RoomDialogProps) {
               name='number'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Room number</FormLabel>
+                  <FormLabel>{roomLabel} number</FormLabel>
                   <FormControl>
-                    <Input placeholder='eg: Room 9' {...field} />
+                    <Input placeholder='eg: 9' {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -94,11 +101,11 @@ export function RoomDialog({ open, onOpenChange, onCreated }: RoomDialogProps) {
               name='type'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Room type</FormLabel>
+                  <FormLabel>{roomLabel} type</FormLabel>
                   <SelectDropdown
                     defaultValue={field.value}
                     onValueChange={field.onChange}
-                    placeholder='Select a room type'
+                    placeholder={`Select a ${noun} type`}
                     items={roomTypes.map((type) => ({
                       value: type,
                       label: roomTypeLabel[type],
@@ -115,7 +122,7 @@ export function RoomDialog({ open, onOpenChange, onCreated }: RoomDialogProps) {
             <Button variant='outline'>Cancel</Button>
           </DialogClose>
           <Button type='submit' form='room-form'>
-            Add room
+            Add {noun}
           </Button>
         </DialogFooter>
       </DialogContent>

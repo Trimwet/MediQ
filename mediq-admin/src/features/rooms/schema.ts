@@ -22,8 +22,8 @@ export const roomTypeLabel: Record<RoomType, string> = {
   recovery: 'Recovery',
 }
 
-export const roomStatusBadge: Record<RoomStatus, string> = {
-  available: 'bg-teal-100/30 text-teal-900 dark:text-teal-200 border-teal-200',
-  occupied: 'bg-indigo-200/40 text-indigo-900 dark:text-indigo-100 border-indigo-300',
-  cleaning: 'bg-amber-200/40 text-amber-900 dark:text-amber-100 border-amber-300',
+export const roomStatusLabel: Record<RoomStatus, string> = {
+  available: 'Available',
+  occupied: 'Occupied',
+  cleaning: 'Cleaning',
 }

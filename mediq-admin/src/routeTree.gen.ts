@@ -23,6 +23,7 @@ import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedAdminAppointmentsRouteImport } from './routes/_authenticated/admin/appointments'
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin/dashboard'
 import { Route as AuthenticatedAdminDoctorsRouteImport } from './routes/_authenticated/admin/doctors'
+import { Route as AuthenticatedAdminNotificationsRouteImport } from './routes/_authenticated/admin/notifications'
 import { Route as AuthenticatedAdminPatientsRouteImport } from './routes/_authenticated/admin/patients'
 import { Route as AuthenticatedAdminQueueRouteImport } from './routes/_authenticated/admin/queue'
 import { Route as AuthenticatedAdminRoomsRouteImport } from './routes/_authenticated/admin/rooms'
@@ -34,6 +35,7 @@ import { Route as AuthenticatedAdminSettingsIndexRouteImport } from './routes/_a
 import { Route as AuthenticatedAdminSettingsAccountRouteImport } from './routes/_authenticated/admin/settings.account'
 import { Route as AuthenticatedAdminSettingsAppearanceRouteImport } from './routes/_authenticated/admin/settings.appearance'
 import { Route as AuthenticatedAdminSettingsDisplayRouteImport } from './routes/_authenticated/admin/settings.display'
+import { Route as AuthenticatedAdminSettingsFacilityRouteImport } from './routes/_authenticated/admin/settings.facility'
 import { Route as AuthenticatedAdminSettingsNotificationsRouteImport } from './routes/_authenticated/admin/settings.notifications'
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
@@ -108,6 +110,12 @@ const AuthenticatedAdminDoctorsRoute =
     path: '/admin/doctors',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminNotificationsRoute =
+  AuthenticatedAdminNotificationsRouteImport.update({
+    id: '/admin/notifications',
+    path: '/admin/notifications',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminPatientsRoute =
   AuthenticatedAdminPatientsRouteImport.update({
     id: '/admin/patients',
@@ -170,6 +178,12 @@ const AuthenticatedAdminSettingsDisplayRoute =
     path: '/display',
     getParentRoute: () => AuthenticatedAdminSettingsRoute,
   } as any)
+const AuthenticatedAdminSettingsFacilityRoute =
+  AuthenticatedAdminSettingsFacilityRouteImport.update({
+    id: '/facility',
+    path: '/facility',
+    getParentRoute: () => AuthenticatedAdminSettingsRoute,
+  } as any)
 const AuthenticatedAdminSettingsNotificationsRoute =
   AuthenticatedAdminSettingsNotificationsRouteImport.update({
     id: '/notifications',
@@ -191,6 +205,7 @@ export interface FileRoutesByFullPath {
   '/admin/appointments': typeof AuthenticatedAdminAppointmentsRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/admin/doctors': typeof AuthenticatedAdminDoctorsRoute
+  '/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
   '/admin/patients': typeof AuthenticatedAdminPatientsRoute
   '/admin/queue': typeof AuthenticatedAdminQueueRoute
   '/admin/rooms': typeof AuthenticatedAdminRoomsRoute
@@ -201,6 +216,7 @@ export interface FileRoutesByFullPath {
   '/admin/settings/account': typeof AuthenticatedAdminSettingsAccountRoute
   '/admin/settings/appearance': typeof AuthenticatedAdminSettingsAppearanceRoute
   '/admin/settings/display': typeof AuthenticatedAdminSettingsDisplayRoute
+  '/admin/settings/facility': typeof AuthenticatedAdminSettingsFacilityRoute
   '/admin/settings/notifications': typeof AuthenticatedAdminSettingsNotificationsRoute
   '/admin/settings/': typeof AuthenticatedAdminSettingsIndexRoute
 }
@@ -218,6 +234,7 @@ export interface FileRoutesByTo {
   '/admin/appointments': typeof AuthenticatedAdminAppointmentsRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/admin/doctors': typeof AuthenticatedAdminDoctorsRoute
+  '/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
   '/admin/patients': typeof AuthenticatedAdminPatientsRoute
   '/admin/queue': typeof AuthenticatedAdminQueueRoute
   '/admin/rooms': typeof AuthenticatedAdminRoomsRoute
@@ -227,6 +244,7 @@ export interface FileRoutesByTo {
   '/admin/settings/account': typeof AuthenticatedAdminSettingsAccountRoute
   '/admin/settings/appearance': typeof AuthenticatedAdminSettingsAppearanceRoute
   '/admin/settings/display': typeof AuthenticatedAdminSettingsDisplayRoute
+  '/admin/settings/facility': typeof AuthenticatedAdminSettingsFacilityRoute
   '/admin/settings/notifications': typeof AuthenticatedAdminSettingsNotificationsRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsIndexRoute
 }
@@ -246,6 +264,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/appointments': typeof AuthenticatedAdminAppointmentsRoute
   '/_authenticated/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/_authenticated/admin/doctors': typeof AuthenticatedAdminDoctorsRoute
+  '/_authenticated/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
   '/_authenticated/admin/patients': typeof AuthenticatedAdminPatientsRoute
   '/_authenticated/admin/queue': typeof AuthenticatedAdminQueueRoute
   '/_authenticated/admin/rooms': typeof AuthenticatedAdminRoomsRoute
@@ -256,6 +275,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/settings/account': typeof AuthenticatedAdminSettingsAccountRoute
   '/_authenticated/admin/settings/appearance': typeof AuthenticatedAdminSettingsAppearanceRoute
   '/_authenticated/admin/settings/display': typeof AuthenticatedAdminSettingsDisplayRoute
+  '/_authenticated/admin/settings/facility': typeof AuthenticatedAdminSettingsFacilityRoute
   '/_authenticated/admin/settings/notifications': typeof AuthenticatedAdminSettingsNotificationsRoute
   '/_authenticated/admin/settings/': typeof AuthenticatedAdminSettingsIndexRoute
 }
@@ -275,6 +295,7 @@ export interface FileRouteTypes {
     | '/admin/appointments'
     | '/admin/dashboard'
     | '/admin/doctors'
+    | '/admin/notifications'
     | '/admin/patients'
     | '/admin/queue'
     | '/admin/rooms'
@@ -285,6 +306,7 @@ export interface FileRouteTypes {
     | '/admin/settings/account'
     | '/admin/settings/appearance'
     | '/admin/settings/display'
+    | '/admin/settings/facility'
     | '/admin/settings/notifications'
     | '/admin/settings/'
   fileRoutesByTo: FileRoutesByTo
@@ -302,6 +324,7 @@ export interface FileRouteTypes {
     | '/admin/appointments'
     | '/admin/dashboard'
     | '/admin/doctors'
+    | '/admin/notifications'
     | '/admin/patients'
     | '/admin/queue'
     | '/admin/rooms'
@@ -311,6 +334,7 @@ export interface FileRouteTypes {
     | '/admin/settings/account'
     | '/admin/settings/appearance'
     | '/admin/settings/display'
+    | '/admin/settings/facility'
     | '/admin/settings/notifications'
     | '/admin/settings'
   id:
@@ -329,6 +353,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/appointments'
     | '/_authenticated/admin/dashboard'
     | '/_authenticated/admin/doctors'
+    | '/_authenticated/admin/notifications'
     | '/_authenticated/admin/patients'
     | '/_authenticated/admin/queue'
     | '/_authenticated/admin/rooms'
@@ -339,6 +364,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/settings/account'
     | '/_authenticated/admin/settings/appearance'
     | '/_authenticated/admin/settings/display'
+    | '/_authenticated/admin/settings/facility'
     | '/_authenticated/admin/settings/notifications'
     | '/_authenticated/admin/settings/'
   fileRoutesById: FileRoutesById
@@ -456,6 +482,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminDoctorsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/notifications': {
+      id: '/_authenticated/admin/notifications'
+      path: '/admin/notifications'
+      fullPath: '/admin/notifications'
+      preLoaderRoute: typeof AuthenticatedAdminNotificationsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/patients': {
       id: '/_authenticated/admin/patients'
       path: '/admin/patients'
@@ -533,6 +566,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminSettingsDisplayRouteImport
       parentRoute: typeof AuthenticatedAdminSettingsRoute
     }
+    '/_authenticated/admin/settings/facility': {
+      id: '/_authenticated/admin/settings/facility'
+      path: '/facility'
+      fullPath: '/admin/settings/facility'
+      preLoaderRoute: typeof AuthenticatedAdminSettingsFacilityRouteImport
+      parentRoute: typeof AuthenticatedAdminSettingsRoute
+    }
     '/_authenticated/admin/settings/notifications': {
       id: '/_authenticated/admin/settings/notifications'
       path: '/notifications'
@@ -547,6 +587,7 @@ interface AuthenticatedAdminSettingsRouteChildren {
   AuthenticatedAdminSettingsAccountRoute: typeof AuthenticatedAdminSettingsAccountRoute
   AuthenticatedAdminSettingsAppearanceRoute: typeof AuthenticatedAdminSettingsAppearanceRoute
   AuthenticatedAdminSettingsDisplayRoute: typeof AuthenticatedAdminSettingsDisplayRoute
+  AuthenticatedAdminSettingsFacilityRoute: typeof AuthenticatedAdminSettingsFacilityRoute
   AuthenticatedAdminSettingsNotificationsRoute: typeof AuthenticatedAdminSettingsNotificationsRoute
   AuthenticatedAdminSettingsIndexRoute: typeof AuthenticatedAdminSettingsIndexRoute
 }
@@ -559,6 +600,8 @@ const AuthenticatedAdminSettingsRouteChildren: AuthenticatedAdminSettingsRouteCh
       AuthenticatedAdminSettingsAppearanceRoute,
     AuthenticatedAdminSettingsDisplayRoute:
       AuthenticatedAdminSettingsDisplayRoute,
+    AuthenticatedAdminSettingsFacilityRoute:
+      AuthenticatedAdminSettingsFacilityRoute,
     AuthenticatedAdminSettingsNotificationsRoute:
       AuthenticatedAdminSettingsNotificationsRoute,
     AuthenticatedAdminSettingsIndexRoute: AuthenticatedAdminSettingsIndexRoute,
@@ -574,6 +617,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminAppointmentsRoute: typeof AuthenticatedAdminAppointmentsRoute
   AuthenticatedAdminDashboardRoute: typeof AuthenticatedAdminDashboardRoute
   AuthenticatedAdminDoctorsRoute: typeof AuthenticatedAdminDoctorsRoute
+  AuthenticatedAdminNotificationsRoute: typeof AuthenticatedAdminNotificationsRoute
   AuthenticatedAdminPatientsRoute: typeof AuthenticatedAdminPatientsRoute
   AuthenticatedAdminQueueRoute: typeof AuthenticatedAdminQueueRoute
   AuthenticatedAdminRoomsRoute: typeof AuthenticatedAdminRoomsRoute
@@ -588,6 +632,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminAppointmentsRoute: AuthenticatedAdminAppointmentsRoute,
   AuthenticatedAdminDashboardRoute: AuthenticatedAdminDashboardRoute,
   AuthenticatedAdminDoctorsRoute: AuthenticatedAdminDoctorsRoute,
+  AuthenticatedAdminNotificationsRoute: AuthenticatedAdminNotificationsRoute,
   AuthenticatedAdminPatientsRoute: AuthenticatedAdminPatientsRoute,
   AuthenticatedAdminQueueRoute: AuthenticatedAdminQueueRoute,
   AuthenticatedAdminRoomsRoute: AuthenticatedAdminRoomsRoute,
