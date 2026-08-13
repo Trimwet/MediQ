@@ -6,7 +6,7 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import dashboardDark from './assets/dashboard-dark.png'
 import dashboardLight from './assets/dashboard-light.png'
 
-type AuthBackTo = '/sign-in' | '/sign-up' | '/forgot-password' | '/otp'
+type AuthBackTo = '/' | '/sign-in' | '/sign-up' | '/forgot-password' | '/otp'
 
 type AuthLayoutProps = {
   title: string
@@ -93,14 +93,14 @@ function AuthVisualPanel() {
             src={dashboardLight}
             alt='MediQ dashboard showing appointments and queue overview'
             width={1024}
-            height={1151}
+            height={720}
             className='h-auto w-full dark:hidden'
           />
           <img
             src={dashboardDark}
             alt='MediQ dashboard showing appointments and queue overview'
             width={1024}
-            height={1138}
+            height={720}
             className='hidden h-auto w-full dark:block'
           />
         </div>

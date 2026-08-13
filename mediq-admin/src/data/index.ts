@@ -8,6 +8,7 @@
  */
 export {
   appointmentsRepository,
+  bookingRepository,
   doctorsRepository,
   notificationsRepository,
   patientsRepository,
@@ -17,6 +18,9 @@ export {
 } from './repos'
 export type {
   AppointmentsRepository,
+  BookingInput,
+  BookingRepository,
+  BookingResult,
   DoctorsRepository,
   NotificationsRepository,
   PatientsRepository,

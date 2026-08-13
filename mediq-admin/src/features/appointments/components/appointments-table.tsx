@@ -16,6 +16,8 @@ type AppointmentsTableProps = {
   loading?: boolean
   canManage: boolean
   onStatusChange: (id: string, status: AppointmentStatus) => void
+  onApprove: (appointment: Appointment) => void
+  onReject: (appointment: Appointment) => void
 }
 
 export function AppointmentsTable({
@@ -23,6 +25,8 @@ export function AppointmentsTable({
   loading = false,
   canManage,
   onStatusChange,
+  onApprove,
+  onReject,
 }: AppointmentsTableProps) {
   const columns = useMemo<ColumnDef<Appointment>[]>(
     () => [
@@ -90,6 +94,8 @@ export function AppointmentsTable({
                   <AppointmentRowActions
                     appointment={row.original}
                     onStatusChange={onStatusChange}
+                    onApprove={onApprove}
+                    onReject={onReject}
                   />
                 </div>
               ),
@@ -97,7 +103,7 @@ export function AppointmentsTable({
           ]
         : []),
     ],
-    [canManage, onStatusChange]
+    [canManage, onStatusChange, onApprove, onReject]
   )
 
   return (

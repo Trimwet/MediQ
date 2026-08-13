@@ -1,4 +1,4 @@
-import { MoreHorizontal } from 'lucide-react'
+import { CheckCircle2, MoreHorizontal, XCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -19,11 +19,15 @@ import {
 type AppointmentRowActionsProps = {
   appointment: Appointment
   onStatusChange: (id: string, status: AppointmentStatus) => void
+  onApprove: (appointment: Appointment) => void
+  onReject: (appointment: Appointment) => void
 }
 
 export function AppointmentRowActions({
   appointment,
   onStatusChange,
+  onApprove,
+  onReject,
 }: AppointmentRowActionsProps) {
   const next = nextStatus[appointment.status]
 
@@ -36,9 +40,25 @@ export function AppointmentRowActions({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align='end' className='w-44'>
-        <DropdownMenuLabel className='text-xs text-muted-foreground'>
-          Update status
-        </DropdownMenuLabel>
+        {appointment.status === 'pending' ? (
+          <>
+            <DropdownMenuLabel className='text-xs text-muted-foreground'>
+              Review request
+            </DropdownMenuLabel>
+            <DropdownMenuItem onClick={() => onApprove(appointment)}>
+              <CheckCircle2 />
+              Approve
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onReject(appointment)}>
+              <XCircle />
+              Reject
+            </DropdownMenuItem>
+          </>
+        ) : (
+          <>
+            <DropdownMenuLabel className='text-xs text-muted-foreground'>
+              Update status
+            </DropdownMenuLabel>
         {next && (
           <>
             <DropdownMenuItem
@@ -71,6 +91,8 @@ export function AppointmentRowActions({
           <DropdownMenuItem disabled>
             No further actions
           </DropdownMenuItem>
+        )}
+          </>
         )}
       </DropdownMenuContent>
     </DropdownMenu>

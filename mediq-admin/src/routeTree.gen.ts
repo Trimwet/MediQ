@@ -10,6 +10,10 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as PublicRouteRouteImport } from './routes/_public/route'
+import { Route as BookRouteImport } from './routes/book'
+import { Route as ChangePasswordRouteImport } from './routes/change-password'
+import { Route as PatientRouteImport } from './routes/patient'
 import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
 import { Route as authOtpRouteImport } from './routes/(auth)/otp'
 import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
@@ -18,7 +22,12 @@ import { Route as errors401RouteImport } from './routes/(errors)/401'
 import { Route as errors403RouteImport } from './routes/(errors)/403'
 import { Route as errors404RouteImport } from './routes/(errors)/404'
 import { Route as errors500RouteImport } from './routes/(errors)/500'
-import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as PublicIndexRouteImport } from './routes/_public/index'
+import { Route as PublicAboutRouteImport } from './routes/_public/about'
+import { Route as PublicContactRouteImport } from './routes/_public/contact'
+import { Route as PublicFaqRouteImport } from './routes/_public/faq'
+import { Route as PublicGalleryRouteImport } from './routes/_public/gallery'
+import { Route as PublicServicesRouteImport } from './routes/_public/services'
 import { Route as AuthenticatedAdminAppointmentsRouteImport } from './routes/_authenticated/admin/appointments'
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin/dashboard'
 import { Route as AuthenticatedAdminDoctorsRouteImport } from './routes/_authenticated/admin/doctors'
@@ -30,6 +39,10 @@ import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminStaffRouteImport } from './routes/_authenticated/admin/staff'
 import { Route as AuthenticatedErrorsErrorRouteImport } from './routes/_authenticated/errors/$error'
 import { Route as AuthenticatedUsersIndexRouteImport } from './routes/_authenticated/users/index'
+import { Route as PublicDepartmentsIndexRouteImport } from './routes/_public/departments/index'
+import { Route as PublicDepartmentsIdRouteImport } from './routes/_public/departments/$id'
+import { Route as PublicDoctorsIndexRouteImport } from './routes/_public/doctors/index'
+import { Route as PublicDoctorsDoctorIdRouteImport } from './routes/_public/doctors/$doctorId'
 import { Route as AuthenticatedAdminSettingsIndexRouteImport } from './routes/_authenticated/admin/settings.index'
 import { Route as AuthenticatedAdminSettingsAccountRouteImport } from './routes/_authenticated/admin/settings.account'
 import { Route as AuthenticatedAdminSettingsAppearanceRouteImport } from './routes/_authenticated/admin/settings.appearance'
@@ -39,6 +52,25 @@ import { Route as AuthenticatedAdminSettingsNotificationsRouteImport } from './r
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PublicRouteRoute = PublicRouteRouteImport.update({
+  id: '/_public',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BookRoute = BookRouteImport.update({
+  id: '/book',
+  path: '/book',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChangePasswordRoute = ChangePasswordRouteImport.update({
+  id: '/change-password',
+  path: '/change-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PatientRoute = PatientRouteImport.update({
+  id: '/patient',
+  path: '/patient',
   getParentRoute: () => rootRouteImport,
 } as any)
 const authForgotPasswordRoute = authForgotPasswordRouteImport.update({
@@ -81,10 +113,35 @@ const errors500Route = errors500RouteImport.update({
   path: '/500',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
+const PublicIndexRoute = PublicIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => AuthenticatedRouteRoute,
+  getParentRoute: () => PublicRouteRoute,
+} as any)
+const PublicAboutRoute = PublicAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => PublicRouteRoute,
+} as any)
+const PublicContactRoute = PublicContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => PublicRouteRoute,
+} as any)
+const PublicFaqRoute = PublicFaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => PublicRouteRoute,
+} as any)
+const PublicGalleryRoute = PublicGalleryRouteImport.update({
+  id: '/gallery',
+  path: '/gallery',
+  getParentRoute: () => PublicRouteRoute,
+} as any)
+const PublicServicesRoute = PublicServicesRouteImport.update({
+  id: '/services',
+  path: '/services',
+  getParentRoute: () => PublicRouteRoute,
 } as any)
 const AuthenticatedAdminAppointmentsRoute =
   AuthenticatedAdminAppointmentsRouteImport.update({
@@ -148,6 +205,26 @@ const AuthenticatedUsersIndexRoute = AuthenticatedUsersIndexRouteImport.update({
   path: '/users/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const PublicDepartmentsIndexRoute = PublicDepartmentsIndexRouteImport.update({
+  id: '/departments/',
+  path: '/departments/',
+  getParentRoute: () => PublicRouteRoute,
+} as any)
+const PublicDepartmentsIdRoute = PublicDepartmentsIdRouteImport.update({
+  id: '/departments/$id',
+  path: '/departments/$id',
+  getParentRoute: () => PublicRouteRoute,
+} as any)
+const PublicDoctorsIndexRoute = PublicDoctorsIndexRouteImport.update({
+  id: '/doctors/',
+  path: '/doctors/',
+  getParentRoute: () => PublicRouteRoute,
+} as any)
+const PublicDoctorsDoctorIdRoute = PublicDoctorsDoctorIdRouteImport.update({
+  id: '/doctors/$doctorId',
+  path: '/doctors/$doctorId',
+  getParentRoute: () => PublicRouteRoute,
+} as any)
 const AuthenticatedAdminSettingsIndexRoute =
   AuthenticatedAdminSettingsIndexRouteImport.update({
     id: '/',
@@ -186,7 +263,10 @@ const AuthenticatedAdminSettingsNotificationsRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof AuthenticatedIndexRoute
+  '/': typeof PublicIndexRoute
+  '/book': typeof BookRoute
+  '/change-password': typeof ChangePasswordRoute
+  '/patient': typeof PatientRoute
   '/forgot-password': typeof authForgotPasswordRoute
   '/otp': typeof authOtpRoute
   '/sign-in': typeof authSignInRoute
@@ -195,6 +275,11 @@ export interface FileRoutesByFullPath {
   '/403': typeof errors403Route
   '/404': typeof errors404Route
   '/500': typeof errors500Route
+  '/about': typeof PublicAboutRoute
+  '/contact': typeof PublicContactRoute
+  '/faq': typeof PublicFaqRoute
+  '/gallery': typeof PublicGalleryRoute
+  '/services': typeof PublicServicesRoute
   '/admin/appointments': typeof AuthenticatedAdminAppointmentsRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/admin/doctors': typeof AuthenticatedAdminDoctorsRoute
@@ -205,7 +290,11 @@ export interface FileRoutesByFullPath {
   '/admin/settings': typeof AuthenticatedAdminSettingsRouteWithChildren
   '/admin/staff': typeof AuthenticatedAdminStaffRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
+  '/departments/$id': typeof PublicDepartmentsIdRoute
+  '/doctors/$doctorId': typeof PublicDoctorsDoctorIdRoute
   '/users/': typeof AuthenticatedUsersIndexRoute
+  '/departments/': typeof PublicDepartmentsIndexRoute
+  '/doctors/': typeof PublicDoctorsIndexRoute
   '/admin/settings/account': typeof AuthenticatedAdminSettingsAccountRoute
   '/admin/settings/appearance': typeof AuthenticatedAdminSettingsAppearanceRoute
   '/admin/settings/display': typeof AuthenticatedAdminSettingsDisplayRoute
@@ -214,6 +303,10 @@ export interface FileRoutesByFullPath {
   '/admin/settings/': typeof AuthenticatedAdminSettingsIndexRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof PublicIndexRoute
+  '/book': typeof BookRoute
+  '/change-password': typeof ChangePasswordRoute
+  '/patient': typeof PatientRoute
   '/forgot-password': typeof authForgotPasswordRoute
   '/otp': typeof authOtpRoute
   '/sign-in': typeof authSignInRoute
@@ -222,7 +315,11 @@ export interface FileRoutesByTo {
   '/403': typeof errors403Route
   '/404': typeof errors404Route
   '/500': typeof errors500Route
-  '/': typeof AuthenticatedIndexRoute
+  '/about': typeof PublicAboutRoute
+  '/contact': typeof PublicContactRoute
+  '/faq': typeof PublicFaqRoute
+  '/gallery': typeof PublicGalleryRoute
+  '/services': typeof PublicServicesRoute
   '/admin/appointments': typeof AuthenticatedAdminAppointmentsRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/admin/doctors': typeof AuthenticatedAdminDoctorsRoute
@@ -232,7 +329,11 @@ export interface FileRoutesByTo {
   '/admin/rooms': typeof AuthenticatedAdminRoomsRoute
   '/admin/staff': typeof AuthenticatedAdminStaffRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
+  '/departments/$id': typeof PublicDepartmentsIdRoute
+  '/doctors/$doctorId': typeof PublicDoctorsDoctorIdRoute
   '/users': typeof AuthenticatedUsersIndexRoute
+  '/departments': typeof PublicDepartmentsIndexRoute
+  '/doctors': typeof PublicDoctorsIndexRoute
   '/admin/settings/account': typeof AuthenticatedAdminSettingsAccountRoute
   '/admin/settings/appearance': typeof AuthenticatedAdminSettingsAppearanceRoute
   '/admin/settings/display': typeof AuthenticatedAdminSettingsDisplayRoute
@@ -243,6 +344,10 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/_public': typeof PublicRouteRouteWithChildren
+  '/book': typeof BookRoute
+  '/change-password': typeof ChangePasswordRoute
+  '/patient': typeof PatientRoute
   '/(auth)/forgot-password': typeof authForgotPasswordRoute
   '/(auth)/otp': typeof authOtpRoute
   '/(auth)/sign-in': typeof authSignInRoute
@@ -251,7 +356,12 @@ export interface FileRoutesById {
   '/(errors)/403': typeof errors403Route
   '/(errors)/404': typeof errors404Route
   '/(errors)/500': typeof errors500Route
-  '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_public/about': typeof PublicAboutRoute
+  '/_public/contact': typeof PublicContactRoute
+  '/_public/faq': typeof PublicFaqRoute
+  '/_public/gallery': typeof PublicGalleryRoute
+  '/_public/services': typeof PublicServicesRoute
+  '/_public/': typeof PublicIndexRoute
   '/_authenticated/admin/appointments': typeof AuthenticatedAdminAppointmentsRoute
   '/_authenticated/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/_authenticated/admin/doctors': typeof AuthenticatedAdminDoctorsRoute
@@ -262,7 +372,11 @@ export interface FileRoutesById {
   '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRouteWithChildren
   '/_authenticated/admin/staff': typeof AuthenticatedAdminStaffRoute
   '/_authenticated/errors/$error': typeof AuthenticatedErrorsErrorRoute
+  '/_public/departments/$id': typeof PublicDepartmentsIdRoute
+  '/_public/doctors/$doctorId': typeof PublicDoctorsDoctorIdRoute
   '/_authenticated/users/': typeof AuthenticatedUsersIndexRoute
+  '/_public/departments/': typeof PublicDepartmentsIndexRoute
+  '/_public/doctors/': typeof PublicDoctorsIndexRoute
   '/_authenticated/admin/settings/account': typeof AuthenticatedAdminSettingsAccountRoute
   '/_authenticated/admin/settings/appearance': typeof AuthenticatedAdminSettingsAppearanceRoute
   '/_authenticated/admin/settings/display': typeof AuthenticatedAdminSettingsDisplayRoute
@@ -274,6 +388,9 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/book'
+    | '/change-password'
+    | '/patient'
     | '/forgot-password'
     | '/otp'
     | '/sign-in'
@@ -282,6 +399,11 @@ export interface FileRouteTypes {
     | '/403'
     | '/404'
     | '/500'
+    | '/about'
+    | '/contact'
+    | '/faq'
+    | '/gallery'
+    | '/services'
     | '/admin/appointments'
     | '/admin/dashboard'
     | '/admin/doctors'
@@ -292,7 +414,11 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/staff'
     | '/errors/$error'
+    | '/departments/$id'
+    | '/doctors/$doctorId'
     | '/users/'
+    | '/departments/'
+    | '/doctors/'
     | '/admin/settings/account'
     | '/admin/settings/appearance'
     | '/admin/settings/display'
@@ -301,6 +427,10 @@ export interface FileRouteTypes {
     | '/admin/settings/'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/'
+    | '/book'
+    | '/change-password'
+    | '/patient'
     | '/forgot-password'
     | '/otp'
     | '/sign-in'
@@ -309,7 +439,11 @@ export interface FileRouteTypes {
     | '/403'
     | '/404'
     | '/500'
-    | '/'
+    | '/about'
+    | '/contact'
+    | '/faq'
+    | '/gallery'
+    | '/services'
     | '/admin/appointments'
     | '/admin/dashboard'
     | '/admin/doctors'
@@ -319,7 +453,11 @@ export interface FileRouteTypes {
     | '/admin/rooms'
     | '/admin/staff'
     | '/errors/$error'
+    | '/departments/$id'
+    | '/doctors/$doctorId'
     | '/users'
+    | '/departments'
+    | '/doctors'
     | '/admin/settings/account'
     | '/admin/settings/appearance'
     | '/admin/settings/display'
@@ -329,6 +467,10 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/_authenticated'
+    | '/_public'
+    | '/book'
+    | '/change-password'
+    | '/patient'
     | '/(auth)/forgot-password'
     | '/(auth)/otp'
     | '/(auth)/sign-in'
@@ -337,7 +479,12 @@ export interface FileRouteTypes {
     | '/(errors)/403'
     | '/(errors)/404'
     | '/(errors)/500'
-    | '/_authenticated/'
+    | '/_public/about'
+    | '/_public/contact'
+    | '/_public/faq'
+    | '/_public/gallery'
+    | '/_public/services'
+    | '/_public/'
     | '/_authenticated/admin/appointments'
     | '/_authenticated/admin/dashboard'
     | '/_authenticated/admin/doctors'
@@ -348,7 +495,11 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/settings'
     | '/_authenticated/admin/staff'
     | '/_authenticated/errors/$error'
+    | '/_public/departments/$id'
+    | '/_public/doctors/$doctorId'
     | '/_authenticated/users/'
+    | '/_public/departments/'
+    | '/_public/doctors/'
     | '/_authenticated/admin/settings/account'
     | '/_authenticated/admin/settings/appearance'
     | '/_authenticated/admin/settings/display'
@@ -359,6 +510,10 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  PublicRouteRoute: typeof PublicRouteRouteWithChildren
+  BookRoute: typeof BookRoute
+  ChangePasswordRoute: typeof ChangePasswordRoute
+  PatientRoute: typeof PatientRoute
   authForgotPasswordRoute: typeof authForgotPasswordRoute
   authOtpRoute: typeof authOtpRoute
   authSignInRoute: typeof authSignInRoute
@@ -376,6 +531,34 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_public': {
+      id: '/_public'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof PublicRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/book': {
+      id: '/book'
+      path: '/book'
+      fullPath: '/book'
+      preLoaderRoute: typeof BookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/change-password': {
+      id: '/change-password'
+      path: '/change-password'
+      fullPath: '/change-password'
+      preLoaderRoute: typeof ChangePasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/patient': {
+      id: '/patient'
+      path: '/patient'
+      fullPath: '/patient'
+      preLoaderRoute: typeof PatientRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(auth)/forgot-password': {
@@ -434,12 +617,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof errors500RouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/': {
-      id: '/_authenticated/'
+    '/_public/': {
+      id: '/_public/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      preLoaderRoute: typeof PublicIndexRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
+    '/_public/about': {
+      id: '/_public/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof PublicAboutRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
+    '/_public/contact': {
+      id: '/_public/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof PublicContactRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
+    '/_public/faq': {
+      id: '/_public/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof PublicFaqRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
+    '/_public/gallery': {
+      id: '/_public/gallery'
+      path: '/gallery'
+      fullPath: '/gallery'
+      preLoaderRoute: typeof PublicGalleryRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
+    '/_public/services': {
+      id: '/_public/services'
+      path: '/services'
+      fullPath: '/services'
+      preLoaderRoute: typeof PublicServicesRouteImport
+      parentRoute: typeof PublicRouteRoute
     }
     '/_authenticated/admin/appointments': {
       id: '/_authenticated/admin/appointments'
@@ -518,6 +736,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedUsersIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_public/departments/': {
+      id: '/_public/departments/'
+      path: '/departments'
+      fullPath: '/departments/'
+      preLoaderRoute: typeof PublicDepartmentsIndexRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
+    '/_public/departments/$id': {
+      id: '/_public/departments/$id'
+      path: '/departments/$id'
+      fullPath: '/departments/$id'
+      preLoaderRoute: typeof PublicDepartmentsIdRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
+    '/_public/doctors/': {
+      id: '/_public/doctors/'
+      path: '/doctors'
+      fullPath: '/doctors/'
+      preLoaderRoute: typeof PublicDoctorsIndexRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
+    '/_public/doctors/$doctorId': {
+      id: '/_public/doctors/$doctorId'
+      path: '/doctors/$doctorId'
+      fullPath: '/doctors/$doctorId'
+      preLoaderRoute: typeof PublicDoctorsDoctorIdRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
     '/_authenticated/admin/settings/': {
       id: '/_authenticated/admin/settings/'
       path: '/'
@@ -593,7 +839,6 @@ const AuthenticatedAdminSettingsRouteWithChildren =
   )
 
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedAdminAppointmentsRoute: typeof AuthenticatedAdminAppointmentsRoute
   AuthenticatedAdminDashboardRoute: typeof AuthenticatedAdminDashboardRoute
   AuthenticatedAdminDoctorsRoute: typeof AuthenticatedAdminDoctorsRoute
@@ -608,7 +853,6 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedAdminAppointmentsRoute: AuthenticatedAdminAppointmentsRoute,
   AuthenticatedAdminDashboardRoute: AuthenticatedAdminDashboardRoute,
   AuthenticatedAdminDoctorsRoute: AuthenticatedAdminDoctorsRoute,
@@ -625,8 +869,42 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface PublicRouteRouteChildren {
+  PublicAboutRoute: typeof PublicAboutRoute
+  PublicContactRoute: typeof PublicContactRoute
+  PublicFaqRoute: typeof PublicFaqRoute
+  PublicGalleryRoute: typeof PublicGalleryRoute
+  PublicServicesRoute: typeof PublicServicesRoute
+  PublicIndexRoute: typeof PublicIndexRoute
+  PublicDepartmentsIdRoute: typeof PublicDepartmentsIdRoute
+  PublicDoctorsDoctorIdRoute: typeof PublicDoctorsDoctorIdRoute
+  PublicDepartmentsIndexRoute: typeof PublicDepartmentsIndexRoute
+  PublicDoctorsIndexRoute: typeof PublicDoctorsIndexRoute
+}
+
+const PublicRouteRouteChildren: PublicRouteRouteChildren = {
+  PublicAboutRoute: PublicAboutRoute,
+  PublicContactRoute: PublicContactRoute,
+  PublicFaqRoute: PublicFaqRoute,
+  PublicGalleryRoute: PublicGalleryRoute,
+  PublicServicesRoute: PublicServicesRoute,
+  PublicIndexRoute: PublicIndexRoute,
+  PublicDepartmentsIdRoute: PublicDepartmentsIdRoute,
+  PublicDoctorsDoctorIdRoute: PublicDoctorsDoctorIdRoute,
+  PublicDepartmentsIndexRoute: PublicDepartmentsIndexRoute,
+  PublicDoctorsIndexRoute: PublicDoctorsIndexRoute,
+}
+
+const PublicRouteRouteWithChildren = PublicRouteRoute._addFileChildren(
+  PublicRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  PublicRouteRoute: PublicRouteRouteWithChildren,
+  BookRoute: BookRoute,
+  ChangePasswordRoute: ChangePasswordRoute,
+  PatientRoute: PatientRoute,
   authForgotPasswordRoute: authForgotPasswordRoute,
   authOtpRoute: authOtpRoute,
   authSignInRoute: authSignInRoute,

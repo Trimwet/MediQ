@@ -35,6 +35,21 @@ type DataState = {
 
   addAppointment: (input: Omit<Appointment, 'id' | 'status'>) => Appointment
   updateAppointmentStatus: (id: string, status: AppointmentStatus) => void
+  approveAppointment: (
+    id: string,
+    doctor?: { id: string; name: string }
+  ) => void
+  rejectAppointment: (id: string, reason?: string) => void
+
+  bookAppointment: (input: {
+    patientName: string
+    email: string
+    phone: string
+    doctorId?: string
+    doctorName?: string
+    scheduledFor: string
+    reason?: string
+  }) => { appointment: Appointment; patient: Patient }
 
   addQueueEntry: (input: {
     appointmentId: string
@@ -77,14 +92,65 @@ export const useDataStore = create<DataState>()((set) => ({
     return appointment
   },
 
+  bookAppointment: (input) => {
+    // Find-or-create the patient record for this email.
+    const existing = useDataStore.getState().patients.find(
+      (p) => p.email?.toLowerCase() === input.email.toLowerCase()
+    )
+    const patient: Patient = existing ?? {
+      id: `pat-${Date.now()}`,
+      name: input.patientName,
+      phone: input.phone,
+      email: input.email,
+      lastVisit: null,
+      visits: 0,
+    }
+    // Self-service bookings are requests: they only become real appointments
+    // once staff approve them (pending -> booked).
+    const appointment: Appointment = {
+      id: `apt-${Date.now()}`,
+      patientName: input.patientName,
+      patientEmail: input.email,
+      doctorId: input.doctorId ?? '',
+      doctorName: input.doctorName ?? 'To be assigned',
+      scheduledFor: input.scheduledFor,
+      status: 'pending',
+      reason: input.reason,
+    }
+    const notification: AppNotification = {
+      id: `n-${Date.now()}`,
+      type: 'appointment',
+      channel: 'email',
+      title: 'New booking request',
+      message: `${input.patientName} requested ${appointment.doctorName} on ${new Date(
+        input.scheduledFor
+      ).toLocaleString([], {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })} — awaiting approval`,
+      createdAt: new Date().toISOString(),
+      read: false,
+    }
+    set((state) => ({
+      appointments: [appointment, ...state.appointments],
+      patients: existing ? state.patients : [patient, ...state.patients],
+      notifications: [notification, ...state.notifications],
+    }))
+    return { appointment, patient }
+  },
+
   updateAppointmentStatus: (id, status) =>
     set((state) => {
+      const appointment = state.appointments.find((a) => a.id === id)
       const appointments = state.appointments.map((a) =>
         a.id === id ? { ...a, status } : a
       )
+
       // Mock cross-entity flow: checking a patient in also adds them to the
       // queue. A real backend would do this atomically server-side.
-      const appointment = appointments.find((a) => a.id === id)
       if (status === 'arrived' && appointment) {
         const queueEntry: QueueEntry = {
           id: `q-${Date.now()}`,
@@ -101,6 +167,59 @@ export const useDataStore = create<DataState>()((set) => ({
         }
       }
       return { appointments }
+    }),
+
+  approveAppointment: (id, doctor) =>
+    set((state) => {
+      const appointment = state.appointments.find((a) => a.id === id)
+      if (!appointment) return state
+      const updated: Appointment = { ...appointment, status: 'booked' }
+      if (doctor) {
+        updated.doctorId = doctor.id
+        updated.doctorName = doctor.name
+      }
+      const notification: AppNotification = {
+        id: `n-${Date.now()}`,
+        type: 'appointment',
+        channel: 'email',
+        title: 'Booking confirmed',
+        message: `${updated.patientName}'s request${doctor ? ` with ${doctor.name}` : ''} was approved.`,
+        createdAt: new Date().toISOString(),
+        read: false,
+      }
+      return {
+        appointments: state.appointments.map((a) => (a.id === id ? updated : a)),
+        notifications: [notification, ...state.notifications],
+      }
+    }),
+
+  rejectAppointment: (id, reason) =>
+    set((state) => {
+      const appointment = state.appointments.find((a) => a.id === id)
+      if (!appointment) return state
+      const notification: AppNotification = {
+        id: `n-${Date.now()}`,
+        type: 'appointment',
+        channel: 'email',
+        title: 'Booking declined',
+        message: reason
+          ? `${appointment.patientName}'s booking request was declined: ${reason}`
+          : `${appointment.patientName}'s booking request was declined.`,
+        createdAt: new Date().toISOString(),
+        read: false,
+      }
+      return {
+        appointments: state.appointments.map((a) =>
+          a.id === id
+            ? {
+                ...a,
+                status: 'rejected',
+                rejectionReason: reason,
+              }
+            : a
+        ),
+        notifications: [notification, ...state.notifications],
+      }
     }),
 
   addQueueEntry: ({

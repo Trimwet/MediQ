@@ -14,6 +14,8 @@ type DatePickerProps = {
   onSelect: (date: Date | undefined) => void
   placeholder?: string
   className?: string
+  /** Disable specific dates. Defaults to disallowing everything after today. */
+  disabled?: (date: Date) => boolean
 }
 
 export function DatePicker({
@@ -21,6 +23,7 @@ export function DatePicker({
   onSelect,
   placeholder = 'Pick a date',
   className,
+  disabled,
 }: DatePickerProps) {
   return (
     <Popover>
@@ -47,8 +50,10 @@ export function DatePicker({
           captionLayout='dropdown'
           selected={selected}
           onSelect={onSelect}
-          disabled={(date: Date) =>
-            date > new Date() || date < new Date('1900-01-01')
+          disabled={
+            disabled ??
+            ((date: Date) =>
+              date > new Date() || date < new Date('1900-01-01'))
           }
         />
       </PopoverContent>

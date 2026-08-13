@@ -39,3 +39,10 @@ playwright-report/
 
 # TanStack Router tmp
 .tanstack/
+
+# Agent state
+.serena/
+mediq-admin/.serena/
+
+# Agent-generated docs
+docs/

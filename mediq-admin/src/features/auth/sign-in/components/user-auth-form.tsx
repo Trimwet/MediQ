@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 
 import { useAuthStore } from '@/stores/auth-store'
 import { roleLabels, ROLES } from '@/config/rbac'
+import { verifyAccount } from '@/data/mock/accounts'
 import { sleep, cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -60,16 +61,26 @@ export function UserAuthForm({
   function onSubmit(data: z.infer<typeof formSchema>) {
     setIsLoading(true)
 
+    // Mock auth: if this email was provisioned through the booking flow, the
+    // role and the temporary password live in the account registry.
+    const account = verifyAccount(data.email, data.password)
+    if (account === null) {
+      setIsLoading(false)
+      toast.error('Invalid email or password.')
+      return
+    }
+
     toast.promise(sleep(2000), {
       loading: 'Signing in...',
       success: () => {
         setIsLoading(false)
 
-        // Mock successful authentication with expiry computed at success time
+        // Mock successful authentication with expiry computed at success time.
+        // Production: role claims come from Supabase Auth.
         const mockUser = {
           accountNo: 'ACC001',
           email: data.email,
-          role: [data.role],
+          role: account ? account.role : [data.role],
           exp: Date.now() + 24 * 60 * 60 * 1000, // 24 hours from now
         }
 
@@ -77,8 +88,18 @@ export function UserAuthForm({
         auth.setUser(mockUser)
         auth.setAccessToken('mock-access-token')
 
-        // Redirect to the stored location or default to dashboard
-        const targetPath = redirectTo || '/'
+        // First login after booking: force the password change.
+        const mustChangePassword = account?.mustChangePassword ?? false
+        // Role-aware default: staff land on the dashboard, patients on their
+        // portal. The landing page is public, so `/` is never the post-login
+        // destination.
+        const role = account ? account.role : [data.role]
+        const defaultPath = role.includes('patient')
+          ? '/patient'
+          : '/admin/dashboard'
+        const targetPath = mustChangePassword
+          ? '/change-password'
+          : redirectTo || defaultPath
         navigate({ to: targetPath, replace: true })
 
         return `Welcome back, ${data.email}!`
@@ -151,6 +172,15 @@ export function UserAuthForm({
           {isLoading ? <Loader2 className='animate-spin' /> : <LogIn />}
           Sign in
         </Button>
+        <p className='text-center text-sm text-muted-foreground'>
+          Visiting as a patient?{' '}
+          <Link
+            to='/book'
+            className='font-medium text-primary underline-offset-4 hover:underline'
+          >
+            Book an appointment — no account needed
+          </Link>
+        </p>
       </form>
     </Form>
   )

@@ -1,0 +1,7 @@
+{
+  "name": "Rayfield Multispecialty Hospital",
+  "description": "A modern, professional hospital website featuring appointment booking, doctor profiles, and department information.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}

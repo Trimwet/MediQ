@@ -8,6 +8,7 @@ export function SignIn() {
   return (
     <AuthLayout
       title='Sign in'
+      back={{ to: '/', label: 'Back to home' }}
       description={
         <>
           Enter your email and password to access your account. Don't have an

@@ -45,6 +45,7 @@ import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { minutesBetween } from '@/features/queue/data'
 import { queueStatusBadge, type QueueEntry } from '@/features/queue/schema'
+import { confirmedStatuses } from '@/features/appointments/schema'
 import {
   DashboardDateRange,
   type DashboardRange,
@@ -125,7 +126,9 @@ export function Dashboard() {
   const inRangeAppointments = useMemo(() => {
     const start = bounds.start.getTime()
     const end = bounds.end.getTime()
+    // Pending requests and rejected ones are not confirmed appointments yet.
     return ownAppointments.filter((appointment) => {
+      if (!confirmedStatuses.includes(appointment.status)) return false
       const time = new Date(appointment.scheduledFor).getTime()
       return time >= start && time <= end
     })

@@ -9,6 +9,7 @@ import { type Room, type RoomStatus } from '@/features/rooms/schema'
 import { type Staff } from '@/features/staff/schema'
 import {
   appointmentsRepository,
+  bookingRepository,
   doctorsRepository,
   notificationsRepository,
   patientsRepository,
@@ -16,6 +17,7 @@ import {
   roomsRepository,
   staffRepository,
 } from './index'
+import { type BookingInput } from './index'
 
 // ---- Appointments ----
 
@@ -45,6 +47,50 @@ export function useUpdateAppointmentStatus() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['appointments'] })
       queryClient.invalidateQueries({ queryKey: ['queue'] })
+    },
+  })
+}
+
+export function useApproveAppointment() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({
+      id,
+      doctor,
+    }: {
+      id: string
+      doctor?: { id: string; name: string }
+    }) => appointmentsRepository.approve(id, doctor),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appointments'] })
+      queryClient.invalidateQueries({ queryKey: ['notifications'] })
+    },
+  })
+}
+
+export function useRejectAppointment() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, reason }: { id: string; reason?: string }) =>
+      appointmentsRepository.reject(id, reason),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appointments'] })
+      queryClient.invalidateQueries({ queryKey: ['notifications'] })
+    },
+  })
+}
+
+// ---- Self-service booking ----
+
+export function useBookAppointment() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (input: BookingInput) => bookingRepository.book(input),
+    // Booking touches appointments, patients, and notifications.
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appointments'] })
+      queryClient.invalidateQueries({ queryKey: ['patients'] })
+      queryClient.invalidateQueries({ queryKey: ['notifications'] })
     },
   })
 }

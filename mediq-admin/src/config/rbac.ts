@@ -10,13 +10,14 @@
  * contract), because hiding a route in the frontend is not security.
  */
 
-export const ROLES = ['admin', 'front_desk', 'doctor'] as const
+export const ROLES = ['admin', 'front_desk', 'doctor', 'patient'] as const
 export type Role = (typeof ROLES)[number]
 
 export const roleLabels: Record<Role, string> = {
   admin: 'Admin',
   front_desk: 'Front Desk',
   doctor: 'Doctor',
+  patient: 'Patient',
 }
 
 export const PERMISSIONS = [
@@ -66,6 +67,9 @@ export const rolePermissions: Record<Role, readonly Permission[]> = {
     'patients:view',
     'notifications:view',
   ],
+  // Patient: a visitor who booked online without signing up. Can only see
+  // their own appointments (row-level scoping — see src/types/domain.ts).
+  patient: ['dashboard:view', 'appointments:view', 'notifications:view'],
 }
 
 export function can(roles: readonly string[], permission: Permission): boolean {

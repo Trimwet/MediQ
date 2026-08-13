@@ -16,6 +16,7 @@ import { type Patient } from '@/features/patients/schema'
 import { type QueueEntry } from '@/features/queue/schema'
 import { type Room, type RoomStatus } from '@/features/rooms/schema'
 import { type Staff } from '@/features/staff/schema'
+import { createAccount, getAccount } from './mock/accounts'
 import { useDataStore } from './mock/store'
 
 // Simulated network latency so loading states are visible and real.
@@ -25,6 +26,13 @@ export interface AppointmentsRepository {
   list: () => Promise<Appointment[]>
   create: (input: Omit<Appointment, 'id' | 'status'>) => Promise<Appointment>
   updateStatus: (id: string, status: AppointmentStatus) => Promise<void>
+  /** Approve a pending request; optionally assign a doctor at the same time. */
+  approve: (
+    id: string,
+    doctor?: { id: string; name: string }
+  ) => Promise<void>
+  /** Reject a pending request, with an optional reason for the patient. */
+  reject: (id: string, reason?: string) => Promise<void>
 }
 
 export interface QueueRepository {
@@ -63,6 +71,37 @@ export interface NotificationsRepository {
   markAllRead: () => Promise<void>
 }
 
+/**
+ * Self-service booking: a visitor books without signing up. The repository
+ * creates the appointment (and patient record) and, for a first-time email,
+ * provisions an account with a one-time temporary password.
+ *
+ * In production this maps to a Supabase edge function: create the user via
+ * `auth.admin.createUser`, send credentials through Resend, and insert the
+ * appointment atomically. See docs/architecture.md.
+ */
+export interface BookingRepository {
+  book: (input: BookingInput) => Promise<BookingResult>
+}
+
+export interface BookingInput {
+  patientName: string
+  email: string
+  phone: string
+  /** Optional — patients may not know a doctor by name; the clinic assigns. */
+  doctorId?: string
+  doctorName?: string
+  scheduledFor: string // ISO 8601
+  reason?: string
+}
+
+export interface BookingResult {
+  appointment: Appointment
+  isNewAccount: boolean
+  /** Present only in mock mode — a real backend emails this via Resend. */
+  tempPassword?: string
+}
+
 export const appointmentsRepository: AppointmentsRepository = {
   async list() {
     await delay()
@@ -75,6 +114,14 @@ export const appointmentsRepository: AppointmentsRepository = {
   async updateStatus(id, status) {
     await delay(150)
     useDataStore.getState().updateAppointmentStatus(id, status)
+  },
+  async approve(id, doctor) {
+    await delay(150)
+    useDataStore.getState().approveAppointment(id, doctor)
+  },
+  async reject(id, reason) {
+    await delay(150)
+    useDataStore.getState().rejectAppointment(id, reason)
   },
 }
 
@@ -150,6 +197,25 @@ export const roomsRepository: RoomsRepository = {
   async updateStatus(id, status) {
     await delay(150)
     useDataStore.getState().setRoomStatus(id, status)
+  },
+}
+
+export const bookingRepository: BookingRepository = {
+  async book(input) {
+    await delay(300)
+    const { appointment } = useDataStore.getState().bookAppointment(input)
+
+    // First-time email: provision an account with a temporary password.
+    // Production: the edge function calls Supabase admin API + Resend here.
+    const existing = getAccount(input.email)
+    if (existing) {
+      return { appointment, isNewAccount: false }
+    }
+    const { password } = createAccount({
+      name: input.patientName,
+      email: input.email,
+    })
+    return { appointment, isNewAccount: true, tempPassword: password }
   },
 }
 
