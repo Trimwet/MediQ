@@ -1,8 +1,8 @@
-import { ArrowLeft, CalendarDays, Stethoscope, Users } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
+import { ArrowLeft, CalendarDays, Stethoscope, Users } from 'lucide-react'
 import { Logo } from '@/assets/logo'
-import { ThemeSwitch } from '@/components/theme-switch'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
+import { ThemeSwitch } from '@/components/theme-switch'
 import dashboardDark from './assets/dashboard-dark.png'
 import dashboardLight from './assets/dashboard-light.png'
 
@@ -47,14 +47,14 @@ export function AuthLayout({
       <div className='absolute end-4 top-4 z-10'>
         <ThemeSwitch />
       </div>
-      <div className='flex flex-col px-6 pb-8 pt-6 sm:px-10 lg:px-14'>
+      <div className='flex flex-col px-6 pt-8 pb-12 sm:px-10 lg:px-16'>
         <Logo className='h-9' />
-        <div className='flex flex-1 items-center justify-center py-10'>
-          <div className='motion-safe:animate-in motion-safe:fade-in-0 motion-safe:duration-500 w-full max-w-sm'>
+        <div className='flex flex-1 items-center justify-center py-16'>
+          <div className='w-full max-w-sm motion-safe:animate-in motion-safe:duration-500 motion-safe:fade-in-0'>
             {back ? (
               <Link
                 to={back.to}
-                className='mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground'
+                className='mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground'
               >
                 <ArrowLeft className='size-4' />
                 {back.label}
@@ -63,8 +63,8 @@ export function AuthLayout({
             <h1 className='font-manrope text-3xl font-bold tracking-tight'>
               {title}
             </h1>
-            <p className='mt-2 text-sm text-muted-foreground'>{description}</p>
-            <Card className='mt-6 gap-4'>
+            <p className='mt-3 text-sm text-muted-foreground'>{description}</p>
+            <Card className='mt-8 gap-5'>
               <CardContent>{children}</CardContent>
               {footer ? (
                 <CardFooter>
@@ -86,9 +86,9 @@ function AuthVisualPanel() {
   return (
     <aside className='relative hidden overflow-hidden border-s border-border bg-muted lg:block'>
       <div className='pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_55%_at_78%_18%,color-mix(in_oklab,var(--primary)_12%,transparent),transparent_65%)]' />
-      <div className='pointer-events-none absolute inset-0 [background-image:radial-gradient(circle,color-mix(in_oklab,var(--foreground)_8%,transparent)_1px,transparent_1px)] [background-size:22px_22px] [mask-image:linear-gradient(to_bottom,transparent,black_20%,black_80%,transparent)]' />
-      <div className='motion-safe:animate-in motion-safe:fade-in-0 motion-safe:duration-700 relative flex h-full flex-col justify-center gap-9 px-12 xl:px-16'>
-        <div className='mx-auto w-full max-w-md overflow-hidden rounded-xl ring-1 ring-border shadow-lg shadow-primary/15'>
+      <div className='pointer-events-none absolute inset-0 [background-image:radial-gradient(circle,color-mix(in_oklab,var(--foreground)_8%,transparent)_1px,transparent_1px)] [mask-image:linear-gradient(to_bottom,transparent,black_20%,black_80%,transparent)] [background-size:22px_22px]' />
+      <div className='relative flex h-full flex-col justify-center gap-9 px-12 motion-safe:animate-in motion-safe:duration-700 motion-safe:fade-in-0 xl:px-16'>
+        <div className='mx-auto w-full max-w-md overflow-hidden rounded-xl shadow-lg ring-1 shadow-primary/15 ring-border'>
           <img
             src={dashboardLight}
             alt='MediQ dashboard showing appointments and queue overview'

@@ -26,8 +26,6 @@ import { Route as PublicIndexRouteImport } from './routes/_public/index'
 import { Route as PublicAboutRouteImport } from './routes/_public/about'
 import { Route as PublicContactRouteImport } from './routes/_public/contact'
 import { Route as PublicFaqRouteImport } from './routes/_public/faq'
-import { Route as PublicGalleryRouteImport } from './routes/_public/gallery'
-import { Route as PublicServicesRouteImport } from './routes/_public/services'
 import { Route as AuthenticatedAdminAppointmentsRouteImport } from './routes/_authenticated/admin/appointments'
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin/dashboard'
 import { Route as AuthenticatedAdminDoctorsRouteImport } from './routes/_authenticated/admin/doctors'
@@ -39,8 +37,6 @@ import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminStaffRouteImport } from './routes/_authenticated/admin/staff'
 import { Route as AuthenticatedErrorsErrorRouteImport } from './routes/_authenticated/errors/$error'
 import { Route as AuthenticatedUsersIndexRouteImport } from './routes/_authenticated/users/index'
-import { Route as PublicDepartmentsIndexRouteImport } from './routes/_public/departments/index'
-import { Route as PublicDepartmentsIdRouteImport } from './routes/_public/departments/$id'
 import { Route as PublicDoctorsIndexRouteImport } from './routes/_public/doctors/index'
 import { Route as PublicDoctorsDoctorIdRouteImport } from './routes/_public/doctors/$doctorId'
 import { Route as AuthenticatedAdminSettingsIndexRouteImport } from './routes/_authenticated/admin/settings.index'
@@ -133,16 +129,6 @@ const PublicFaqRoute = PublicFaqRouteImport.update({
   path: '/faq',
   getParentRoute: () => PublicRouteRoute,
 } as any)
-const PublicGalleryRoute = PublicGalleryRouteImport.update({
-  id: '/gallery',
-  path: '/gallery',
-  getParentRoute: () => PublicRouteRoute,
-} as any)
-const PublicServicesRoute = PublicServicesRouteImport.update({
-  id: '/services',
-  path: '/services',
-  getParentRoute: () => PublicRouteRoute,
-} as any)
 const AuthenticatedAdminAppointmentsRoute =
   AuthenticatedAdminAppointmentsRouteImport.update({
     id: '/admin/appointments',
@@ -204,16 +190,6 @@ const AuthenticatedUsersIndexRoute = AuthenticatedUsersIndexRouteImport.update({
   id: '/users/',
   path: '/users/',
   getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const PublicDepartmentsIndexRoute = PublicDepartmentsIndexRouteImport.update({
-  id: '/departments/',
-  path: '/departments/',
-  getParentRoute: () => PublicRouteRoute,
-} as any)
-const PublicDepartmentsIdRoute = PublicDepartmentsIdRouteImport.update({
-  id: '/departments/$id',
-  path: '/departments/$id',
-  getParentRoute: () => PublicRouteRoute,
 } as any)
 const PublicDoctorsIndexRoute = PublicDoctorsIndexRouteImport.update({
   id: '/doctors/',
@@ -278,8 +254,6 @@ export interface FileRoutesByFullPath {
   '/about': typeof PublicAboutRoute
   '/contact': typeof PublicContactRoute
   '/faq': typeof PublicFaqRoute
-  '/gallery': typeof PublicGalleryRoute
-  '/services': typeof PublicServicesRoute
   '/admin/appointments': typeof AuthenticatedAdminAppointmentsRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/admin/doctors': typeof AuthenticatedAdminDoctorsRoute
@@ -290,10 +264,8 @@ export interface FileRoutesByFullPath {
   '/admin/settings': typeof AuthenticatedAdminSettingsRouteWithChildren
   '/admin/staff': typeof AuthenticatedAdminStaffRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
-  '/departments/$id': typeof PublicDepartmentsIdRoute
   '/doctors/$doctorId': typeof PublicDoctorsDoctorIdRoute
   '/users/': typeof AuthenticatedUsersIndexRoute
-  '/departments/': typeof PublicDepartmentsIndexRoute
   '/doctors/': typeof PublicDoctorsIndexRoute
   '/admin/settings/account': typeof AuthenticatedAdminSettingsAccountRoute
   '/admin/settings/appearance': typeof AuthenticatedAdminSettingsAppearanceRoute
@@ -318,8 +290,6 @@ export interface FileRoutesByTo {
   '/about': typeof PublicAboutRoute
   '/contact': typeof PublicContactRoute
   '/faq': typeof PublicFaqRoute
-  '/gallery': typeof PublicGalleryRoute
-  '/services': typeof PublicServicesRoute
   '/admin/appointments': typeof AuthenticatedAdminAppointmentsRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/admin/doctors': typeof AuthenticatedAdminDoctorsRoute
@@ -329,10 +299,8 @@ export interface FileRoutesByTo {
   '/admin/rooms': typeof AuthenticatedAdminRoomsRoute
   '/admin/staff': typeof AuthenticatedAdminStaffRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
-  '/departments/$id': typeof PublicDepartmentsIdRoute
   '/doctors/$doctorId': typeof PublicDoctorsDoctorIdRoute
   '/users': typeof AuthenticatedUsersIndexRoute
-  '/departments': typeof PublicDepartmentsIndexRoute
   '/doctors': typeof PublicDoctorsIndexRoute
   '/admin/settings/account': typeof AuthenticatedAdminSettingsAccountRoute
   '/admin/settings/appearance': typeof AuthenticatedAdminSettingsAppearanceRoute
@@ -359,8 +327,6 @@ export interface FileRoutesById {
   '/_public/about': typeof PublicAboutRoute
   '/_public/contact': typeof PublicContactRoute
   '/_public/faq': typeof PublicFaqRoute
-  '/_public/gallery': typeof PublicGalleryRoute
-  '/_public/services': typeof PublicServicesRoute
   '/_public/': typeof PublicIndexRoute
   '/_authenticated/admin/appointments': typeof AuthenticatedAdminAppointmentsRoute
   '/_authenticated/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
@@ -372,10 +338,8 @@ export interface FileRoutesById {
   '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRouteWithChildren
   '/_authenticated/admin/staff': typeof AuthenticatedAdminStaffRoute
   '/_authenticated/errors/$error': typeof AuthenticatedErrorsErrorRoute
-  '/_public/departments/$id': typeof PublicDepartmentsIdRoute
   '/_public/doctors/$doctorId': typeof PublicDoctorsDoctorIdRoute
   '/_authenticated/users/': typeof AuthenticatedUsersIndexRoute
-  '/_public/departments/': typeof PublicDepartmentsIndexRoute
   '/_public/doctors/': typeof PublicDoctorsIndexRoute
   '/_authenticated/admin/settings/account': typeof AuthenticatedAdminSettingsAccountRoute
   '/_authenticated/admin/settings/appearance': typeof AuthenticatedAdminSettingsAppearanceRoute
@@ -402,8 +366,6 @@ export interface FileRouteTypes {
     | '/about'
     | '/contact'
     | '/faq'
-    | '/gallery'
-    | '/services'
     | '/admin/appointments'
     | '/admin/dashboard'
     | '/admin/doctors'
@@ -414,10 +376,8 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/staff'
     | '/errors/$error'
-    | '/departments/$id'
     | '/doctors/$doctorId'
     | '/users/'
-    | '/departments/'
     | '/doctors/'
     | '/admin/settings/account'
     | '/admin/settings/appearance'
@@ -442,8 +402,6 @@ export interface FileRouteTypes {
     | '/about'
     | '/contact'
     | '/faq'
-    | '/gallery'
-    | '/services'
     | '/admin/appointments'
     | '/admin/dashboard'
     | '/admin/doctors'
@@ -453,10 +411,8 @@ export interface FileRouteTypes {
     | '/admin/rooms'
     | '/admin/staff'
     | '/errors/$error'
-    | '/departments/$id'
     | '/doctors/$doctorId'
     | '/users'
-    | '/departments'
     | '/doctors'
     | '/admin/settings/account'
     | '/admin/settings/appearance'
@@ -482,8 +438,6 @@ export interface FileRouteTypes {
     | '/_public/about'
     | '/_public/contact'
     | '/_public/faq'
-    | '/_public/gallery'
-    | '/_public/services'
     | '/_public/'
     | '/_authenticated/admin/appointments'
     | '/_authenticated/admin/dashboard'
@@ -495,10 +449,8 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/settings'
     | '/_authenticated/admin/staff'
     | '/_authenticated/errors/$error'
-    | '/_public/departments/$id'
     | '/_public/doctors/$doctorId'
     | '/_authenticated/users/'
-    | '/_public/departments/'
     | '/_public/doctors/'
     | '/_authenticated/admin/settings/account'
     | '/_authenticated/admin/settings/appearance'
@@ -645,20 +597,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicFaqRouteImport
       parentRoute: typeof PublicRouteRoute
     }
-    '/_public/gallery': {
-      id: '/_public/gallery'
-      path: '/gallery'
-      fullPath: '/gallery'
-      preLoaderRoute: typeof PublicGalleryRouteImport
-      parentRoute: typeof PublicRouteRoute
-    }
-    '/_public/services': {
-      id: '/_public/services'
-      path: '/services'
-      fullPath: '/services'
-      preLoaderRoute: typeof PublicServicesRouteImport
-      parentRoute: typeof PublicRouteRoute
-    }
     '/_authenticated/admin/appointments': {
       id: '/_authenticated/admin/appointments'
       path: '/admin/appointments'
@@ -735,20 +673,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/users/'
       preLoaderRoute: typeof AuthenticatedUsersIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_public/departments/': {
-      id: '/_public/departments/'
-      path: '/departments'
-      fullPath: '/departments/'
-      preLoaderRoute: typeof PublicDepartmentsIndexRouteImport
-      parentRoute: typeof PublicRouteRoute
-    }
-    '/_public/departments/$id': {
-      id: '/_public/departments/$id'
-      path: '/departments/$id'
-      fullPath: '/departments/$id'
-      preLoaderRoute: typeof PublicDepartmentsIdRouteImport
-      parentRoute: typeof PublicRouteRoute
     }
     '/_public/doctors/': {
       id: '/_public/doctors/'
@@ -873,12 +797,8 @@ interface PublicRouteRouteChildren {
   PublicAboutRoute: typeof PublicAboutRoute
   PublicContactRoute: typeof PublicContactRoute
   PublicFaqRoute: typeof PublicFaqRoute
-  PublicGalleryRoute: typeof PublicGalleryRoute
-  PublicServicesRoute: typeof PublicServicesRoute
   PublicIndexRoute: typeof PublicIndexRoute
-  PublicDepartmentsIdRoute: typeof PublicDepartmentsIdRoute
   PublicDoctorsDoctorIdRoute: typeof PublicDoctorsDoctorIdRoute
-  PublicDepartmentsIndexRoute: typeof PublicDepartmentsIndexRoute
   PublicDoctorsIndexRoute: typeof PublicDoctorsIndexRoute
 }
 
@@ -886,12 +806,8 @@ const PublicRouteRouteChildren: PublicRouteRouteChildren = {
   PublicAboutRoute: PublicAboutRoute,
   PublicContactRoute: PublicContactRoute,
   PublicFaqRoute: PublicFaqRoute,
-  PublicGalleryRoute: PublicGalleryRoute,
-  PublicServicesRoute: PublicServicesRoute,
   PublicIndexRoute: PublicIndexRoute,
-  PublicDepartmentsIdRoute: PublicDepartmentsIdRoute,
   PublicDoctorsDoctorIdRoute: PublicDoctorsDoctorIdRoute,
-  PublicDepartmentsIndexRoute: PublicDepartmentsIndexRoute,
   PublicDoctorsIndexRoute: PublicDoctorsIndexRoute,
 }
 

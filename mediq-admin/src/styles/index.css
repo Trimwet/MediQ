@@ -143,26 +143,49 @@
   overflow: hidden;
 }
 .CollapsibleContent[data-state='open'] {
-  animation: slideDown 300ms ease-out;
+  animation: slideDown 300ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 .CollapsibleContent[data-state='closed'] {
-  animation: slideUp 300ms ease-out;
+  animation: slideUp 200ms ease-in;
 }
 
 @keyframes slideDown {
   from {
     height: 0;
+    opacity: 0;
+    transform: translateY(-4px);
   }
   to {
     height: var(--radix-collapsible-content-height);
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
 @keyframes slideUp {
   from {
     height: var(--radix-collapsible-content-height);
+    opacity: 1;
+    transform: translateY(0);
   }
   to {
     height: 0;
+    opacity: 0;
+    transform: translateY(-4px);
   }
+}
+
+/* ---------- Color-pulse keyframe for decorative icons ---------- */
+@keyframes mediq-icon-pulse {
+  0%,
+  100% {
+    color: color-mix(in oklab, var(--color-muted-foreground) 20%, transparent);
+  }
+  50% {
+    color: color-mix(in oklab, var(--color-primary) 45%, transparent);
+  }
+}
+
+.animate-icon-pulse {
+  animation: mediq-icon-pulse 3.5s ease-in-out infinite;
 }

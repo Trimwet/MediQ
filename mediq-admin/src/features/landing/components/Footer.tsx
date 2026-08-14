@@ -3,19 +3,17 @@ import { Globe, MessageCircle, Share2, ExternalLink, Mail, Phone, MapPin } from 
 import { Logo } from '@/assets/logo'
 
 const quickLinks = [
-  { to: '/about', label: 'About Us' },
   { to: '/doctors', label: 'Our Doctors' },
-  { to: '/departments', label: 'Departments' },
-  { to: '/services', label: 'Services' },
+  { to: '/about', label: 'About Us' },
+  { to: '/faq', label: 'FAQ' },
+  { to: '/contact', label: 'Contact' },
   { to: '/book', label: 'Book Appointment' },
 ]
 
-const departmentLinks = [
-  { to: '/departments', label: 'Cardiology' },
-  { to: '/departments', label: 'Neurology' },
-  { to: '/departments', label: 'Orthopedics' },
-  { to: '/departments', label: 'Pediatrics' },
-  { to: '/departments', label: 'Dermatology' },
+const patientLinks = [
+  { to: '/book', label: 'Book an appointment' },
+  { to: '/sign-up', label: 'Create an account' },
+  { to: '/sign-in', label: 'Sign in' },
 ]
 
 const socials = [
@@ -69,14 +67,14 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Departments */}
+          {/* For Patients */}
           <div>
             <h4 className='font-manrope text-sm font-semibold tracking-tight'>
-              Departments
+              For Patients
             </h4>
             <ul className='mt-3 flex flex-col gap-2 text-sm text-muted-foreground'>
-              {departmentLinks.map((link, i) => (
-                <li key={i}>
+              {patientLinks.map((link) => (
+                <li key={link.to + link.label}>
                   <Link to={link.to} className='transition-colors hover:text-foreground'>
                     {link.label}
                   </Link>
