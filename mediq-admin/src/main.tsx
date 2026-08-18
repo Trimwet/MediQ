@@ -105,3 +105,6 @@ if (!rootElement.innerHTML) {
     </StrictMode>
   )
 }
+
+// Remove boot loader now that React has mounted
+document.getElementById('boot-loader')?.remove()

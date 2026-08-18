@@ -48,9 +48,64 @@
     <meta property="twitter:title" content="MediQ" />
     <meta property="twitter:description" content="Appointment & Queue Management System" />
 
-    <!-- font family -->
+    <!-- Boot loader styles: must be inline since Vite-injected CSS loads after JS -->
+    <style>
+      @keyframes wave-bar-bounce {
+        0%, 80%, 100% { height: 0.35em; }
+        40% { height: 1em; }
+      }
+      #boot-loader {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        background: oklch(1 0 0);
+      }
+      .dark #boot-loader {
+        background: oklch(0.129 0.042 264.695);
+      }
+      #boot-loader .wave-bar {
+        display: inline-block;
+        width: 0.25em;
+        height: 0.35em;
+        border-radius: 9999px;
+        background: oklch(0.554 0.046 257.417);
+        animation: wave-bar-bounce 1.2s ease-in-out infinite;
+      }
+      .dark #boot-loader .wave-bar {
+        background: oklch(0.704 0.04 256.788);
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #boot-loader .wave-bar { animation: none; }
+      }
+    </style>
+    <!-- font family: pre-paint class so chosen font applies before first paint -->
+    <script>
+      (function () {
+        try {
+          var c = document.cookie.match(/(?:^|;\s*)font=([^;]*)/);
+          var v = '';
+          if (c) { try { v = decodeURIComponent(c[1]); } catch(e) { v = c[1]; } }
+          var root = document.documentElement.classList;
+          root.remove('font-inter', 'font-manrope', 'font-system');
+          if (v === 'inter' || v === 'manrope' || v === 'system') {
+            root.add('font-' + v);
+          } else {
+            root.add('font-inter');
+          }
+        } catch (e) {
+          document.documentElement.classList.add('font-inter');
+        }
+      })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Preload critical latin-subset font files so first paint uses the real font -->
+    <link rel="preload" href="https://fonts.gstatic.com/s/inter/v20/UcCo3FwrK3iLTcviYwY.woff2" as="font" type="font/woff2" crossorigin fetchpriority="high" />
+    <link rel="preload" href="https://fonts.gstatic.com/s/inter/v20/UcCm3FwrK3iLTcvnUwQT9g.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggexSg.woff2" as="font" type="font/woff2" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Manrope:wght@200..800&display=swap"
       rel="stylesheet"
@@ -60,6 +115,16 @@
   </head>
 
   <body>
+    <!-- Static boot loader: visible before React hydrates, removed on mount -->
+    <div id="boot-loader">
+      <div style="display:flex;align-items:center;justify-content:center;gap:0.375rem;height:2.5rem;">
+        <span class="wave-bar" style="animation-delay:0s"></span>
+        <span class="wave-bar" style="animation-delay:0.12s"></span>
+        <span class="wave-bar" style="animation-delay:0.24s"></span>
+        <span class="wave-bar" style="animation-delay:0.36s"></span>
+        <span class="wave-bar" style="animation-delay:0.48s"></span>
+      </div>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

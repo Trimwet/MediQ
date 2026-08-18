@@ -189,3 +189,45 @@
 .animate-icon-pulse {
   animation: mediq-icon-pulse 3.5s ease-in-out infinite;
 }
+
+/* ---------- Wave physics loader ---------- */
+@keyframes wave-bar-bounce {
+  0%,
+  80%,
+  100% {
+    height: 0.35em;
+  }
+  40% {
+    height: 1em;
+  }
+}
+
+@layer components {
+  .wave-bar {
+    display: inline-block;
+    width: 0.25em;
+    height: 0.35em;
+    border-radius: 9999px;
+    animation: wave-bar-bounce 1.2s ease-in-out infinite;
+  }
+
+  /* Boot loader shown before React hydrates (id kept for JS removal) */
+  #boot-loader {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    background: var(--background);
+  }
+  #boot-loader .wave-bar {
+    background: var(--muted-foreground);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wave-bar {
+    animation: none;
+  }
+}

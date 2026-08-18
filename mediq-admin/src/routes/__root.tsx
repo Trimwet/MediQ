@@ -3,7 +3,7 @@ import { createRootRouteWithContext, Outlet } from '@tanstack/react-router'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import { Toaster } from '@/components/ui/sonner'
-import { NavigationProgress } from '@/components/navigation-progress'
+import { WavePhysicsLoader } from '@/components/wave-physics-loader'
 import { GeneralError } from '@/features/errors/general-error'
 import { NotFoundError } from '@/features/errors/not-found-error'
 
@@ -13,7 +13,6 @@ export const Route = createRootRouteWithContext<{
   component: () => {
     return (
       <>
-        <NavigationProgress />
         <Outlet />
         <Toaster duration={5000} />
         {import.meta.env.MODE === 'development' && (
@@ -25,6 +24,11 @@ export const Route = createRootRouteWithContext<{
       </>
     )
   },
+  pendingComponent: () => (
+    <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-background/60">
+      <WavePhysicsLoader size="lg" />
+    </div>
+  ),
   notFoundComponent: NotFoundError,
   errorComponent: GeneralError,
 })
