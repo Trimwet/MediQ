@@ -67,3 +67,23 @@ The admin dashboard (`mediq-admin/`) currently runs on mock repositories
 (`mediq-admin/src/data/mock/`). When this backend is ready, the mock
 implementations will be swapped for Supabase-backed ones — the repository
 interfaces in `mediq-admin/src/data/repos.ts` remain unchanged.
+
+## RPCs
+
+- **`book_appointment(name, email, phone, scheduled_for, doctor_id?, reason?)` → uuid**
+  Anonymous/self-service booking entry point. Upserts patient (lowercased email),
+  resolves doctor name from `doctors` table, inserts appointment with status locked
+  to `pending`. Granted to `anon` and `authenticated`.
+- **`mark_notification_read(notification_id)`** — marks one notification as read for the
+  calling user. Granted to `authenticated`.
+- **`mark_all_notifications_read()`** — marks all unread notifications as read.
+  Granted to `authenticated`.
+
+## Bootstrap First Admin
+
+After the first user signs up, promote them to admin via the Dashboard SQL Editor:
+
+```sql
+UPDATE public.profiles SET role = 'admin'
+WHERE id = (SELECT id FROM auth.users WHERE email = '<admin-email>' LIMIT 1);
+```
