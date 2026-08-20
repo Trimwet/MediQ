@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -7,7 +7,6 @@ import { supabase } from '@/lib/supabase'
 import { ArrowLeft, KeyRound, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Logo } from '@/assets/logo'
-import { useAuthStore } from '@/stores/auth-store'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import {
@@ -35,9 +34,11 @@ const formSchema = z
 
 type FormValues = z.infer<typeof formSchema>
 
+type Status = 'loading' | 'ready' | 'invalid'
+
 export function ChangePassword() {
   const navigate = useNavigate()
-  const user = useAuthStore((state) => state.auth.user)
+  const [status, setStatus] = useState<Status>('loading')
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -47,14 +48,46 @@ export function ChangePassword() {
     },
   })
 
-  // Route guard: must be signed in.
   useEffect(() => {
-    if (!user) {
-      navigate({ to: '/sign-in', replace: true })
-    }
-  }, [user, navigate])
+    // Supabase appends the recovery token as a URL hash:
+    // /change-password#access_token=...&refresh_token=...&type=recovery
+    const hash = window.location.hash
+    const params = new URLSearchParams(hash.replace('#', ''))
+    const accessToken = params.get('access_token')
+    const refreshToken = params.get('refresh_token')
+    const type = params.get('type')
 
-  if (!user) return null
+    if (type === 'recovery' && accessToken && refreshToken) {
+      // Exchange the recovery tokens for a real session so
+      // supabase.auth.updateUser() works below.
+      supabase.auth
+        .setSession({ access_token: accessToken, refresh_token: refreshToken })
+        .then(({ error }) => {
+          if (error) {
+            toast.error('Reset link is invalid or has expired.')
+            setStatus('invalid')
+          } else {
+            setStatus('ready')
+          }
+        })
+    } else {
+      // No recovery token — check if the user is already signed in
+      supabase.auth.getSession().then(({ data }) => {
+        if (data.session) {
+          setStatus('ready')
+        } else {
+          setStatus('invalid')
+        }
+      })
+    }
+  }, [])
+
+  useEffect(() => {
+    if (status === 'invalid') {
+      toast.error('No valid reset session. Request a new password reset link.')
+      navigate({ to: '/forgot-password', replace: true })
+    }
+  }, [status, navigate])
 
   async function onSubmit(values: FormValues) {
     const { error } = await supabase.auth.updateUser({
@@ -64,11 +97,16 @@ export function ChangePassword() {
       toast.error(error.message ?? 'Failed to update password.')
       return
     }
-    toast.success('Password updated. Welcome to MediQ!')
-    const target = user?.role.includes('patient')
-      ? '/patient'
-      : '/admin/dashboard'
-    navigate({ to: target, replace: true })
+    toast.success('Password updated successfully!')
+    navigate({ to: '/sign-in', replace: true })
+  }
+
+  if (status === 'loading') {
+    return (
+      <div className='flex min-h-svh items-center justify-center'>
+        <Loader2 className='size-6 animate-spin text-muted-foreground' />
+      </div>
+    )
   }
 
   return (
@@ -103,7 +141,6 @@ export function ChangePassword() {
               className='grid gap-3'
               noValidate
             >
-
               <FormField
                 control={form.control}
                 name='newPassword'
