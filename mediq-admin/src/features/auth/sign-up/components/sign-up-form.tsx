@@ -21,6 +21,8 @@ import { PasswordInput } from '@/components/password-input'
 
 const formSchema = z
   .object({
+    name: z.string().min(2, 'Please enter your full name.'),
+    phone: z.string().min(7, 'Please enter a valid phone number.'),
     email: z.email({
       error: (iss) =>
         iss.input === '' ? 'Please enter your email.' : undefined,
@@ -46,6 +48,8 @@ export function SignUpForm({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      name: '',
+      phone: '',
       email: '',
       password: '',
       confirmPassword: '',
@@ -56,8 +60,10 @@ export function SignUpForm({
     setIsLoading(true)
 
     const promise = authRepository.signUp({
+      name: data.name,
       email: data.email,
       password: data.password,
+      phone: data.phone,
     })
 
     toast.promise(promise, {
@@ -83,6 +89,36 @@ export function SignUpForm({
         className={cn('grid gap-4', className)}
         {...props}
       >
+        <FormField
+          control={form.control}
+          name='name'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Full name</FormLabel>
+              <FormControl>
+                <Input placeholder='eg: Aisha Bello' {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name='phone'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Phone</FormLabel>
+              <FormControl>
+                <Input
+                  type='tel'
+                  placeholder='eg: +234 801 234 5678'
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name='email'

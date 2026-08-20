@@ -1,6 +1,8 @@
+import { useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { hasRole } from '@/config/rbac'
 import { useAuthStore } from '@/stores/auth-store'
+import { supabase } from '@/lib/supabase'
 import {
   type Appointment,
   type AppointmentStatus,
@@ -44,15 +46,16 @@ function useDoctorIdentity() {
 // ---- Appointments ----
 
 export function useAppointments() {
-  const { isDoctor, doctor } = useDoctorIdentity()
+  // Supabase RLS already scopes rows by role server-side:
+  //   - admin / front_desk  → all rows
+  //   - doctor              → only rows where doctor_id matches their linked doctors.id
+  //   - patient             → only rows where patient_email matches their auth email
+  // No client-side filter is needed; doing it here would be a redundant pass
+  // over data that the DB has already scoped correctly (and was causing a
+  // triple-filter bug when combined with the memo in index.tsx).
   return useQuery({
-    queryKey: ['appointments', doctor?.id ?? (isDoctor ? 'unresolved' : 'all')],
-    queryFn: async () => {
-      const all = await appointmentsRepository.list()
-      if (!isDoctor) return all
-      if (!doctor) return []
-      return all.filter((a) => a.doctorId === doctor.id)
-    },
+    queryKey: ['appointments'],
+    queryFn: () => appointmentsRepository.list(),
   })
 }
 
@@ -71,8 +74,23 @@ export function useUpdateAppointmentStatus() {
   return useMutation({
     mutationFn: ({ id, status }: { id: string; status: AppointmentStatus }) =>
       appointmentsRepository.updateStatus(id, status),
-    // Check-in also affects the queue (see mock store).
-    onSuccess: () => {
+    // Optimistic update: patch the cache immediately so the UI responds
+    // without waiting for the Supabase round-trip.
+    onMutate: async ({ id, status }) => {
+      await queryClient.cancelQueries({ queryKey: ['appointments'] })
+      const previous = queryClient.getQueryData<Appointment[]>(['appointments'])
+      queryClient.setQueryData<Appointment[]>(['appointments'], (old) =>
+        (old ?? []).map((a) => (a.id === id ? { ...a, status } : a))
+      )
+      return { previous }
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(['appointments'], context.previous)
+      }
+    },
+    // Check-in also affects the queue; always refetch both on settle.
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['appointments'] })
       queryClient.invalidateQueries({ queryKey: ['queue'] })
     },
@@ -89,7 +107,30 @@ export function useApproveAppointment() {
       id: string
       doctor?: { id: string; name: string }
     }) => appointmentsRepository.approve(id, doctor),
-    onSuccess: () => {
+    onMutate: async ({ id, doctor }) => {
+      await queryClient.cancelQueries({ queryKey: ['appointments'] })
+      const previous = queryClient.getQueryData<Appointment[]>(['appointments'])
+      queryClient.setQueryData<Appointment[]>(['appointments'], (old) =>
+        (old ?? []).map((a) =>
+          a.id === id
+            ? {
+                ...a,
+                status: 'booked' as AppointmentStatus,
+                ...(doctor
+                  ? { doctorId: doctor.id, doctorName: doctor.name }
+                  : {}),
+              }
+            : a
+        )
+      )
+      return { previous }
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(['appointments'], context.previous)
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['appointments'] })
       queryClient.invalidateQueries({ queryKey: ['notifications'] })
     },
@@ -101,7 +142,28 @@ export function useRejectAppointment() {
   return useMutation({
     mutationFn: ({ id, reason }: { id: string; reason?: string }) =>
       appointmentsRepository.reject(id, reason),
-    onSuccess: () => {
+    onMutate: async ({ id, reason }) => {
+      await queryClient.cancelQueries({ queryKey: ['appointments'] })
+      const previous = queryClient.getQueryData<Appointment[]>(['appointments'])
+      queryClient.setQueryData<Appointment[]>(['appointments'], (old) =>
+        (old ?? []).map((a) =>
+          a.id === id
+            ? {
+                ...a,
+                status: 'rejected' as AppointmentStatus,
+                rejectionReason: reason,
+              }
+            : a
+        )
+      )
+      return { previous }
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(['appointments'], context.previous)
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['appointments'] })
       queryClient.invalidateQueries({ queryKey: ['notifications'] })
     },
@@ -344,4 +406,59 @@ export function useMarkAllNotificationsRead() {
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: ['notifications'] }),
   })
+}
+
+// ---- Realtime subscriptions ----
+// Subscribe to Supabase Postgres changes and auto-invalidate the matching
+// React Query cache. This makes the queue and appointments live for all
+// connected clients without manual polling.
+
+function useRealtimeTable(
+  table: string,
+  queryKey: string[],
+  /** Only invalidate when the row matches this filter. Omit for all changes. */
+  filter?: { column: string; value: string }
+) {
+  const queryClient = useQueryClient()
+
+  useEffect(() => {
+    const channel = supabase
+      .channel(`rt:${table}:${queryKey.join('/')}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table,
+          ...(filter ? { filter: `${filter.column}=eq.${filter.value}` } : {}),
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey })
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [table, queryKey.join('/'), queryClient, filter])
+}
+
+/** Subscribe to queue changes for live updates on the front desk and doctor views. */
+export function useRealtimeQueue(doctorName?: string) {
+  useRealtimeTable(
+    'queue_entries',
+    ['queue'],
+    doctorName ? { column: 'doctor_name', value: doctorName } : undefined
+  )
+}
+
+/** Subscribe to appointment changes for live updates. */
+export function useRealtimeAppointments() {
+  useRealtimeTable('appointments', ['appointments'])
+}
+
+/** Subscribe to notification changes for the live bell. */
+export function useRealtimeNotifications() {
+  useRealtimeTable('notifications', ['notifications'])
 }

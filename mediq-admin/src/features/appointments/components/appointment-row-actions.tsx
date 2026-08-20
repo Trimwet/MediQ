@@ -59,39 +59,39 @@ export function AppointmentRowActions({
             <DropdownMenuLabel className='text-xs text-muted-foreground'>
               Update status
             </DropdownMenuLabel>
-        {next && (
-          <>
-            <DropdownMenuItem
-              onClick={() => onStatusChange(appointment.id, next)}
-            >
-              {next === 'arrived'
-                ? 'Check in'
-                : next === 'in_progress'
-                  ? 'Start visit'
-                  : 'Complete'}
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-          </>
-        )}
-        {canCancel.includes(appointment.status) && (
-          <DropdownMenuItem
-            onClick={() => onStatusChange(appointment.id, 'cancelled')}
-          >
-            Cancel
-          </DropdownMenuItem>
-        )}
-        {canNoShow.includes(appointment.status) && (
-          <DropdownMenuItem
-            onClick={() => onStatusChange(appointment.id, 'no_show')}
-          >
-            Mark no-show
-          </DropdownMenuItem>
-        )}
-        {!next && !canCancel.includes(appointment.status) && (
-          <DropdownMenuItem disabled>
-            No further actions
-          </DropdownMenuItem>
-        )}
+            {next && (
+              <>
+                <DropdownMenuItem
+                  onClick={() => onStatusChange(appointment.id, next)}
+                >
+                  {next === 'arrived'
+                    ? 'Check in'
+                    : next === 'in_progress'
+                      ? 'Start visit'
+                      : 'Complete'}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+              </>
+            )}
+            {canCancel.includes(appointment.status) && (
+              <DropdownMenuItem
+                onClick={() => onStatusChange(appointment.id, 'cancelled')}
+              >
+                Cancel
+              </DropdownMenuItem>
+            )}
+            {canNoShow.includes(appointment.status) && (
+              <DropdownMenuItem
+                onClick={() => onStatusChange(appointment.id, 'no_show')}
+              >
+                Mark no-show
+              </DropdownMenuItem>
+            )}
+            {!next &&
+              !canCancel.includes(appointment.status) &&
+              !canNoShow.includes(appointment.status) && (
+                <DropdownMenuItem disabled>No further actions</DropdownMenuItem>
+              )}
           </>
         )}
       </DropdownMenuContent>

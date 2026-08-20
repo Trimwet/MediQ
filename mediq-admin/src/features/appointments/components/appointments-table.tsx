@@ -53,13 +53,25 @@ export function AppointmentsTable({
       {
         accessorKey: 'scheduledFor',
         header: ({ column }) => (
-          <DataTableColumnHeader column={column} title='Time' />
+          <DataTableColumnHeader column={column} title='Date • Time' />
         ),
-        cell: ({ row }) =>
-          new Date(row.getValue('scheduledFor')).toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-          }),
+        cell: ({ row }) => {
+          const d = new Date(row.getValue('scheduledFor'))
+          return (
+            <span className='whitespace-nowrap'>
+              {d.toLocaleDateString([], {
+                month: 'short',
+                day: 'numeric',
+              })}
+              {' · '}
+              {d.toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
+            </span>
+          )
+        },
+        sortingFn: 'datetime',
       },
       {
         accessorKey: 'reason',
@@ -114,6 +126,8 @@ export function AppointmentsTable({
       searchPlaceholder='Search patients, doctors...'
       emptyMessage='No appointments scheduled.'
       emptyDescription='Book an appointment to get started.'
+      // Newest / soonest appointments first on load.
+      initialSorting={[{ id: 'scheduledFor', desc: true }]}
       filters={[
         {
           columnId: 'status',

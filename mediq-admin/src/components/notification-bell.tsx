@@ -1,5 +1,9 @@
 import { Link } from '@tanstack/react-router'
-import { useMarkAllNotificationsRead, useNotifications } from '@/data/hooks'
+import {
+  useMarkAllNotificationsRead,
+  useNotifications,
+  useRealtimeNotifications,
+} from '@/data/hooks'
 import { Bell, CheckCheck } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -20,6 +24,7 @@ import {
 } from '@/features/notifications/schema'
 
 export function NotificationBell() {
+  useRealtimeNotifications()
   const { data: notifications = [], isPending } = useNotifications()
   const markAllRead = useMarkAllNotificationsRead()
 

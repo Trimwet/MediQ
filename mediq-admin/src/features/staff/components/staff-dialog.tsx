@@ -1,11 +1,11 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useCreateDoctor, useDoctors } from '@/data/hooks'
-import { supabaseAdmin } from '@/lib/supabase'
 import { Check, Copy, UserPlus } from 'lucide-react'
 import { toast } from 'sonner'
+import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -52,6 +52,16 @@ type StaffDialogProps = {
   onCreated: (member: Omit<Staff, 'id'>) => void
 }
 
+/** Generate a human-friendly temporary password (no ambiguous characters). */
+function generateTempPassword(): string {
+  const chars = 'abcdefghjkmnpqrstuvwxyz23456789'
+  let out = ''
+  for (let i = 0; i < 8; i += 1) {
+    out += chars[Math.floor(Math.random() * chars.length)]
+  }
+  return out
+}
+
 export function StaffDialog({
   open,
   onOpenChange,
@@ -60,7 +70,7 @@ export function StaffDialog({
   const [invite, setInvite] = useState<{
     name: string
     email: string
-    inviteLink: string
+    temporaryPassword: string
   } | null>(null)
 
   const form = useForm<StaffForm>({
@@ -78,60 +88,32 @@ export function StaffDialog({
   const role = form.watch('role')
   const doctorsQuery = useDoctors()
   const createDoctor = useCreateDoctor()
+  const tempPassword = useMemo(generateTempPassword, [invite])
 
   async function onSubmit(values: StaffForm) {
-    let generatedInviteLink = ''
-
-    if (!supabaseAdmin) {
-      toast.error(
-        'Service role key not configured. Add VITE_SUPABASE_SERVICE_ROLE_KEY to your .env file to generate invite links.'
-      )
-      return
-    }
-
-    // Provision the Supabase Auth account via the admin API and generate a secure invite link.
-    // If the user already exists in auth (e.g. they were previously deleted from staff but
-    // their auth account remains), fall back to a password recovery link — same end result.
-    let linkResult = await supabaseAdmin.auth.admin.generateLink({
-      type: 'invite',
+    // Create the Supabase Auth account with a temporary password.
+    // The handle_new_user trigger auto-creates a profile with role 'patient';
+    // in production the role is set via an Edge Function or admin action.
+    const { error: authError } = await supabase.auth.signUp({
       email: values.email,
+      password: tempPassword,
       options: {
-        redirectTo: `${window.location.origin}/change-password`,
         data: {
           name: values.name,
           role: values.role,
         },
+        emailRedirectTo: `${window.location.origin}/change-password`,
       },
     })
 
-    if (
-      linkResult.error &&
-      linkResult.error.message?.toLowerCase().includes('already been registered')
-    ) {
-      // User exists — generate a password recovery link instead
-      linkResult = await supabaseAdmin.auth.admin.generateLink({
-        type: 'recovery',
-        email: values.email,
-        options: {
-          redirectTo: `${window.location.origin}/change-password`,
-        },
-      })
-    }
-
-    const { data, error } = linkResult
-
-    if (error) {
-      toast.error(error.message ?? 'Failed to generate invite link.')
+    // If the user already exists in auth, that's fine — we still create
+    // the staff directory record. The existing account can sign in.
+    if (authError && !authError.message?.includes('already been registered')) {
+      toast.error(authError.message ?? 'Failed to create auth account.')
       return
     }
 
-    generatedInviteLink = data?.properties?.action_link ?? ''
-
-    if (!generatedInviteLink) {
-      toast.error('Invite link was not returned by Supabase. Check your service role key.')
-      return
-    }
-
+    // Create the staff directory record.
     onCreated({
       name: values.name,
       role: values.role as Staff['role'],
@@ -157,13 +139,17 @@ export function StaffDialog({
       }
     }
 
-    setInvite({ name: values.name, email: values.email, inviteLink: generatedInviteLink })
+    setInvite({
+      name: values.name,
+      email: values.email,
+      temporaryPassword: tempPassword,
+    })
   }
 
   function handleCopy() {
     if (!invite) return
-    navigator.clipboard?.writeText(invite.inviteLink)
-    toast.success('Invite link copied')
+    navigator.clipboard?.writeText(invite.temporaryPassword)
+    toast.success('Password copied')
   }
 
   function closeDialog() {
@@ -194,24 +180,26 @@ export function StaffDialog({
                 Invite ready
               </DialogTitle>
               <DialogDescription>
-                {invite.name} can now access the system. Share this secure invite link with them.
+                {invite.name} can now sign in. Share the temporary password with
+                them — they&apos;ll set their own on first sign-in.
               </DialogDescription>
             </DialogHeader>
             <div className='rounded-lg border border-dashed p-4'>
               <p className='text-xs font-medium tracking-wide text-muted-foreground uppercase'>
-                Invite Link
+                Temporary password
               </p>
-              <div className='mt-2 space-y-2'>
-                <code className='block w-full break-all rounded bg-muted px-3 py-2 font-mono text-xs leading-relaxed'>
-                  {invite.inviteLink}
+              <div className='mt-2 flex items-center justify-between gap-3'>
+                <code className='font-mono text-lg font-semibold tracking-wider'>
+                  {invite.temporaryPassword}
                 </code>
-                <Button variant='outline' size='sm' onClick={handleCopy} className='w-full'>
+                <Button variant='outline' size='sm' onClick={handleCopy}>
                   <Copy />
-                  Copy invite link
+                  Copy
                 </Button>
               </div>
               <p className='mt-3 text-xs text-muted-foreground'>
-                This secure link handles the entire onboarding process. They will be prompted to set their permanent password before accessing the dashboard.
+                Signed in as {invite.email}. First sign-in takes them straight
+                to a password change.
               </p>
             </div>
             <DialogFooter>
@@ -226,7 +214,7 @@ export function StaffDialog({
               </DialogTitle>
               <DialogDescription>
                 Provision a staff account and assign their role. They&apos;ll
-                receive a secure invite link to set up their account.
+                receive a temporary password to sign in with.
               </DialogDescription>
             </DialogHeader>
             <Form {...form}>

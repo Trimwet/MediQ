@@ -1,61 +1,49 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import {
   useAppointments,
   useApproveAppointment,
   useCreateAppointment,
-  useDoctors,
+  useRealtimeAppointments,
   useRejectAppointment,
   useUpdateAppointmentStatus,
 } from '@/data/hooks'
 import { CalendarPlus } from 'lucide-react'
 import { toast } from 'sonner'
-import { useAuthStore } from '@/stores/auth-store'
 import { useRbac } from '@/hooks/use-rbac'
 import { Button } from '@/components/ui/button'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
-import { Main } from '@/components/layout/main'
 import { HeaderNav } from '@/components/layout/header-nav'
+import { Main } from '@/components/layout/main'
 import { NotificationBell } from '@/components/notification-bell'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { AppointmentDialog } from './components/appointment-dialog'
+import { AppointmentsTable } from './components/appointments-table'
 import { ApproveDialog } from './components/approve-dialog'
 import { RejectDialog } from './components/reject-dialog'
-import { AppointmentsTable } from './components/appointments-table'
 import { type Appointment, type AppointmentStatus } from './schema'
 
 export function Appointments() {
   const { can } = useRbac()
   const canBook = can('appointments:book')
   const canManage = can('appointments:manage')
-  const user = useAuthStore((state) => state.auth.user)
+  useRealtimeAppointments()
 
   const [dialogOpen, setDialogOpen] = useState(false)
   const [approveTarget, setApproveTarget] = useState<Appointment | null>(null)
   const [rejectTarget, setRejectTarget] = useState<Appointment | null>(null)
 
   const appointmentsQuery = useAppointments()
-  const doctorsQuery = useDoctors()
   const createAppointment = useCreateAppointment()
   const updateStatus = useUpdateAppointmentStatus()
   const approve = useApproveAppointment()
   const reject = useRejectAppointment()
 
-  /**
-   * Row-level scoping demo: doctors only see appointments assigned to the
-   * doctor matching their account email. In production the backend MUST
-   * enforce this server-side; this is the UI mirror (see types/domain.ts).
-   */
-  const isDoctor = user?.role.includes('doctor')
-  const visibleAppointments = useMemo(() => {
-    const appointments = appointmentsQuery.data ?? []
-    if (!user || !isDoctor) return appointments
-    const doctor = doctorsQuery.data?.find((d) => d.email === user.email)
-    if (!doctor) return []
-    return appointments.filter((a) => a.doctorId === doctor.id)
-  }, [appointmentsQuery.data, doctorsQuery.data, isDoctor, user])
+  // RLS scopes appointment rows server-side per role (admin/front_desk = all,
+  // doctor = their own, patient = their own). No client-side filter needed.
+  const visibleAppointments = appointmentsQuery.data ?? []
 
   function handleStatusChange(id: string, status: AppointmentStatus) {
     updateStatus.mutate(

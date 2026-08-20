@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react'
-import { useQueue, useQueueActions } from '@/data/hooks'
+import { useQueue, useQueueActions, useRealtimeQueue } from '@/data/hooks'
 import { Megaphone } from 'lucide-react'
 import { toast } from 'sonner'
 import { useRbac } from '@/hooks/use-rbac'
@@ -8,8 +8,8 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
-import { Main } from '@/components/layout/main'
 import { HeaderNav } from '@/components/layout/header-nav'
+import { Main } from '@/components/layout/main'
 import { NotificationBell } from '@/components/notification-bell'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
@@ -23,6 +23,7 @@ export function Queue() {
   const { can } = useRbac()
   const canManage = can('queue:manage')
 
+  useRealtimeQueue()
   const queueQuery = useQueue()
   const actions = useQueueActions()
 

@@ -24,7 +24,12 @@ type Table =
 
 /** Map from table name -> React Query cache keys to bust. */
 const TABLE_KEYS: Record<Table, string[]> = {
-  appointments: ['appointments', 'notifications'],
+  // Notifications are NOT included here: approve/reject mutations already
+  // call queryClient.invalidateQueries(['notifications']) in their onSuccess
+  // callbacks, so including it here would cause a double refetch every time
+  // an appointment row changes.
+  appointments: ['appointments'],
+  // queue_entries drives both the queue view and room occupancy display.
   queue_entries: ['queue', 'rooms'],
   patients: ['patients'],
   doctors: ['doctors'],

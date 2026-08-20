@@ -51,9 +51,7 @@ function mapAppointment(row: Record<string, unknown>): Appointment {
 function mapQueueEntry(row: Record<string, unknown>): QueueEntry {
   return {
     id: String(row.id),
-    appointmentId: row.appointment_id
-      ? String(row.appointment_id)
-      : undefined,
+    appointmentId: row.appointment_id ? String(row.appointment_id) : undefined,
     patientName: String(row.patient_name),
     appointmentTime: String(row.appointment_time),
     checkedInAt: String(row.checked_in_at),
@@ -148,6 +146,10 @@ export const appointmentsRepository: AppointmentsRepository = {
         doctor_name: input.doctorName,
         scheduled_for: input.scheduledFor,
         reason: input.reason ?? null,
+        // Staff-created appointments start as 'booked' immediately.
+        // Self-service bookings go through book_appointment() RPC which
+        // locks status to 'pending' for staff approval.
+        status: 'booked',
       })
       .select()
       .single()
@@ -330,9 +332,8 @@ export const doctorsRepository: DoctorsRepository = {
       countMap.set(c.doctor_id, (countMap.get(c.doctor_id) ?? 0) + 1)
     }
 
-    return doctors.map(
-      (d: Record<string, unknown>) =>
-        mapDoctor({ ...d, today_appointments: countMap.get(String(d.id)) ?? 0 })
+    return doctors.map((d: Record<string, unknown>) =>
+      mapDoctor({ ...d, today_appointments: countMap.get(String(d.id)) ?? 0 })
     )
   },
 
@@ -544,28 +545,28 @@ export const bookingRepository: BookingRepository = {
     // Call the book_appointment() RPC — status is locked to 'pending'
     // server-side, email is lowercased, doctor name resolved from DB.
     // The RPC now returns the full appointment record, bypassing RLS issues.
-    const { data: apt, error } = await supabase.rpc(
-      'book_appointment',
-      {
-        p_name: input.patientName,
-        p_email: input.email,
-        p_phone: input.phone,
-        p_scheduled_for: input.scheduledFor,
-        p_doctor_id: input.doctorId ?? null,
-        p_reason: input.reason ?? null,
-      }
-    )
+    const { data: apt, error } = await supabase.rpc('book_appointment', {
+      p_name: input.patientName,
+      p_email: input.email,
+      p_phone: input.phone,
+      p_scheduled_for: input.scheduledFor,
+      p_doctor_id: input.doctorId ?? null,
+      p_reason: input.reason ?? null,
+    })
 
     if (error) throw error
     if (!apt) throw new Error('Booking failed to return appointment data.')
 
-    // Check if an account already exists for this email.
-    const { data: existingUser } = await supabase.auth.getUser()
-    const hasAccount = existingUser?.user?.email === input.email.toLowerCase()
-
+    // We cannot safely check whether an arbitrary email already has an auth
+    // account from the frontend (supabase.auth.getUser() only returns the
+    // *currently signed-in* user, not a lookup by email). The sign-up step
+    // that follows booking handles the "already has account" case via the
+    // error thrown by supabase.auth.signUp() for duplicate emails — the
+    // sign-up page redirects existing users to sign-in instead.
+    // Always return false here; the post-booking flow handles it.
     return {
       appointment: mapAppointment(apt),
-      hasAccount,
+      hasAccount: false,
     }
   },
 }
@@ -580,7 +581,10 @@ export const authRepository: AuthRepository = {
       email: input.email,
       password: input.password,
       options: {
-        data: input.name ? { name: input.name } : undefined,
+        data: {
+          ...(input.name ? { name: input.name } : {}),
+          ...(input.phone ? { phone: input.phone } : {}),
+        },
       },
     })
 
@@ -594,6 +598,20 @@ export const authRepository: AuthRepository = {
       .select('role')
       .eq('id', data.user.id)
       .single()
+
+    // Also create a patient directory record so the patient appears in the
+    // admin Patients page immediately — not just after their first booking.
+    if (input.name && input.phone) {
+      await supabase.from('patients').upsert(
+        {
+          name: input.name,
+          phone: input.phone,
+          email: input.email,
+          visits: 0,
+        },
+        { onConflict: 'email' }
+      )
+    }
 
     return {
       email: data.user.email ?? input.email,

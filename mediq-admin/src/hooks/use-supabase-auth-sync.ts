@@ -21,7 +21,12 @@ export function useSupabaseAuthSync() {
             accountNo: session.user.id,
             email: session.user.email ?? '',
             role: profile?.role ? [profile.role] : ['patient'],
-            exp: (session.expires_at ?? 0) * 1000,
+            // expires_at is a Unix timestamp in seconds. Multiplying by 1000
+            // gives ms for comparison with Date.now().
+            // Use Infinity when undefined (e.g. magic-link sessions without
+            // an explicit expiry) so the session isn't immediately invalidated
+            // by the `user.exp < Date.now()` guard in the route loader.
+            exp: session.expires_at != null ? session.expires_at * 1000 : Infinity,
           })
         }
       } else if (event === 'SIGNED_OUT') {

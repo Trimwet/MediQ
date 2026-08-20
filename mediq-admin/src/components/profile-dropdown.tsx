@@ -1,9 +1,9 @@
 import { Link } from '@tanstack/react-router'
-import { User } from 'lucide-react'
+import { KeyRound, User } from 'lucide-react'
+import { useAuthStore } from '@/stores/auth-store'
 import useDialogState from '@/hooks/use-dialog-state'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { useAuthStore } from '@/stores/auth-store'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,9 +35,7 @@ export function ProfileDropdown() {
         <DropdownMenuContent className='w-56' align='end' forceMount>
           <DropdownMenuLabel className='font-normal'>
             <div className='flex flex-col gap-1.5'>
-              <p className='text-sm leading-none font-medium'>
-                {user?.email}
-              </p>
+              <p className='text-sm leading-none font-medium'>{user?.email}</p>
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
@@ -52,6 +50,12 @@ export function ProfileDropdown() {
               <Link to='/admin/settings'>
                 Settings
                 <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to='/change-password'>
+                <KeyRound className='mr-2 size-4' />
+                Change password
               </Link>
             </DropdownMenuItem>
           </DropdownMenuGroup>

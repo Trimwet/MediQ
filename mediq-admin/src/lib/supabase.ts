@@ -23,21 +23,10 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
 })
 
-/**
- * Admin client — uses the service-role key to call privileged APIs such as
- * `auth.admin.createUser`. Only used for staff invites; never exposed to
- * non-admin code paths.
- */
-const serviceRoleKey = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY as
-  | string
-  | undefined
-
-export const supabaseAdmin = serviceRoleKey
-  ? createClient(supabaseUrl, serviceRoleKey, {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-        storageKey: 'mediq-admin-service-role',
-      },
-    })
-  : null
+// supabaseAdmin was removed.
+// The service role key MUST NOT be a VITE_* env var — Vite exposes every
+// VITE_* variable in the browser bundle, which would let any visitor bypass
+// all Row-Level Security.
+// Privileged calls (e.g. staff invite) go through the invite-staff Edge
+// Function which reads SUPABASE_SERVICE_ROLE_KEY from Supabase Secrets on
+// the server side. See supabase/functions/invite-staff/index.ts.

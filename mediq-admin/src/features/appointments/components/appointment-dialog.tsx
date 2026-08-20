@@ -68,6 +68,10 @@ export function AppointmentDialog({
 
     onCreated({
       patientName: patient.name,
+      // Pass the patient's email so the appointment is linked to their account.
+      // Without this, the patient can't see or cancel their own appointment
+      // (the RLS SELECT/UPDATE policies filter by patient_email).
+      patientEmail: patient.email,
       doctorId: doctor.id,
       doctorName: doctor.name,
       scheduledFor: new Date(`${values.date}T${values.time}`).toISOString(),
@@ -132,12 +136,12 @@ export function AppointmentDialog({
                     onValueChange={field.onChange}
                     placeholder='Select a doctor'
                     isPending={doctorsQuery.isPending}
-                    items={doctorsQuery.data?.map(
-                      ({ id, name, specialization }) => ({
+                    items={doctorsQuery.data
+                      ?.filter((d) => d.status === 'active')
+                      .map(({ id, name, specialization }) => ({
                         value: id,
                         label: `${name} — ${specialization}`,
-                      })
-                    )}
+                      }))}
                   />
                   <FormMessage />
                 </FormItem>
@@ -193,7 +197,11 @@ export function AppointmentDialog({
           <Button
             type='submit'
             form='appointment-form'
-            disabled={form.formState.isSubmitting || (form.formState.isDirty && !form.formState.isValid)}
+            // Disable while submitting or whenever the form is invalid.
+            // The previous condition `isDirty && !isValid` left the button
+            // enabled on an untouched form, allowing a no-op submit that
+            // only showed errors after the click rather than being prevented.
+            disabled={form.formState.isSubmitting || !form.formState.isValid}
           >
             Book appointment
           </Button>

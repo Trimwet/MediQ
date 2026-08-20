@@ -1,6 +1,15 @@
 import { useEffect } from 'react'
-import { Link, useNavigate } from '@tanstack/react-router'
 import { format, isToday } from 'date-fns'
+import { Link, useNavigate } from '@tanstack/react-router'
+import { hasRole } from '@/config/rbac'
+import {
+  useAppointments,
+  useCancelAppointment,
+  useDoctors,
+  useQueue,
+  useRealtimeAppointments,
+  useRealtimeQueue,
+} from '@/data/hooks'
 import {
   ArrowLeft,
   CalendarDays,
@@ -11,21 +20,17 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Logo } from '@/assets/logo'
-import {
-  useAppointments,
-  useCancelAppointment,
-  useDoctors,
-  useQueue,
-} from '@/data/hooks'
 import { useAuthStore } from '@/stores/auth-store'
-import { hasRole } from '@/config/rbac'
-import { type Appointment, appointmentStatusBadge } from '@/features/appointments/schema'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ThemeSwitch } from '@/components/theme-switch'
+import {
+  type Appointment,
+  appointmentStatusBadge,
+} from '@/features/appointments/schema'
 
 const CANCELLABLE_STATUSES = ['pending', 'booked'] as const
 
@@ -34,6 +39,8 @@ export function PatientPortal() {
   const user = useAuthStore((state) => state.auth.user)
   const reset = useAuthStore((state) => state.auth.reset)
 
+  useRealtimeAppointments()
+  useRealtimeQueue()
   const appointmentsQuery = useAppointments()
   const queueQuery = useQueue()
   const doctorsQuery = useDoctors()
@@ -146,7 +153,6 @@ export function PatientPortal() {
       </header>
 
       <main className='mx-auto flex max-w-2xl flex-col gap-8 px-4 py-10 sm:px-6'>
-
         {/* Queue position banner — only when they're in today's queue */}
         {todayAppointment && queuePosition >= 0 && (
           <div className='rounded-lg border bg-background p-4'>
@@ -216,15 +222,15 @@ export function PatientPortal() {
               ) : (
                 upcoming.map((appointment) => {
                   const spec = getSpecialization(appointment)
-                  const canCancel = (CANCELLABLE_STATUSES as readonly string[]).includes(
-                    appointment.status
-                  )
+                  const canCancel = (
+                    CANCELLABLE_STATUSES as readonly string[]
+                  ).includes(appointment.status)
                   return (
                     <Card key={appointment.id}>
                       <CardContent className='pt-5 pb-4'>
                         <div className='flex items-start justify-between gap-3'>
                           <div className='space-y-1'>
-                            <p className='font-medium leading-tight'>
+                            <p className='leading-tight font-medium'>
                               {appointment.doctorName}
                             </p>
                             {spec && (
@@ -236,7 +242,9 @@ export function PatientPortal() {
                           </div>
                           <Badge
                             variant='outline'
-                            className={appointmentStatusBadge[appointment.status]}
+                            className={
+                              appointmentStatusBadge[appointment.status]
+                            }
                           >
                             {appointment.status.replace('_', ' ')}
                           </Badge>
@@ -292,7 +300,7 @@ export function PatientPortal() {
                       <CardContent className='pt-5 pb-4'>
                         <div className='flex items-start justify-between gap-3'>
                           <div className='space-y-1'>
-                            <p className='font-medium leading-tight'>
+                            <p className='leading-tight font-medium'>
                               {appointment.doctorName}
                             </p>
                             {spec && (
@@ -304,7 +312,9 @@ export function PatientPortal() {
                           </div>
                           <Badge
                             variant='outline'
-                            className={appointmentStatusBadge[appointment.status]}
+                            className={
+                              appointmentStatusBadge[appointment.status]
+                            }
                           >
                             {appointment.status.replace('_', ' ')}
                           </Badge>
@@ -350,4 +360,3 @@ export function PatientPortal() {
     </div>
   )
 }
-

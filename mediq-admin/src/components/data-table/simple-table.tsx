@@ -43,6 +43,8 @@ type SimpleDataTableProps<TData> = {
   emptyMessage?: string
   emptyDescription?: string
   emptyAction?: ReactNode
+  /** Initial sort applied when the table first renders. */
+  initialSorting?: SortingState
 }
 
 /**
@@ -59,8 +61,9 @@ export function SimpleDataTable<TData>({
   emptyMessage = 'No results found.',
   emptyDescription,
   emptyAction,
+  initialSorting = [],
 }: SimpleDataTableProps<TData>) {
-  const [sorting, setSorting] = useState<SortingState>([])
+  const [sorting, setSorting] = useState<SortingState>(initialSorting)
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [globalFilter, setGlobalFilter] = useState('')
