@@ -57,15 +57,19 @@ type DataState = {
     doctorName: string
     appointmentTime: string
   }) => void
-  callNext: () => void
+  /** Call the next waiting patient. Pass doctorName to scope to a specific doctor. */
+  callNext: (doctorName?: string) => void
   startVisit: (id: string) => void
   completeVisit: (id: string) => void
   markLeft: (id: string) => void
 
   addPatient: (input: Omit<Patient, 'id'>) => Patient
   addDoctor: (input: Omit<Doctor, 'id'>) => Doctor
+  removeDoctor: (id: string) => void
   setDoctorStatus: (id: string, status: DoctorStatus) => void
   addStaff: (input: Omit<Staff, 'id'>) => Staff
+  removeStaff: (id: string) => void
+
   addRoom: (input: Omit<Room, 'id'>) => Room
   setRoomStatus: (id: string, status: RoomStatus) => void
   markNotificationRead: (id: string) => void
@@ -85,7 +89,7 @@ export const useDataStore = create<DataState>()((set) => ({
   addAppointment: (input) => {
     const appointment: Appointment = {
       ...input,
-      id: `apt-${Date.now()}`,
+      id: crypto.randomUUID(),
       status: 'booked',
     }
     set((state) => ({ appointments: [appointment, ...state.appointments] }))
@@ -98,19 +102,19 @@ export const useDataStore = create<DataState>()((set) => ({
       (p) => p.email?.toLowerCase() === input.email.toLowerCase()
     )
     const patient: Patient = existing ?? {
-      id: `pat-${Date.now()}`,
+      id: crypto.randomUUID(),
       name: input.patientName,
       phone: input.phone,
-      email: input.email,
+      email: input.email.toLowerCase(),
       lastVisit: null,
       visits: 0,
     }
     // Self-service bookings are requests: they only become real appointments
     // once staff approve them (pending -> booked).
     const appointment: Appointment = {
-      id: `apt-${Date.now()}`,
+      id: crypto.randomUUID(),
       patientName: input.patientName,
-      patientEmail: input.email,
+      patientEmail: input.email.toLowerCase(),
       doctorId: input.doctorId ?? '',
       doctorName: input.doctorName ?? 'To be assigned',
       scheduledFor: input.scheduledFor,
@@ -118,7 +122,7 @@ export const useDataStore = create<DataState>()((set) => ({
       reason: input.reason,
     }
     const notification: AppNotification = {
-      id: `n-${Date.now()}`,
+      id: crypto.randomUUID(),
       type: 'appointment',
       channel: 'email',
       title: 'New booking request',
@@ -179,7 +183,7 @@ export const useDataStore = create<DataState>()((set) => ({
         updated.doctorName = doctor.name
       }
       const notification: AppNotification = {
-        id: `n-${Date.now()}`,
+        id: crypto.randomUUID(),
         type: 'appointment',
         channel: 'email',
         title: 'Booking confirmed',
@@ -198,7 +202,7 @@ export const useDataStore = create<DataState>()((set) => ({
       const appointment = state.appointments.find((a) => a.id === id)
       if (!appointment) return state
       const notification: AppNotification = {
-        id: `n-${Date.now()}`,
+        id: crypto.randomUUID(),
         type: 'appointment',
         channel: 'email',
         title: 'Booking declined',
@@ -232,7 +236,7 @@ export const useDataStore = create<DataState>()((set) => ({
       queue: [
         ...state.queue,
         {
-          id: `q-${Date.now()}`,
+          id: crypto.randomUUID(),
           appointmentId,
           patientName,
           doctorName,
@@ -243,10 +247,15 @@ export const useDataStore = create<DataState>()((set) => ({
       ],
     })),
 
-  callNext: () =>
+  callNext: (doctorName?: string) =>
     set((state) => {
       const waiting = state.queue
-        .filter((e) => e.status === 'waiting')
+        .filter((e) => {
+          if (e.status !== 'waiting') return false
+          // When called from a doctor's view, scope to their patients only.
+          if (doctorName) return e.doctorName === doctorName
+          return true
+        })
         .sort(
           (a, b) =>
             new Date(a.checkedInAt).getTime() -
@@ -293,30 +302,37 @@ export const useDataStore = create<DataState>()((set) => ({
     })),
 
   addPatient: (input) => {
-    const patient: Patient = { ...input, id: `pat-${Date.now()}` }
+    const patient: Patient = { ...input, id: crypto.randomUUID() }
     set((state) => ({ patients: [patient, ...state.patients] }))
     return patient
   },
 
   addDoctor: (input) => {
-    const doctor: Doctor = { ...input, id: `doc-${Date.now()}` }
-    set((state) => ({ doctors: [...state.doctors, doctor] }))
-    return doctor
+    const doc: Doctor = {
+      ...input,
+      id: crypto.randomUUID(),
+      todayAppointments: 0,
+    }
+    set((state) => ({ doctors: [...state.doctors, doc] }))
+    return doc
   },
-
+  removeDoctor: (id) =>
+    set((state) => ({ doctors: state.doctors.filter((d) => d.id !== id) })),
   setDoctorStatus: (id, status) =>
     set((state) => ({
       doctors: state.doctors.map((d) => (d.id === id ? { ...d, status } : d)),
     })),
 
   addStaff: (input) => {
-    const member: Staff = { ...input, id: `stf-${Date.now()}` }
-    set((state) => ({ staff: [...state.staff, member] }))
-    return member
+    const s = { ...input, id: crypto.randomUUID() }
+    set((state) => ({ staff: [...state.staff, s] }))
+    return s
   },
+  removeStaff: (id) =>
+    set((state) => ({ staff: state.staff.filter((s) => s.id !== id) })),
 
   addRoom: (input) => {
-    const room: Room = { ...input, id: `room-${Date.now()}` }
+    const room: Room = { ...input, id: crypto.randomUUID() }
     set((state) => ({ rooms: [...state.rooms, room] }))
     return room
   },

@@ -1,6 +1,8 @@
 import { useMemo } from 'react'
 import { type ColumnDef } from '@tanstack/react-table'
+import { Trash2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { DataTableColumnHeader } from '@/components/data-table'
 import { SimpleDataTable } from '@/components/data-table/simple-table'
 import {
@@ -16,9 +18,10 @@ import {
 type StaffTableProps = {
   data: Staff[]
   loading?: boolean
+  onDelete?: (id: string) => void
 }
 
-export function StaffTable({ data, loading = false }: StaffTableProps) {
+export function StaffTable({ data, loading = false, onDelete }: StaffTableProps) {
   const columns = useMemo<ColumnDef<Staff>[]>(
     () => [
       {
@@ -73,8 +76,27 @@ export function StaffTable({ data, loading = false }: StaffTableProps) {
         },
         filterFn: (row, id, value) => value.includes(row.getValue(id)),
       },
+      {
+        id: 'actions',
+        cell: ({ row }) => {
+          if (!onDelete) return null
+          return (
+            <div className='flex justify-end'>
+              <Button
+                variant='ghost'
+                size='icon'
+                className='text-muted-foreground hover:text-destructive'
+                onClick={() => onDelete(row.original.id)}
+                title='Delete invite/staff'
+              >
+                <Trash2 className='size-4' />
+              </Button>
+            </div>
+          )
+        },
+      },
     ],
-    []
+    [onDelete]
   )
 
   return (

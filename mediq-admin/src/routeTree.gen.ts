@@ -36,7 +36,6 @@ import { Route as AuthenticatedAdminRoomsRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin/settings'
 import { Route as AuthenticatedAdminStaffRouteImport } from './routes/_authenticated/admin/staff'
 import { Route as AuthenticatedErrorsErrorRouteImport } from './routes/_authenticated/errors/$error'
-import { Route as AuthenticatedUsersIndexRouteImport } from './routes/_authenticated/users/index'
 import { Route as PublicDoctorsIndexRouteImport } from './routes/_public/doctors/index'
 import { Route as PublicDoctorsDoctorIdRouteImport } from './routes/_public/doctors/$doctorId'
 import { Route as AuthenticatedAdminSettingsIndexRouteImport } from './routes/_authenticated/admin/settings.index'
@@ -186,11 +185,6 @@ const AuthenticatedErrorsErrorRoute =
     path: '/errors/$error',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedUsersIndexRoute = AuthenticatedUsersIndexRouteImport.update({
-  id: '/users/',
-  path: '/users/',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const PublicDoctorsIndexRoute = PublicDoctorsIndexRouteImport.update({
   id: '/doctors/',
   path: '/doctors/',
@@ -265,7 +259,6 @@ export interface FileRoutesByFullPath {
   '/admin/staff': typeof AuthenticatedAdminStaffRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/doctors/$doctorId': typeof PublicDoctorsDoctorIdRoute
-  '/users/': typeof AuthenticatedUsersIndexRoute
   '/doctors/': typeof PublicDoctorsIndexRoute
   '/admin/settings/account': typeof AuthenticatedAdminSettingsAccountRoute
   '/admin/settings/appearance': typeof AuthenticatedAdminSettingsAppearanceRoute
@@ -300,7 +293,6 @@ export interface FileRoutesByTo {
   '/admin/staff': typeof AuthenticatedAdminStaffRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/doctors/$doctorId': typeof PublicDoctorsDoctorIdRoute
-  '/users': typeof AuthenticatedUsersIndexRoute
   '/doctors': typeof PublicDoctorsIndexRoute
   '/admin/settings/account': typeof AuthenticatedAdminSettingsAccountRoute
   '/admin/settings/appearance': typeof AuthenticatedAdminSettingsAppearanceRoute
@@ -339,7 +331,6 @@ export interface FileRoutesById {
   '/_authenticated/admin/staff': typeof AuthenticatedAdminStaffRoute
   '/_authenticated/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/_public/doctors/$doctorId': typeof PublicDoctorsDoctorIdRoute
-  '/_authenticated/users/': typeof AuthenticatedUsersIndexRoute
   '/_public/doctors/': typeof PublicDoctorsIndexRoute
   '/_authenticated/admin/settings/account': typeof AuthenticatedAdminSettingsAccountRoute
   '/_authenticated/admin/settings/appearance': typeof AuthenticatedAdminSettingsAppearanceRoute
@@ -377,7 +368,6 @@ export interface FileRouteTypes {
     | '/admin/staff'
     | '/errors/$error'
     | '/doctors/$doctorId'
-    | '/users/'
     | '/doctors/'
     | '/admin/settings/account'
     | '/admin/settings/appearance'
@@ -412,7 +402,6 @@ export interface FileRouteTypes {
     | '/admin/staff'
     | '/errors/$error'
     | '/doctors/$doctorId'
-    | '/users'
     | '/doctors'
     | '/admin/settings/account'
     | '/admin/settings/appearance'
@@ -450,7 +439,6 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/staff'
     | '/_authenticated/errors/$error'
     | '/_public/doctors/$doctorId'
-    | '/_authenticated/users/'
     | '/_public/doctors/'
     | '/_authenticated/admin/settings/account'
     | '/_authenticated/admin/settings/appearance'
@@ -667,13 +655,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedErrorsErrorRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/users/': {
-      id: '/_authenticated/users/'
-      path: '/users'
-      fullPath: '/users/'
-      preLoaderRoute: typeof AuthenticatedUsersIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_public/doctors/': {
       id: '/_public/doctors/'
       path: '/doctors'
@@ -773,7 +754,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRouteWithChildren
   AuthenticatedAdminStaffRoute: typeof AuthenticatedAdminStaffRoute
   AuthenticatedErrorsErrorRoute: typeof AuthenticatedErrorsErrorRoute
-  AuthenticatedUsersIndexRoute: typeof AuthenticatedUsersIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -787,7 +767,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRouteWithChildren,
   AuthenticatedAdminStaffRoute: AuthenticatedAdminStaffRoute,
   AuthenticatedErrorsErrorRoute: AuthenticatedErrorsErrorRoute,
-  AuthenticatedUsersIndexRoute: AuthenticatedUsersIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

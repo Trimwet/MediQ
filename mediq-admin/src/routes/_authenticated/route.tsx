@@ -7,8 +7,11 @@ export const Route = createFileRoute('/_authenticated')({
   beforeLoad: ({ location }) => {
     const user = useAuthStore.getState().auth.user
 
-    // Not signed in: send to sign-in and remember where they were going
-    if (!user) {
+    // Not signed in or session expired: send to sign-in and remember where they were going
+    if (!user || user.exp < Date.now()) {
+      if (user) {
+        useAuthStore.getState().auth.reset()
+      }
       throw redirect({
         to: '/sign-in',
         search: { redirect: location.href },

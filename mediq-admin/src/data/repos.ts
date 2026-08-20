@@ -27,17 +27,15 @@ export interface AppointmentsRepository {
   create: (input: Omit<Appointment, 'id' | 'status'>) => Promise<Appointment>
   updateStatus: (id: string, status: AppointmentStatus) => Promise<void>
   /** Approve a pending request; optionally assign a doctor at the same time. */
-  approve: (
-    id: string,
-    doctor?: { id: string; name: string }
-  ) => Promise<void>
+  approve: (id: string, doctor?: { id: string; name: string }) => Promise<void>
   /** Reject a pending request, with an optional reason for the patient. */
   reject: (id: string, reason?: string) => Promise<void>
 }
 
 export interface QueueRepository {
   list: () => Promise<QueueEntry[]>
-  callNext: () => Promise<void>
+  /** Call the next waiting patient. Pass doctorName to scope to a doctor's queue. */
+  callNext: (doctorName?: string) => Promise<void>
   startVisit: (id: string) => Promise<void>
   complete: (id: string) => Promise<void>
   markLeft: (id: string) => Promise<void>
@@ -52,11 +50,13 @@ export interface DoctorsRepository {
   list: () => Promise<Doctor[]>
   create: (input: Omit<Doctor, 'id'>) => Promise<Doctor>
   updateStatus: (id: string, status: DoctorStatus) => Promise<void>
+  delete: (id: string) => Promise<void>
 }
 
 export interface StaffRepository {
   list: () => Promise<Staff[]>
   create: (input: Omit<Staff, 'id'>) => Promise<Staff>
+  delete: (id: string) => Promise<void>
 }
 
 export interface RoomsRepository {
@@ -73,15 +73,31 @@ export interface NotificationsRepository {
 
 /**
  * Self-service booking: a visitor books without signing up. The repository
- * creates the appointment (and patient record) and, for a first-time email,
- * provisions an account with a one-time temporary password.
+ * creates the appointment as a pending request (and patient record) for
+ * staff to approve; it does not create an account — the visitor sets their
+ * own password right after, using the email they already provided.
  *
- * In production this maps to a Supabase edge function: create the user via
- * `auth.admin.createUser`, send credentials through Resend, and insert the
- * appointment atomically. See docs/architecture.md.
+ * In production this maps to a Supabase edge function that inserts the
+ * patient + appointment atomically. See docs/architecture.md.
  */
 export interface BookingRepository {
   book: (input: BookingInput) => Promise<BookingResult>
+}
+
+/**
+ * Sign-up: the visitor creates an account with the email they provided at
+ * booking (or on the sign-up page). Any further onboarding information is
+ * collected here as well.
+ */
+export interface AuthRepository {
+  signUp: (input: SignUpInput) => Promise<{ email: string; role: string[] }>
+}
+
+export interface SignUpInput {
+  /** Optional — booking already collected the full name; sign-up defaults it. */
+  name?: string
+  email: string
+  password: string
 }
 
 export interface BookingInput {
@@ -97,9 +113,8 @@ export interface BookingInput {
 
 export interface BookingResult {
   appointment: Appointment
-  isNewAccount: boolean
-  /** Present only in mock mode — a real backend emails this via Resend. */
-  tempPassword?: string
+  /** Whether an account already exists for the booking email. */
+  hasAccount: boolean
 }
 
 export const appointmentsRepository: AppointmentsRepository = {
@@ -130,9 +145,9 @@ export const queueRepository: QueueRepository = {
     await delay()
     return useDataStore.getState().queue
   },
-  async callNext() {
+  async callNext(doctorName?: string) {
     await delay(150)
-    useDataStore.getState().callNext()
+    useDataStore.getState().callNext(doctorName)
   },
   async startVisit(id) {
     await delay(150)
@@ -172,6 +187,10 @@ export const doctorsRepository: DoctorsRepository = {
     await delay(150)
     useDataStore.getState().setDoctorStatus(id, status)
   },
+  async delete(id) {
+    await delay(150)
+    useDataStore.getState().removeDoctor(id)
+  },
 }
 
 export const staffRepository: StaffRepository = {
@@ -182,6 +201,10 @@ export const staffRepository: StaffRepository = {
   async create(input) {
     await delay(150)
     return useDataStore.getState().addStaff(input)
+  },
+  async delete(id) {
+    await delay(150)
+    useDataStore.getState().removeStaff(id)
   },
 }
 
@@ -204,18 +227,28 @@ export const bookingRepository: BookingRepository = {
   async book(input) {
     await delay(300)
     const { appointment } = useDataStore.getState().bookAppointment(input)
-
-    // First-time email: provision an account with a temporary password.
-    // Production: the edge function calls Supabase admin API + Resend here.
-    const existing = getAccount(input.email)
-    if (existing) {
-      return { appointment, isNewAccount: false }
+    // Booking never provisions an account — the visitor creates their own
+    // password afterwards. We just report whether they already have one.
+    return {
+      appointment,
+      hasAccount: Boolean(getAccount(input.email)),
     }
-    const { password } = createAccount({
-      name: input.patientName,
+  },
+}
+
+export const authRepository: AuthRepository = {
+  async signUp(input) {
+    await delay(250)
+    // Production: `auth.signUp({ email, password })` + insert a profiles row.
+    if (getAccount(input.email)) {
+      throw new Error('An account already exists for this email.')
+    }
+    const { account } = createAccount({
+      name: input.name,
       email: input.email,
+      password: input.password,
     })
-    return { appointment, isNewAccount: true, tempPassword: password }
+    return { email: account.email, role: account.role }
   },
 }
 

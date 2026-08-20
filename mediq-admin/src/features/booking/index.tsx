@@ -1,13 +1,20 @@
-import { useState } from 'react'
-import { Link } from '@tanstack/react-router'
+import { useMemo, useState } from 'react'
 import { z } from 'zod'
+import { format, startOfDay, isSameDay } from 'date-fns'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { format, startOfDay } from 'date-fns'
-import { ArrowLeft, CalendarCheck2, CheckCircle2, Loader2 } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
+import { type BookingResult } from '@/data'
+import { useBookAppointment, useDoctors, useSignUp } from '@/data/hooks'
+import {
+  ArrowLeft,
+  CalendarCheck2,
+  CheckCircle2,
+  KeyRound,
+  Loader2,
+} from 'lucide-react'
+import { toast } from 'sonner'
 import { Logo } from '@/assets/logo'
-import { useBookAppointment, useDoctors } from '@/data/hooks'
-import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import {
@@ -20,9 +27,10 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { DatePicker } from '@/components/date-picker'
+import { PasswordInput } from '@/components/password-input'
+import { SearchableSelect } from '@/components/searchable-select'
 import { SelectDropdown } from '@/components/select-dropdown'
 import { ThemeSwitch } from '@/components/theme-switch'
-import { type BookingResult } from '@/data'
 
 const TIME_SLOTS = [
   { label: '9:00 AM', hour: 9 },
@@ -36,10 +44,7 @@ const TIME_SLOTS = [
 ]
 
 const formSchema = z.object({
-  patientName: z
-    .string()
-    .min(2, 'Please enter your full name.')
-    .max(60),
+  patientName: z.string().min(2, 'Please enter your full name.').max(60),
   email: z.email({
     error: (iss) => (iss.input === '' ? 'Please enter your email.' : undefined),
   }),
@@ -74,6 +79,46 @@ export function Booking() {
     (d) => d.status === 'active'
   )
 
+  // Clinics can have many doctors, so the picker groups them by specialty
+  // (with a count per group) while still allowing a name/specialty search.
+  const doctorGroups = useMemo(() => {
+    const bySpecialty = new Map<string, { label: string; value: string }[]>()
+    for (const doctor of activeDoctors) {
+      const key = doctor.specialization
+      const list = bySpecialty.get(key) ?? []
+      list.push({
+        label: `${doctor.name} — ${key}`,
+        value: doctor.id,
+      })
+      bySpecialty.set(key, list)
+    }
+    const specialtyGroups = [...bySpecialty.entries()]
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([specialty, doctorItems]) => ({
+        heading: specialty,
+        count: doctorItems.length,
+        items: doctorItems,
+      }))
+    return [
+      {
+        items: [
+          {
+            label: 'No preference — match me with a doctor',
+            value: 'no_preference',
+          },
+        ],
+      },
+      ...specialtyGroups,
+    ]
+  }, [activeDoctors])
+
+  const selectedDate = form.watch('date')
+  const availableTimeSlots = useMemo(() => {
+    const isToday = selectedDate && isSameDay(selectedDate, new Date())
+    const currentHour = new Date().getHours()
+    return TIME_SLOTS.filter((slot) => !isToday || slot.hour > currentHour)
+  }, [selectedDate])
+
   function onSubmit(values: FormValues) {
     const slot = TIME_SLOTS.find((s) => s.label === values.time)
     if (!slot) return
@@ -84,6 +129,8 @@ export function Booking() {
         ? activeDoctors.find((d) => d.id === values.doctorId)
         : undefined
 
+    // TODO: This constructs the time in the user's local timezone. If the clinic
+    // operates in a specific timezone, we should explicitly construct it in that tz.
     const scheduledFor = new Date(values.date)
     scheduledFor.setHours(slot.hour, 0, 0, 0)
 
@@ -108,10 +155,7 @@ export function Booking() {
 
   if (result) {
     return (
-      <BookingSuccess
-        result={result}
-        onBookAnother={() => setResult(null)}
-      />
+      <BookingSuccess result={result} onBookAnother={() => setResult(null)} />
     )
   }
 
@@ -142,8 +186,8 @@ export function Booking() {
             Book an appointment
           </h1>
           <p className='text-sm text-muted-foreground'>
-            No account needed — book in under a minute and we&apos;ll email
-            your sign-in details.
+            No account needed — book in under a minute. Your request goes to the
+            clinic for approval, and you can set a password to track it.
           </p>
         </div>
 
@@ -213,23 +257,20 @@ export function Booking() {
                           (optional)
                         </span>
                       </FormLabel>
-                      <SelectDropdown
-                        isControlled
-                        defaultValue={field.value}
+                      <SearchableSelect
+                        value={field.value}
                         onValueChange={field.onChange}
                         isPending={doctorsQuery.isPending}
-                        placeholder='Choose a doctor'
-                        items={[
-                          {
-                            label: 'No preference — clinic will assign',
-                            value: 'no_preference',
-                          },
-                          ...activeDoctors.map((d) => ({
-                            label: `${d.name} — ${d.specialization}`,
-                            value: d.id,
-                          })),
-                        ]}
+                        placeholder='Search and choose a doctor'
+                        searchPlaceholder='Search by name or specialty'
+                        emptyText='No doctor matches your search.'
+                        groups={doctorGroups}
                       />
+                      <p className='text-xs text-muted-foreground'>
+                        Pick the doctor you&apos;d like to see, or leave it on
+                        &ldquo;No preference&rdquo; and we&apos;ll assign the
+                        doctor best suited to your visit.
+                      </p>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -246,10 +287,7 @@ export function Booking() {
                           onSelect={field.onChange}
                           placeholder='Pick a date'
                           className='w-full'
-                          disabled={(date) =>
-                            date < startOfDay(new Date()) ||
-                            date < new Date('1900-01-01')
-                          }
+                          disabled={(date) => date < startOfDay(new Date())}
                         />
                       </FormControl>
                       <FormMessage />
@@ -267,7 +305,7 @@ export function Booking() {
                         defaultValue={field.value}
                         onValueChange={field.onChange}
                         placeholder='Choose a time'
-                        items={TIME_SLOTS.map((slot) => ({
+                        items={availableTimeSlots.map((slot) => ({
                           label: slot.label,
                           value: slot.label,
                         }))}
@@ -318,6 +356,21 @@ export function Booking() {
   )
 }
 
+const passwordSchema = z
+  .object({
+    password: z
+      .string()
+      .min(1, 'Please enter your password.')
+      .min(7, 'Password must be at least 7 characters long.'),
+    confirmPassword: z.string().min(1, 'Please confirm your password.'),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match.",
+    path: ['confirmPassword'],
+  })
+
+type PasswordValues = z.infer<typeof passwordSchema>
+
 function BookingSuccess({
   result,
   onBookAnother,
@@ -325,8 +378,38 @@ function BookingSuccess({
   result: BookingResult
   onBookAnother: () => void
 }) {
-  const { appointment, isNewAccount, tempPassword } = result
-  const when = format(new Date(appointment.scheduledFor), 'EEEE, MMM d • h:mm a')
+  const { appointment, hasAccount } = result
+  const [accountCreated, setAccountCreated] = useState(false)
+  const signUp = useSignUp()
+  const when = format(
+    new Date(appointment.scheduledFor),
+    'EEEE, MMM d • h:mm a'
+  )
+  const email = appointment.patientEmail ?? ''
+
+  const passwordForm = useForm<PasswordValues>({
+    resolver: zodResolver(passwordSchema),
+    defaultValues: {
+      password: '',
+      confirmPassword: '',
+    },
+  })
+
+  function onCreatePassword(values: PasswordValues) {
+    signUp.mutate(
+      { email, password: values.password },
+      {
+        onSuccess: () => setAccountCreated(true),
+        onError: (error) => {
+          toast.error(
+            error instanceof Error
+              ? error.message
+              : 'Something went wrong creating your account.'
+          )
+        },
+      }
+    )
+  }
 
   return (
     <div className='flex min-h-svh flex-col items-center justify-center gap-6 bg-muted/40 px-4 py-10'>
@@ -347,7 +430,7 @@ function BookingSuccess({
           <CheckCircle2 className='mx-auto size-10 text-emerald-500' />
           <div className='space-y-1'>
             <h1 className='text-xl font-bold tracking-tight'>
-              Booking confirmed
+              Booking request sent
             </h1>
             <p className='text-sm text-muted-foreground'>
               Reference{' '}
@@ -373,47 +456,115 @@ function BookingSuccess({
           </dl>
 
           <p className='rounded-lg bg-muted/60 p-3 text-start text-xs text-muted-foreground'>
-            Your booking is a request — the clinic reviews it and confirms
-            before it appears on the schedule.
+            The clinic reviews your request and confirms before it appears on
+            the schedule. You&apos;ll be able to track it once you sign in.
           </p>
 
-          {isNewAccount && tempPassword && (
-            <div className='rounded-lg border border-amber-200 bg-amber-50 p-4 text-start text-sm dark:border-amber-800 dark:bg-amber-950/40'>
-              <p className='font-medium text-amber-900 dark:text-amber-100'>
-                We&apos;ve emailed you a temporary password
+          {hasAccount || accountCreated ? (
+            <div className='flex flex-col gap-2'>
+              {accountCreated && (
+                <p className='rounded-lg bg-emerald-50 p-3 text-start text-sm text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300'>
+                  Account created — you can now sign in and track your
+                  appointment.
+                </p>
+              )}
+              <Button asChild>
+                <Link
+                  to='/sign-in'
+                  search={{ redirect: '/patient' }}
+                  className='w-full'
+                >
+                  Sign in to view your appointments
+                </Link>
+              </Button>
+              <Button variant='ghost' onClick={onBookAnother}>
+                Book another appointment
+              </Button>
+            </div>
+          ) : (
+            <div className='rounded-lg border bg-muted/40 p-4 text-start'>
+              <div className='flex items-center gap-2'>
+                <KeyRound className='size-4 text-primary' />
+                <p className='text-sm font-medium'>Create your password</p>
+              </div>
+              <p className='mt-1 text-xs text-muted-foreground'>
+                We use the email you provided. Set a password now to sign in and
+                track your booking — the rest of your details can be completed
+                at sign-up.
               </p>
-              <p className='mt-1 text-amber-800/80 dark:text-amber-200/70'>
-                Use it to sign in and view your appointments. You&apos;ll be
-                asked to set your own password on first login.
-              </p>
-              <p
-                className={cn(
-                  'mt-3 rounded-md border border-dashed border-amber-300 p-2 text-center font-mono text-foreground dark:border-amber-700',
-                  'dark:text-amber-50'
-                )}
+              <Form {...passwordForm}>
+                <form
+                  onSubmit={passwordForm.handleSubmit(onCreatePassword)}
+                  className='mt-3 grid gap-3'
+                  noValidate
+                >
+                  <div>
+                    <FormLabel>Email</FormLabel>
+                    <Input
+                      type='email'
+                      value={email}
+                      disabled
+                      className='mt-1'
+                      aria-label='Email'
+                    />
+                  </div>
+                  <FormField
+                    control={passwordForm.control}
+                    name='password'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Password</FormLabel>
+                        <FormControl>
+                          <PasswordInput
+                            placeholder='••••••••'
+                            autoComplete='new-password'
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={passwordForm.control}
+                    name='confirmPassword'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Confirm password</FormLabel>
+                        <FormControl>
+                          <PasswordInput
+                            placeholder='••••••••'
+                            autoComplete='new-password'
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button
+                    type='submit'
+                    className='mt-1'
+                    disabled={signUp.isPending}
+                  >
+                    {signUp.isPending ? (
+                      <Loader2 className='animate-spin' />
+                    ) : (
+                      <KeyRound />
+                    )}
+                    Create account &amp; password
+                  </Button>
+                </form>
+              </Form>
+              <Button
+                variant='ghost'
+                onClick={onBookAnother}
+                className='mt-2 w-full'
               >
-                {tempPassword}
-              </p>
-              <p className='mt-2 text-xs text-amber-800/70 dark:text-amber-200/60'>
-                Demo mode: this would be sent by email (Resend) in production.
-              </p>
+                Book another appointment
+              </Button>
             </div>
           )}
-
-          <div className='flex flex-col gap-2'>
-            <Button asChild>
-              <Link
-                to='/sign-in'
-                search={{ redirect: '/patient' }}
-                className='w-full'
-              >
-                Sign in to view your appointments
-              </Link>
-            </Button>
-            <Button variant='ghost' onClick={onBookAnother}>
-              Book another appointment
-            </Button>
-          </div>
         </CardContent>
       </Card>
     </div>

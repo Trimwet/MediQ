@@ -23,15 +23,17 @@ import {
 type DoctorsTableProps = {
   data: Doctor[]
   loading?: boolean
-  canManage: boolean
+  canManage?: boolean
   onStatusChange: (id: string, status: DoctorStatus) => void
+  onDelete?: (id: string) => void
 }
 
 export function DoctorsTable({
   data,
   loading = false,
-  canManage,
+  canManage = false,
   onStatusChange,
+  onDelete,
 }: DoctorsTableProps) {
   const columns = useMemo<ColumnDef<Doctor>[]>(
     () => [
@@ -95,13 +97,14 @@ export function DoctorsTable({
                 <DoctorRowActions
                   doctor={row.original}
                   onStatusChange={onStatusChange}
+                  onDelete={onDelete}
                 />
               ),
             } satisfies ColumnDef<Doctor>,
           ]
         : []),
     ],
-    [canManage, onStatusChange]
+    [canManage, onStatusChange, onDelete]
   )
 
   return (
@@ -129,11 +132,13 @@ export function DoctorsTable({
 type DoctorRowActionsProps = {
   doctor: Doctor
   onStatusChange: (id: string, status: DoctorStatus) => void
+  onDelete?: (id: string) => void
 }
 
 function DoctorRowActions({
   doctor,
   onStatusChange,
+  onDelete,
 }: DoctorRowActionsProps) {
   const toggle: DoctorStatus = doctor.status === 'active' ? 'away' : 'active'
 
@@ -152,13 +157,18 @@ function DoctorRowActions({
         <DropdownMenuItem onClick={() => onStatusChange(doctor.id, toggle)}>
           {toggle === 'active' ? 'Mark active' : 'Mark away'}
         </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={() => onStatusChange(doctor.id, 'away')}
-          disabled={doctor.status === 'away'}
-        >
-          Mark away
-        </DropdownMenuItem>
+        
+        {onDelete && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className='text-destructive focus:text-destructive'
+              onClick={() => onDelete(doctor.id)}
+            >
+              Delete doctor
+            </DropdownMenuItem>
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   )

@@ -16,8 +16,9 @@ import {
   Activity,
 } from 'lucide-react'
 import {
-  Bar,
-  BarChart,
+  CartesianGrid,
+  Line,
+  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -43,9 +44,9 @@ import { NotificationBell } from '@/components/notification-bell'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
+import { confirmedStatuses } from '@/features/appointments/schema'
 import { minutesBetween } from '@/features/queue/data'
 import { queueStatusBadge, type QueueEntry } from '@/features/queue/schema'
-import { confirmedStatuses } from '@/features/appointments/schema'
 import {
   DashboardDateRange,
   type DashboardRange,
@@ -236,8 +237,7 @@ export function Dashboard() {
       })
       .sort(
         (a, b) =>
-          new Date(b.checkedInAt).getTime() -
-          new Date(a.checkedInAt).getTime()
+          new Date(b.checkedInAt).getTime() - new Date(a.checkedInAt).getTime()
       )
       .slice(0, 5)
   }, [queue, bounds])
@@ -316,10 +316,17 @@ export function Dashboard() {
                 <CardContent>
                   <div className='h-64 w-full'>
                     <ResponsiveContainer width='100%' height='100%'>
-                      <BarChart
+                      <LineChart
                         data={chartData}
                         margin={{ top: 4, right: 4, bottom: 0, left: -20 }}
                       >
+                        <CartesianGrid
+                          horizontal
+                          vertical={false}
+                          stroke='var(--border)'
+                          strokeDasharray='4 4'
+                          strokeOpacity={0.6}
+                        />
                         <XAxis
                           dataKey='label'
                           tickLine={false}
@@ -340,7 +347,11 @@ export function Dashboard() {
                           width={28}
                         />
                         <Tooltip
-                          cursor={{ fill: 'var(--muted)', opacity: 0.4 }}
+                          cursor={{
+                            stroke: 'var(--muted-foreground)',
+                            strokeDasharray: '4 4',
+                            strokeOpacity: 0.4,
+                          }}
                           contentStyle={{
                             borderRadius: 8,
                             border: '1px solid var(--border)',
@@ -352,13 +363,19 @@ export function Dashboard() {
                             fontWeight: 600,
                           }}
                         />
-                        <Bar
+                        <Line
+                          type='monotone'
                           dataKey='appointments'
-                          className='fill-primary'
-                          radius={[4, 4, 0, 0]}
-                          maxBarSize={48}
+                          stroke='var(--primary)'
+                          strokeWidth={2.5}
+                          dot={false}
+                          activeDot={{
+                            r: 4,
+                            stroke: 'var(--background)',
+                            strokeWidth: 2,
+                          }}
                         />
-                      </BarChart>
+                      </LineChart>
                     </ResponsiveContainer>
                   </div>
                 </CardContent>

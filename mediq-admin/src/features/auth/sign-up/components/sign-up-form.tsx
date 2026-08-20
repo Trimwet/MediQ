@@ -2,9 +2,11 @@ import { useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useNavigate } from '@tanstack/react-router'
+import { authRepository } from '@/data'
 import { Loader2, UserPlus } from 'lucide-react'
 import { toast } from 'sonner'
-import { sleep, cn } from '@/lib/utils'
+import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -39,6 +41,7 @@ export function SignUpForm({
   ...props
 }: React.HTMLAttributes<HTMLFormElement>) {
   const [isLoading, setIsLoading] = useState(false)
+  const navigate = useNavigate()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -52,13 +55,24 @@ export function SignUpForm({
   function onSubmit(data: z.infer<typeof formSchema>) {
     setIsLoading(true)
 
-    toast.promise(sleep(2000), {
+    const promise = authRepository.signUp({
+      email: data.email,
+      password: data.password,
+    })
+
+    toast.promise(promise, {
       loading: 'Creating account...',
       success: () => {
         setIsLoading(false)
-        return `Account created for ${data.email}.`
+        navigate({ to: '/sign-in' })
+        return `Account created for ${data.email}. Sign in to continue.`
       },
-      error: 'Error',
+      error: (error) => {
+        setIsLoading(false)
+        return error instanceof Error
+          ? error.message
+          : 'Error creating account.'
+      },
     })
   }
 

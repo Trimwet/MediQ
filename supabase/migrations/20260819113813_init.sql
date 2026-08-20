@@ -464,9 +464,9 @@ CREATE POLICY doctors_delete_admin
 -- staff policies
 -- --------------------------
 
-CREATE POLICY staff_select_admin
+CREATE POLICY staff_select_staff
   ON staff FOR SELECT
-  USING (is_admin());
+  USING (is_admin() OR has_role('front_desk') OR has_role('doctor'));
 
 CREATE POLICY staff_insert_admin
   ON staff FOR INSERT

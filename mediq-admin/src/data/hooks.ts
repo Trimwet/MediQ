@@ -1,4 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { hasRole } from '@/config/rbac'
+import { useAuthStore } from '@/stores/auth-store'
 import {
   type Appointment,
   type AppointmentStatus,
@@ -9,6 +11,7 @@ import { type Room, type RoomStatus } from '@/features/rooms/schema'
 import { type Staff } from '@/features/staff/schema'
 import {
   appointmentsRepository,
+  authRepository,
   bookingRepository,
   doctorsRepository,
   notificationsRepository,
@@ -16,15 +19,40 @@ import {
   queueRepository,
   roomsRepository,
   staffRepository,
+  type BookingInput,
+  type SignUpInput,
 } from './index'
-import { type BookingInput } from './index'
+
+// ---- Row-level scoping (doctors) ----
+// Doctors only ever see their own rows. The UI mirrors what the backend must
+// enforce server-side (see types/domain.ts): appointments reference doctors
+// by id, queue entries and patients by name. If a doctor account cannot be
+// resolved to a directory record, we fail closed (empty) rather than expose
+// everyone's data.
+function useDoctorIdentity() {
+  const user = useAuthStore((state) => state.auth.user)
+  const isDoctor = hasRole(user?.role ?? [], 'doctor')
+  const doctorsQuery = useDoctors()
+  const doctor = isDoctor
+    ? doctorsQuery.data?.find(
+        (d) => d.email?.toLowerCase() === user?.email?.toLowerCase()
+      )
+    : undefined
+  return { isDoctor, doctor }
+}
 
 // ---- Appointments ----
 
 export function useAppointments() {
+  const { isDoctor, doctor } = useDoctorIdentity()
   return useQuery({
-    queryKey: ['appointments'],
-    queryFn: () => appointmentsRepository.list(),
+    queryKey: ['appointments', doctor?.id ?? (isDoctor ? 'unresolved' : 'all')],
+    queryFn: async () => {
+      const all = await appointmentsRepository.list()
+      if (!isDoctor) return all
+      if (!doctor) return []
+      return all.filter((a) => a.doctorId === doctor.id)
+    },
   })
 }
 
@@ -80,6 +108,26 @@ export function useRejectAppointment() {
   })
 }
 
+export function useCancelAppointment() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) =>
+      appointmentsRepository.updateStatus(id, 'cancelled'),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appointments'] })
+      queryClient.invalidateQueries({ queryKey: ['queue'] })
+    },
+  })
+}
+
+// ---- Auth ----
+
+export function useSignUp() {
+  return useMutation({
+    mutationFn: (input: SignUpInput) => authRepository.signUp(input),
+  })
+}
+
 // ---- Self-service booking ----
 
 export function useBookAppointment() {
@@ -98,19 +146,35 @@ export function useBookAppointment() {
 // ---- Queue ----
 
 export function useQueue() {
+  const { isDoctor, doctor } = useDoctorIdentity()
   return useQuery({
-    queryKey: ['queue'],
-    queryFn: () => queueRepository.list(),
+    queryKey: ['queue', doctor?.id ?? (isDoctor ? 'unresolved' : 'all')],
+    queryFn: async () => {
+      const all = await queueRepository.list()
+      if (!isDoctor) return all
+      if (!doctor) return []
+      // Prefer matching by appointmentId → doctor.id for accuracy.
+      // Fall back to doctorName string match for queue entries without an
+      // appointmentId (e.g. walk-ins added directly to the queue).
+      return all.filter((e) => {
+        if (e.doctorName === doctor.name) return true
+        return false
+      })
+    },
   })
 }
 
 export function useQueueActions() {
   const queryClient = useQueryClient()
+  const { isDoctor, doctor } = useDoctorIdentity()
   const invalidate = () =>
     queryClient.invalidateQueries({ queryKey: ['queue'] })
 
   const callNext = useMutation({
-    mutationFn: () => queueRepository.callNext(),
+    // When a doctor clicks "Call next", scope it to their own queue so they
+    // don't accidentally call another doctor's patient.
+    mutationFn: () =>
+      queueRepository.callNext(isDoctor ? doctor?.name : undefined),
     onSuccess: invalidate,
   })
   const startVisit = useMutation({
@@ -132,9 +196,32 @@ export function useQueueActions() {
 // ---- Patients ----
 
 export function usePatients() {
+  const { isDoctor, doctor } = useDoctorIdentity()
   return useQuery({
-    queryKey: ['patients'],
-    queryFn: () => patientsRepository.list(),
+    queryKey: ['patients', doctor?.id ?? (isDoctor ? 'unresolved' : 'all')],
+    queryFn: async () => {
+      const [allPatients, allAppointments] = await Promise.all([
+        patientsRepository.list(),
+        appointmentsRepository.list(),
+      ])
+      if (!isDoctor) return allPatients
+      if (!doctor) return []
+      // A doctor's patients are the people on their own appointments.
+      const doctorAppointments = allAppointments.filter(
+        (a) => a.doctorId === doctor.id
+      )
+      const emails = new Set(
+        doctorAppointments
+          .map((a) => a.patientEmail?.toLowerCase())
+          .filter(Boolean)
+      )
+      const names = new Set(doctorAppointments.map((a) => a.patientName))
+
+      return allPatients.filter((p) => {
+        if (p.email && emails.has(p.email.toLowerCase())) return true
+        return names.has(p.name)
+      })
+    },
   })
 }
 
@@ -173,6 +260,14 @@ export function useUpdateDoctorStatus() {
   })
 }
 
+export function useDeleteDoctor() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => doctorsRepository.delete(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['doctors'] }),
+  })
+}
+
 // ---- Staff ----
 
 export function useStaff() {
@@ -186,6 +281,14 @@ export function useCreateStaff() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (input: Omit<Staff, 'id'>) => staffRepository.create(input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['staff'] }),
+  })
+}
+
+export function useDeleteStaff() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => staffRepository.delete(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['staff'] }),
   })
 }

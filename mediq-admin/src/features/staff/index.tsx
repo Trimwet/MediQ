@@ -1,13 +1,13 @@
 import { useState } from 'react'
-import { useCreateStaff, useStaff } from '@/data/hooks'
-import { UserCog } from 'lucide-react'
+import { useCreateStaff, useDeleteStaff, useStaff } from '@/data/hooks'
+import { UserPlus } from 'lucide-react'
 import { toast } from 'sonner'
 import { useRbac } from '@/hooks/use-rbac'
 import { Button } from '@/components/ui/button'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
-import { Main } from '@/components/layout/main'
 import { HeaderNav } from '@/components/layout/header-nav'
+import { Main } from '@/components/layout/main'
 import { NotificationBell } from '@/components/notification-bell'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
@@ -22,12 +22,23 @@ export function Staff() {
 
   const staffQuery = useStaff()
   const createStaff = useCreateStaff()
+  const deleteStaff = useDeleteStaff()
   const [dialogOpen, setDialogOpen] = useState(false)
 
   function handleCreated(member: Omit<Staff, 'id'>) {
     createStaff.mutate(member, {
-      onSuccess: (created) => toast.success(`${created.name} added to staff`),
+      onSuccess: (created) =>
+        toast.success(`${created.name} invited — share the invite link`),
     })
+  }
+
+  function handleDelete(id: string) {
+    if (confirm('Are you sure you want to remove this staff member?')) {
+      deleteStaff.mutate(id, {
+        onSuccess: () => toast.success('Staff member removed.'),
+        onError: (err) => toast.error(`Failed to remove: ${err.message}`),
+      })
+    }
   }
 
   return (
@@ -51,8 +62,8 @@ export function Staff() {
           </div>
           {canManage && (
             <Button onClick={() => setDialogOpen(true)}>
-              <UserCog />
-              Add staff
+              <UserPlus />
+              Invite staff
             </Button>
           )}
         </div>
@@ -60,6 +71,7 @@ export function Staff() {
         <StaffTable
           data={staffQuery.data ?? []}
           loading={staffQuery.isPending}
+          onDelete={canManage ? handleDelete : undefined}
         />
       </Main>
 

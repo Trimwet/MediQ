@@ -1,13 +1,13 @@
 import { useEffect } from 'react'
-import { Link, useNavigate } from '@tanstack/react-router'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { Link, useNavigate } from '@tanstack/react-router'
+import { supabase } from '@/lib/supabase'
 import { ArrowLeft, KeyRound, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Logo } from '@/assets/logo'
 import { useAuthStore } from '@/stores/auth-store'
-import { changePassword, getAccount } from '@/data/mock/accounts'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import {
@@ -23,7 +23,6 @@ import { ThemeSwitch } from '@/components/theme-switch'
 
 const formSchema = z
   .object({
-    currentPassword: z.string().min(1, 'Please enter your current password.'),
     newPassword: z
       .string()
       .min(7, 'Password must be at least 7 characters long.'),
@@ -49,32 +48,28 @@ export function ChangePassword() {
     },
   })
 
-  // Route guards: must be signed in and on a first-login password change.
+  // Route guard: must be signed in.
   useEffect(() => {
     if (!user) {
       navigate({ to: '/sign-in', replace: true })
-      return
-    }
-    const account = user.email ? getAccount(user.email) : undefined
-    if (account && !account.mustChangePassword) {
-      navigate({ to: '/patient', replace: true })
     }
   }, [user, navigate])
 
   if (!user) return null
 
-  function onSubmit(values: FormValues) {
-    const email = user?.email
-    const account = email ? getAccount(email) : undefined
-    if (account && account.password !== values.currentPassword) {
-      toast.error('Current password is incorrect.')
+  async function onSubmit(values: FormValues) {
+    const { error } = await supabase.auth.updateUser({
+      password: values.newPassword,
+    })
+    if (error) {
+      toast.error(error.message ?? 'Failed to update password.')
       return
     }
-    if (email) {
-      changePassword(email, values.newPassword)
-    }
     toast.success('Password updated. Welcome to MediQ!')
-    navigate({ to: '/patient', replace: true })
+    const target = user?.role.includes('patient')
+      ? '/patient'
+      : '/admin/dashboard'
+    navigate({ to: target, replace: true })
   }
 
   return (
@@ -96,11 +91,10 @@ export function ChangePassword() {
           <div className='flex flex-col items-center gap-2 text-center'>
             <KeyRound className='size-8 text-primary' />
             <h1 className='text-xl font-bold tracking-tight'>
-              Set a new password
+              Change your password
             </h1>
             <p className='text-sm text-muted-foreground'>
-              You signed in with a temporary password. Choose a personal one
-              to continue.
+              Choose a new password for your account.
             </p>
           </div>
 
@@ -110,23 +104,7 @@ export function ChangePassword() {
               className='grid gap-3'
               noValidate
             >
-              <FormField
-                control={form.control}
-                name='currentPassword'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Temporary password</FormLabel>
-                    <FormControl>
-                      <PasswordInput
-                        placeholder='••••••••'
-                        autoComplete='current-password'
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+
               <FormField
                 control={form.control}
                 name='newPassword'

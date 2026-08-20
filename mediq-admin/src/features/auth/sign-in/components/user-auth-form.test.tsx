@@ -44,9 +44,23 @@ vi.mock('@tanstack/react-router', async (importOriginal) => {
   }
 })
 
-vi.mock('@/lib/utils', async (orig) => ({
-  ...(await orig()),
-  sleep: vi.fn(() => Promise.resolve()),
+// --- Supabase mocks ---
+const signInMock = vi.fn()
+const profileResult = vi.fn(() => ({ data: { role: 'admin', full_name: 'Test User' }, error: null }))
+
+vi.mock('@/lib/supabase', () => ({
+  supabase: {
+    auth: {
+      signInWithPassword: (...args: unknown[]) => signInMock(...args),
+    },
+    from: () => ({
+      select: () => ({
+        eq: () => ({
+          single: () => profileResult(),
+        }),
+      }),
+    }),
+  },
 }))
 
 describe('UserAuthForm', () => {
@@ -59,6 +73,24 @@ describe('UserAuthForm', () => {
 
     beforeEach(async () => {
       vi.clearAllMocks()
+      signInMock.mockResolvedValue({
+        data: {
+          user: {
+            id: 'user-123',
+            email: 'a@b.com',
+          },
+          session: {
+            access_token: 'test-access-token',
+            expires_at: Math.floor(Date.now() / 1000) + 3600,
+          },
+        },
+        error: null,
+      })
+      profileResult.mockResolvedValue({
+        data: { role: 'admin', full_name: 'Test User' },
+        error: null,
+      })
+
       screen = await render(<UserAuthForm />)
       emailInput = screen.getByRole('textbox', { name: /^Email$/i })
       passwordInput = screen.getByLabelText(/^Password$/i)
@@ -90,26 +122,49 @@ describe('UserAuthForm', () => {
 
       await userEvent.click(signInButton)
 
+      await vi.waitFor(() => expect(signInMock).toHaveBeenCalledOnce())
+      expect(signInMock).toHaveBeenCalledWith({
+        email: 'a@b.com',
+        password: '1234567',
+      })
+
       await vi.waitFor(() => expect(setUserMock).toHaveBeenCalledOnce())
       expect(setUserMock).toHaveBeenCalledWith(
         expect.objectContaining({
           email: 'a@b.com',
-          accountNo: expect.any(String),
-          role: expect.any(Array),
+          accountNo: 'user-123',
+          role: ['admin'],
           exp: expect.any(Number),
         })
       )
       expect(setAccessTokenMock).toHaveBeenCalledOnce()
-      expect(setAccessTokenMock).toHaveBeenCalledWith('mock-access-token')
+      expect(setAccessTokenMock).toHaveBeenCalledWith('test-access-token')
 
       await vi.waitFor(() =>
-        expect(navigate).toHaveBeenCalledWith({ to: '/', replace: true })
+        expect(navigate).toHaveBeenCalledWith({
+          to: '/admin/dashboard',
+          replace: true,
+        })
       )
     })
   })
 
   it('navigates to redirectTo when provided', async () => {
     vi.clearAllMocks()
+    signInMock.mockResolvedValue({
+      data: {
+        user: { id: 'user-456', email: 'a@b.com' },
+        session: {
+          access_token: 'test-token',
+          expires_at: Math.floor(Date.now() / 1000) + 3600,
+        },
+      },
+      error: null,
+    })
+    profileResult.mockResolvedValue({
+      data: { role: 'front_desk', full_name: 'Staff User' },
+      error: null,
+    })
 
     const { getByRole, getByLabelText } = await render(
       <UserAuthForm redirectTo='/settings' />
@@ -129,5 +184,24 @@ describe('UserAuthForm', () => {
         replace: true,
       })
     )
+  })
+
+  it('shows error toast on invalid credentials', async () => {
+    vi.clearAllMocks()
+    signInMock.mockResolvedValue({
+      data: { user: null, session: null },
+      error: { message: 'Invalid login credentials' },
+    })
+
+    const { getByRole, getByLabelText } = await render(<UserAuthForm />)
+
+    await userEvent.fill(getByRole('textbox', { name: /Email/i }), 'a@b.com')
+    await userEvent.fill(getByLabelText('Password'), '1234567')
+
+    await userEvent.click(getByRole('button', { name: /Sign in/i }))
+
+    await vi.waitFor(() => expect(signInMock).toHaveBeenCalledOnce())
+    // setUser should not be called on error
+    expect(setUserMock).not.toHaveBeenCalled()
   })
 })

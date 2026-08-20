@@ -86,7 +86,7 @@ function Hero() {
   }, [activeIndex])
 
   return (
-    <section className='relative isolate flex min-h-[calc(100svh-4rem)] flex-col'>
+    <section className='relative isolate flex min-h-[calc(100svh-4rem)] flex-col overflow-hidden'>
       {heroImages.map((image, index) => (
         <div
           key={image}

@@ -72,12 +72,6 @@ export const sidebarData: SidebarData = {
           icon: DoorOpen,
           roles: ['admin'],
         },
-        {
-          title: 'Users & Roles',
-          url: '/users',
-          icon: ShieldCheck,
-          roles: ['admin'],
-        },
       ],
     },
     {

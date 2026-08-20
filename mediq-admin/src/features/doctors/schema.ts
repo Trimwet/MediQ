@@ -9,7 +9,7 @@ export const doctorSchema = z.object({
   specialization: z.string(),
   email: z.string(),
   status: z.enum(doctorStatuses),
-  todayAppointments: z.number(),
+  todayAppointments: z.number().optional(),
 })
 export type Doctor = z.infer<typeof doctorSchema>
 

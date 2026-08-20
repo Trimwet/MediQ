@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export const staffRoles = ['front_desk', 'admin'] as const
+export const staffRoles = ['front_desk', 'admin', 'doctor'] as const
 export type StaffRole = (typeof staffRoles)[number]
 
 export const staffStatuses = ['active', 'inactive'] as const
@@ -18,7 +18,9 @@ export type Staff = z.infer<typeof staffSchema>
 
 export const staffRoleBadge: Record<StaffRole, string> = {
   front_desk: 'bg-sky-200/40 text-sky-900 dark:text-sky-100 border-sky-300',
-  admin: 'bg-indigo-200/40 text-indigo-900 dark:text-indigo-100 border-indigo-300',
+  admin:
+    'bg-indigo-200/40 text-indigo-900 dark:text-indigo-100 border-indigo-300',
+  doctor: 'bg-teal-200/40 text-teal-900 dark:text-teal-100 border-teal-300',
 }
 
 export const staffStatusBadge: Record<StaffStatus, string> = {

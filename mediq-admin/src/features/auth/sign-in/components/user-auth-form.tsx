@@ -3,12 +3,11 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link, useNavigate } from '@tanstack/react-router'
-import { roleLabels, ROLES } from '@/config/rbac'
-import { verifyAccount } from '@/data/mock/accounts'
+import { supabase } from '@/lib/supabase'
 import { Loader2, LogIn } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuthStore } from '@/stores/auth-store'
-import { sleep, cn } from '@/lib/utils'
+import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -20,7 +19,6 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/password-input'
-import { SelectDropdown } from '@/components/select-dropdown'
 
 const formSchema = z.object({
   email: z.email({
@@ -30,8 +28,6 @@ const formSchema = z.object({
     .string()
     .min(1, 'Please enter your password.')
     .min(7, 'Password must be at least 7 characters long.'),
-  // Demo-only: with no backend yet, the signed-in role is chosen here.
-  role: z.enum(ROLES),
 })
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLFormElement> {
@@ -52,58 +48,81 @@ export function UserAuthForm({
     defaultValues: {
       email: '',
       password: '',
-      role: 'admin',
     },
   })
 
-  function onSubmit(data: z.infer<typeof formSchema>) {
+  async function onSubmit(data: z.infer<typeof formSchema>) {
     setIsLoading(true)
 
-    // Mock auth: if this email was provisioned through the booking flow, the
-    // role and the temporary password live in the account registry.
-    const account = verifyAccount(data.email, data.password)
-    if (account === null) {
-      setIsLoading(false)
-      toast.error('Invalid email or password.')
-      return
-    }
-
-    toast.promise(sleep(2000), {
-      loading: 'Signing in...',
-      success: () => {
-        setIsLoading(false)
-
-        // Mock successful authentication with expiry computed at success time.
-        // Production: role claims come from Supabase Auth.
-        const mockUser = {
-          accountNo: 'ACC001',
+    try {
+      // 1. Sign in with Supabase Auth.
+      const { data: sessionData, error: authError } =
+        await supabase.auth.signInWithPassword({
           email: data.email,
-          role: account ? account.role : [data.role],
-          exp: Date.now() + 24 * 60 * 60 * 1000, // 24 hours from now
+          password: data.password,
+        })
+
+      if (authError || !sessionData.user) {
+        setIsLoading(false)
+        const msg = authError?.message ?? ''
+        if (msg.includes('Invalid login credentials')) {
+          toast.error(
+            'Wrong email or password. If you haven\'t signed up yet, create an account first.'
+          )
+        } else if (msg.includes('Email not confirmed')) {
+          toast.error(
+            'Please confirm your email address before signing in. Check your inbox for the confirmation link.'
+          )
+        } else {
+          toast.error(msg || 'Could not sign you in. Please try again.')
         }
+        return
+      }
 
-        // Set user and access token
-        auth.setUser(mockUser)
-        auth.setAccessToken('mock-access-token')
+      // 2. Fetch the user's profile to get their role.
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('role, full_name')
+        .eq('id', sessionData.user.id)
+        .single()
 
-        // First login after booking: force the password change.
-        const mustChangePassword = account?.mustChangePassword ?? false
-        // Role-aware default: staff land on the dashboard, patients on their
-        // portal. The landing page is public, so `/` is never the post-login
-        // destination.
-        const role = account ? account.role : [data.role]
-        const defaultPath = role.includes('patient')
-          ? '/patient'
-          : '/admin/dashboard'
-        const targetPath = mustChangePassword
-          ? '/change-password'
-          : redirectTo || defaultPath
-        navigate({ to: targetPath, replace: true })
+      if (profileError || !profile) {
+        setIsLoading(false)
+        toast.error('Could not load your profile. Please try again.')
+        return
+      }
 
-        return `Welcome back, ${data.email}!`
-      },
-      error: 'Error',
-    })
+      const role = [String(profile.role)]
+
+      // 3. Persist to the auth store (mirrors the shape the rest of the app
+      //    expects: roles as string[], email, exp from the JWT).
+      const exp =
+        sessionData.session?.expires_at
+          ? sessionData.session.expires_at * 1000
+          : Date.now() + 24 * 60 * 60 * 1000
+
+      auth.setUser({
+        accountNo: sessionData.user.id,
+        email: sessionData.user.email ?? data.email,
+        role,
+        exp,
+      })
+      auth.setAccessToken(sessionData.session?.access_token ?? '')
+
+      // 4. Route based on role — staff land on the dashboard, patients on
+      //    their portal. The landing page is public, so `/` is never the
+      //    post-login destination.
+      const defaultPath = role.includes('patient')
+        ? '/patient'
+        : '/admin/dashboard'
+      const targetPath = redirectTo || defaultPath
+      navigate({ to: targetPath, replace: true })
+
+      toast.success(`Welcome back, ${profile.full_name || data.email}!`)
+    } catch {
+      setIsLoading(false)
+      toast.error('An unexpected error occurred. Please try again.')
+    }
   }
 
   return (
@@ -142,25 +161,6 @@ export function UserAuthForm({
               >
                 Forgot password?
               </Link>
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name='role'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Role</FormLabel>
-              <SelectDropdown
-                defaultValue={field.value}
-                onValueChange={field.onChange}
-                className='w-full'
-                items={ROLES.map((role) => ({
-                  label: roleLabels[role],
-                  value: role,
-                }))}
-              />
-              <FormMessage />
             </FormItem>
           )}
         />

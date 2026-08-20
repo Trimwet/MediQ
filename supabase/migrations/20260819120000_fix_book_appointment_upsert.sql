@@ -1,5 +1,7 @@
--- Fix: book_appointment() upsert — ON CONFLICT ON CONSTRAINT cannot reference
--- a unique INDEX (patients_email_unique_idx). Replace with NOT EXISTS guard.
+-- Fix: book_appointment() upsert — use INSERT … ON CONFLICT DO UPDATE so that
+-- returning patients have their name and phone kept current.
+-- The partial unique index (patients_email_unique_idx) on lower(email) WHERE
+-- email IS NOT NULL is referenced via the expression form of ON CONFLICT.
 CREATE OR REPLACE FUNCTION public.book_appointment(
   p_name          text,
   p_email         text,
@@ -20,14 +22,17 @@ DECLARE
 BEGIN
   v_patient_email := lower(p_email);
 
-  -- Upsert patient (partial unique index on lower(email) WHERE email IS NOT NULL)
+  -- Upsert patient: insert on first booking, update name/phone on repeat visits
+  -- so returning patients always have their latest contact details recorded.
   INSERT INTO public.patients (name, phone, email)
-  SELECT p_name, p_phone, v_patient_email
-  WHERE NOT EXISTS (
-    SELECT 1 FROM public.patients WHERE lower(email) = v_patient_email AND email IS NOT NULL
-  );
+  VALUES (p_name, p_phone, v_patient_email)
+  ON CONFLICT (lower(email))
+    WHERE email IS NOT NULL
+  DO UPDATE SET
+    name  = EXCLUDED.name,
+    phone = EXCLUDED.phone;
 
-  -- Resolve doctor name from the doctors table (never trust client input)
+  -- Resolve doctor name from the doctors table (never trust client input).
   IF p_doctor_id IS NOT NULL THEN
     SELECT name INTO v_doctor_name
     FROM public.doctors
@@ -46,3 +51,8 @@ BEGIN
   RETURN v_id;
 END;
 $$;
+
+COMMENT ON FUNCTION public.book_appointment(text,text,text,timestamptz,uuid,text) IS
+  'Anonymous/self-service booking entry point. Atomic patient upsert + appointment insert. '
+  'Status is locked to pending — never client-supplied. Email is lowercased. '
+  'Repeat bookings update name and phone. Doctor name resolved from doctors table.';

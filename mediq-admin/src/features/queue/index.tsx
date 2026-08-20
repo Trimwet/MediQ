@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { useQueue, useQueueActions } from '@/data/hooks'
 import { Megaphone } from 'lucide-react'
 import { toast } from 'sonner'
@@ -29,7 +29,15 @@ export function Queue() {
   const entries = queueQuery.data ?? []
   const isPending = queueQuery.isPending
 
-  const now = new Date().toISOString()
+  const [now, setNow] = useState(() => new Date().toISOString())
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setNow(new Date().toISOString())
+    }, 60000)
+    return () => clearInterval(interval)
+  }, [])
+
   const waiting = useMemo(
     () =>
       entries

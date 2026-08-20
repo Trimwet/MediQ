@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { render, type RenderResult } from 'vitest-browser-react'
 import { type Locator, userEvent } from 'vitest/browser'
 import { SignUpForm } from './sign-up-form'
@@ -16,7 +16,18 @@ const toastPromise = vi.hoisted(() =>
   })
 )
 
+const signUpMock = vi.hoisted(() => vi.fn())
+const navigate = vi.hoisted(() => vi.fn())
+
 vi.mock('sonner', () => ({ toast: { promise: toastPromise } }))
+
+vi.mock('@/data', () => ({
+  authRepository: { signUp: (...args: unknown[]) => signUpMock(...args) },
+}))
+
+vi.mock('@tanstack/react-router', () => ({
+  useNavigate: () => navigate,
+}))
 
 describe('SignUpForm', () => {
   let screen: RenderResult
@@ -27,16 +38,13 @@ describe('SignUpForm', () => {
 
   beforeEach(async () => {
     vi.clearAllMocks()
+    signUpMock.mockResolvedValue({ email: 'a@b.com', role: ['patient'] })
 
     screen = await render(<SignUpForm />)
     emailInput = screen.getByRole('textbox', { name: /^Email$/i })
     passwordInput = screen.getByLabelText(/^Password$/i)
     confirmPasswordInput = screen.getByLabelText(/^Confirm Password$/i)
     submitButton = screen.getByRole('button', { name: /^Create Account$/i })
-  })
-
-  afterEach(() => {
-    vi.useRealTimers()
   })
 
   it('renders fields and submit button', async () => {
@@ -71,8 +79,25 @@ describe('SignUpForm', () => {
       .toBeInTheDocument()
   })
 
-  it('disables submit while submitting and re-enables after timeout', async () => {
-    vi.useFakeTimers()
+  it('creates the account and navigates to sign-in on success', async () => {
+    await userEvent.fill(emailInput, 'a@b.com')
+    await userEvent.fill(passwordInput, '1234567')
+    await userEvent.fill(confirmPasswordInput, '1234567')
+
+    await userEvent.click(submitButton)
+
+    expect(signUpMock).toHaveBeenCalledWith({
+      email: 'a@b.com',
+      password: '1234567',
+    })
+    await vi.waitFor(() =>
+      expect(navigate).toHaveBeenCalledWith({ to: '/sign-in' })
+    )
+  })
+
+  it('disables submit while submitting and re-enables after', async () => {
+    let resolve!: (value: unknown) => void
+    signUpMock.mockReturnValue(new Promise((r) => (resolve = r)))
 
     await userEvent.fill(emailInput, 'a@b.com')
     await userEvent.fill(passwordInput, '1234567')
@@ -81,7 +106,7 @@ describe('SignUpForm', () => {
     await userEvent.click(submitButton)
     await expect.element(submitButton).toBeDisabled()
 
-    await vi.advanceTimersByTimeAsync(2000)
+    resolve({ email: 'a@b.com', role: ['patient'] })
     await expect.element(submitButton).toBeEnabled()
     expect(toastPromise).toHaveBeenCalledOnce()
   })

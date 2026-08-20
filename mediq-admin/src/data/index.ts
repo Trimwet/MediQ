@@ -1,13 +1,13 @@
 /**
  * Data layer entry point.
  *
- * Pages and hooks import repositories from here — never from the mock
- * implementations. To move to a real backend, implement the same interfaces
- * with axios in `src/data/api/` and swap the exports below; the UI and the
- * react-query hooks in `src/data/hooks.ts` stay unchanged.
+ * Pages and hooks import repositories from here — never from the
+ * implementations directly. The Supabase implementations match the same
+ * interfaces as the mock repos; swapping back to mock is a one-line change.
  */
 export {
   appointmentsRepository,
+  authRepository,
   bookingRepository,
   doctorsRepository,
   notificationsRepository,
@@ -15,9 +15,10 @@ export {
   queueRepository,
   roomsRepository,
   staffRepository,
-} from './repos'
+} from './supabase/repos'
 export type {
   AppointmentsRepository,
+  AuthRepository,
   BookingInput,
   BookingRepository,
   BookingResult,
@@ -26,5 +27,6 @@ export type {
   PatientsRepository,
   QueueRepository,
   RoomsRepository,
+  SignUpInput,
   StaffRepository,
 } from './repos'

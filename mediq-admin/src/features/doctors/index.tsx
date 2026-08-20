@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import {
   useCreateDoctor,
+  useDeleteDoctor,
   useDoctors,
   useUpdateDoctorStatus,
 } from '@/data/hooks'
@@ -27,6 +28,7 @@ export function Doctors() {
   const doctorsQuery = useDoctors()
   const createDoctor = useCreateDoctor()
   const updateStatus = useUpdateDoctorStatus()
+  const deleteDoctor = useDeleteDoctor()
   const [dialogOpen, setDialogOpen] = useState(false)
 
   function handleStatusChange(id: string, status: DoctorStatus) {
@@ -42,6 +44,15 @@ export function Doctors() {
       onSuccess: (created) =>
         toast.success(`${created.name} added to the directory`),
     })
+  }
+
+  function handleDelete(id: string) {
+    if (confirm('Are you sure you want to remove this doctor from the directory?')) {
+      deleteDoctor.mutate(id, {
+        onSuccess: () => toast.success('Doctor removed.'),
+        onError: (err) => toast.error(`Failed to remove: ${err.message}`),
+      })
+    }
   }
 
   return (
@@ -76,6 +87,7 @@ export function Doctors() {
           loading={doctorsQuery.isPending}
           canManage={canManage}
           onStatusChange={handleStatusChange}
+          onDelete={canManage ? handleDelete : undefined}
         />
       </Main>
 
