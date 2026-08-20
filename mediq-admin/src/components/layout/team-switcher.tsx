@@ -1,12 +1,10 @@
-import * as React from 'react'
-import { ChevronsUpDown, Plus } from 'lucide-react'
+import { Building2, Check, ChevronsUpDown } from 'lucide-react'
+import { useClinicContext } from '@/lib/clinic-context'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import {
@@ -16,17 +14,11 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar'
 
-type TeamSwitcherProps = {
-  teams: {
-    name: string
-    logo: React.ElementType
-    plan: string
-  }[]
-}
-
-export function TeamSwitcher({ teams }: TeamSwitcherProps) {
+export function TeamSwitcher() {
   const { isMobile } = useSidebar()
-  const [activeTeam, setActiveTeam] = React.useState(teams[0])
+  const { clinic, allClinics, switchClinic } = useClinicContext()
+
+  if (!clinic) return null
 
   return (
     <SidebarMenu>
@@ -37,42 +29,54 @@ export function TeamSwitcher({ teams }: TeamSwitcherProps) {
               size='lg'
               className='data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground'
             >
-              <div className='flex flex-1 justify-center'>
-                <activeTeam.logo className='h-10 w-auto' />
+              <div className='flex size-8 items-center justify-center rounded-md bg-primary/10'>
+                <Building2 className='size-4 text-primary' />
               </div>
-              <ChevronsUpDown className='ms-auto' />
+              <div className='grid flex-1 text-left text-sm leading-tight'>
+                <span className='truncate font-semibold'>
+                  {clinic.clinicName}
+                </span>
+                <span className='truncate text-xs text-muted-foreground capitalize'>
+                  {clinic.plan} plan
+                </span>
+              </div>
+              {allClinics.length > 1 && (
+                <ChevronsUpDown className='ms-auto size-4' />
+              )}
             </SidebarMenuButton>
           </DropdownMenuTrigger>
-          <DropdownMenuContent
-            className='w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg'
-            align='start'
-            side={isMobile ? 'bottom' : 'right'}
-            sideOffset={4}
-          >
-            <DropdownMenuLabel className='text-xs text-muted-foreground'>
-              Teams
-            </DropdownMenuLabel>
-            {teams.map((team, index) => (
-              <DropdownMenuItem
-                key={team.name}
-                onClick={() => setActiveTeam(team)}
-                className='gap-2 p-2'
-              >
-                <div className='flex size-6 items-center justify-center'>
-                  <team.logo className='h-5 w-auto shrink-0' />
-                </div>
-                {team.name}
-                <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
-              </DropdownMenuItem>
-            ))}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className='gap-2 p-2'>
-              <div className='flex size-6 items-center justify-center rounded-md border bg-background'>
-                <Plus className='size-4' />
-              </div>
-              <div className='font-medium text-muted-foreground'>Add team</div>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
+          {allClinics.length > 1 && (
+            <DropdownMenuContent
+              className='w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg'
+              align='start'
+              side={isMobile ? 'bottom' : 'right'}
+              sideOffset={4}
+            >
+              <DropdownMenuLabel className='text-xs text-muted-foreground'>
+                Clinics
+              </DropdownMenuLabel>
+              {allClinics.map((c) => (
+                <DropdownMenuItem
+                  key={c.clinicId}
+                  onClick={() => switchClinic(c.clinicId)}
+                  className='gap-2 p-2'
+                >
+                  <div className='flex size-6 items-center justify-center rounded-md bg-primary/10'>
+                    <Building2 className='size-3.5 text-primary' />
+                  </div>
+                  <div className='flex flex-col'>
+                    <span className='font-medium'>{c.clinicName}</span>
+                    <span className='text-xs text-muted-foreground capitalize'>
+                      {c.clinicRole.replace('_', ' ')}
+                    </span>
+                  </div>
+                  {c.clinicId === clinic.clinicId && (
+                    <Check className='ms-auto size-4' />
+                  )}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          )}
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>

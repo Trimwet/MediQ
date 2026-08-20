@@ -26,9 +26,10 @@ import {
   User,
   UserCheck,
 } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { cn } from '@/lib/utils'
+import { PricingSection } from './components/pricing-section'
 
 /* -------------------------------------------------------------------------- */
 /*  Decorative floating icon helper                                            */
@@ -45,7 +46,7 @@ function FloatIcon({
     <Icon
       aria-hidden='true'
       className={cn(
-        'pointer-events-none absolute animate-icon-pulse',
+        'animate-icon-pulse pointer-events-none absolute',
         className
       )}
     />
@@ -57,10 +58,10 @@ function FloatIcon({
 /* -------------------------------------------------------------------------- */
 
 const heroStats = [
-  { value: '12k+', label: 'Appointments booked' },
-  { value: '3 min', label: 'Average booking time' },
-  { value: '5+', label: 'Active doctors' },
-  { value: '100%', label: 'Queue transparency' },
+  { value: '0', label: 'Appointments booked' },
+  { value: '0 min', label: 'Average booking time' },
+  { value: '0', label: 'Active doctors' },
+  { value: '0%', label: 'Queue transparency' },
 ]
 
 // Background slides for the hero carousel. The first slide is the waiting
@@ -172,20 +173,6 @@ function Hero() {
           ))}
         </div>
       </div>
-
-      {/* Floating accent icons */}
-      <FloatIcon
-        icon={Stethoscope}
-        className='size-8 top-20 right-[8%] rotate-12 opacity-60'
-      />
-      <FloatIcon
-        icon={Activity}
-        className='size-7 top-[55%] left-[5%] -rotate-6 opacity-50'
-      />
-      <FloatIcon
-        icon={HeartPulse}
-        className='size-6 bottom-28 right-[12%] rotate-[20deg] opacity-40'
-      />
     </section>
   )
 }
@@ -481,7 +468,7 @@ function HowItWorks() {
       <svg
         aria-hidden='true'
         viewBox='0 0 800 800'
-        className='pointer-events-none absolute left-1/2 top-1/2 w-[min(720px,92vw)] -translate-x-1/2 -translate-y-1/2 text-primary'
+        className='pointer-events-none absolute top-1/2 left-1/2 w-[min(720px,92vw)] -translate-x-1/2 -translate-y-1/2 text-primary'
         fill='none'
       >
         {/* outer rhombus — acute angles pointing left/right (forward) */}
@@ -499,17 +486,38 @@ function HowItWorks() {
           strokeWidth='1.5'
         />
         {/* forward-pointing angle lines (chevrons) */}
-        <polyline points='285,355 325,400 285,445' stroke='currentColor' strokeOpacity='0.1' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' />
-        <polyline points='365,355 405,400 365,445' stroke='currentColor' strokeOpacity='0.1' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' />
-        <polyline points='445,355 485,400 445,445' stroke='currentColor' strokeOpacity='0.1' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' />
+        <polyline
+          points='285,355 325,400 285,445'
+          stroke='currentColor'
+          strokeOpacity='0.1'
+          strokeWidth='2'
+          strokeLinecap='round'
+          strokeLinejoin='round'
+        />
+        <polyline
+          points='365,355 405,400 365,445'
+          stroke='currentColor'
+          strokeOpacity='0.1'
+          strokeWidth='2'
+          strokeLinecap='round'
+          strokeLinejoin='round'
+        />
+        <polyline
+          points='445,355 485,400 445,445'
+          stroke='currentColor'
+          strokeOpacity='0.1'
+          strokeWidth='2'
+          strokeLinecap='round'
+          strokeLinejoin='round'
+        />
       </svg>
       <FloatIcon
         icon={Syringe}
-        className='size-8 bottom-[15%] left-[4%] -rotate-12 opacity-40'
+        className='bottom-[15%] left-[4%] size-8 -rotate-12 opacity-40'
       />
       <FloatIcon
         icon={Pill}
-        className='size-7 top-[12%] right-[5%] rotate-[30deg] opacity-40'
+        className='top-[12%] right-[5%] size-7 rotate-[30deg] opacity-40'
       />
       <div className='relative mx-auto max-w-6xl px-4 sm:px-6'>
         <SectionHeading
@@ -567,11 +575,14 @@ const clinicFeatures = [
 
 function ClinicFloor() {
   return (
-    <section id='clinic-floor' className='relative overflow-hidden py-16 sm:py-20'>
+    <section
+      id='clinic-floor'
+      className='relative overflow-hidden py-16 sm:py-20'
+    >
       {/* Faceted crystal / geometric lattice backdrop — 26+ elements */}
       <svg
         aria-hidden='true'
-        className='pointer-events-none absolute -left-24 -top-16 w-[min(900px,95vw)] text-primary'
+        className='pointer-events-none absolute -top-16 -left-24 w-[min(900px,95vw)] text-primary'
         viewBox='0 0 800 800'
         fill='none'
         xmlns='http://www.w3.org/2000/svg'
@@ -614,18 +625,114 @@ function ClinicFloor() {
         />
 
         {/* ── 12 radiating spokes from core ── */}
-        <line x1='480' y1='400' x2='750' y2='400' stroke='currentColor' strokeWidth='0.5' strokeOpacity='0.06' />
-        <line x1='469' y1='335' x2='712' y2='257' stroke='currentColor' strokeWidth='0.5' strokeOpacity='0.06' />
-        <line x1='440' y1='280' x2='650' y2='130' stroke='currentColor' strokeWidth='0.5' strokeOpacity='0.06' />
-        <line x1='400' y1='320' x2='400' y2='50' stroke='currentColor' strokeWidth='0.5' strokeOpacity='0.06' />
-        <line x1='360' y1='280' x2='150' y2='130' stroke='currentColor' strokeWidth='0.5' strokeOpacity='0.06' />
-        <line x1='331' y1='335' x2='88' y2='257' stroke='currentColor' strokeWidth='0.5' strokeOpacity='0.06' />
-        <line x1='320' y1='400' x2='50' y2='400' stroke='currentColor' strokeWidth='0.5' strokeOpacity='0.06' />
-        <line x1='331' y1='465' x2='88' y2='543' stroke='currentColor' strokeWidth='0.5' strokeOpacity='0.05' />
-        <line x1='360' y1='520' x2='150' y2='670' stroke='currentColor' strokeWidth='0.5' strokeOpacity='0.05' />
-        <line x1='400' y1='480' x2='400' y2='750' stroke='currentColor' strokeWidth='0.5' strokeOpacity='0.05' />
-        <line x1='440' y1='520' x2='650' y2='670' stroke='currentColor' strokeWidth='0.5' strokeOpacity='0.05' />
-        <line x1='469' y1='465' x2='712' y2='543' stroke='currentColor' strokeWidth='0.5' strokeOpacity='0.05' />
+        <line
+          x1='480'
+          y1='400'
+          x2='750'
+          y2='400'
+          stroke='currentColor'
+          strokeWidth='0.5'
+          strokeOpacity='0.06'
+        />
+        <line
+          x1='469'
+          y1='335'
+          x2='712'
+          y2='257'
+          stroke='currentColor'
+          strokeWidth='0.5'
+          strokeOpacity='0.06'
+        />
+        <line
+          x1='440'
+          y1='280'
+          x2='650'
+          y2='130'
+          stroke='currentColor'
+          strokeWidth='0.5'
+          strokeOpacity='0.06'
+        />
+        <line
+          x1='400'
+          y1='320'
+          x2='400'
+          y2='50'
+          stroke='currentColor'
+          strokeWidth='0.5'
+          strokeOpacity='0.06'
+        />
+        <line
+          x1='360'
+          y1='280'
+          x2='150'
+          y2='130'
+          stroke='currentColor'
+          strokeWidth='0.5'
+          strokeOpacity='0.06'
+        />
+        <line
+          x1='331'
+          y1='335'
+          x2='88'
+          y2='257'
+          stroke='currentColor'
+          strokeWidth='0.5'
+          strokeOpacity='0.06'
+        />
+        <line
+          x1='320'
+          y1='400'
+          x2='50'
+          y2='400'
+          stroke='currentColor'
+          strokeWidth='0.5'
+          strokeOpacity='0.06'
+        />
+        <line
+          x1='331'
+          y1='465'
+          x2='88'
+          y2='543'
+          stroke='currentColor'
+          strokeWidth='0.5'
+          strokeOpacity='0.05'
+        />
+        <line
+          x1='360'
+          y1='520'
+          x2='150'
+          y2='670'
+          stroke='currentColor'
+          strokeWidth='0.5'
+          strokeOpacity='0.05'
+        />
+        <line
+          x1='400'
+          y1='480'
+          x2='400'
+          y2='750'
+          stroke='currentColor'
+          strokeWidth='0.5'
+          strokeOpacity='0.05'
+        />
+        <line
+          x1='440'
+          y1='520'
+          x2='650'
+          y2='670'
+          stroke='currentColor'
+          strokeWidth='0.5'
+          strokeOpacity='0.05'
+        />
+        <line
+          x1='469'
+          y1='465'
+          x2='712'
+          y2='543'
+          stroke='currentColor'
+          strokeWidth='0.5'
+          strokeOpacity='0.05'
+        />
 
         {/* ── Triangle pair (star-of-david overlap) ── */}
         <polygon
@@ -677,8 +784,24 @@ function ClinicFloor() {
         />
 
         {/* ── Angular X cross (whisper lines) ── */}
-        <line x1='200' y1='200' x2='600' y2='600' stroke='currentColor' strokeWidth='0.5' strokeOpacity='0.04' />
-        <line x1='600' y1='200' x2='200' y2='600' stroke='currentColor' strokeWidth='0.5' strokeOpacity='0.04' />
+        <line
+          x1='200'
+          y1='200'
+          x2='600'
+          y2='600'
+          stroke='currentColor'
+          strokeWidth='0.5'
+          strokeOpacity='0.04'
+        />
+        <line
+          x1='600'
+          y1='200'
+          x2='200'
+          y2='600'
+          stroke='currentColor'
+          strokeWidth='0.5'
+          strokeOpacity='0.04'
+        />
 
         {/* ── Centre micro-diamond fill (barely there) ── */}
         <polygon
@@ -693,11 +816,11 @@ function ClinicFloor() {
 
       <FloatIcon
         icon={Microscope}
-        className='size-9 bottom-[18%] right-[6%] rotate-[15deg] opacity-40'
+        className='right-[6%] bottom-[18%] size-9 rotate-[15deg] opacity-40'
       />
       <FloatIcon
         icon={Dna}
-        className='size-7 top-[10%] right-[10%] -rotate-[20deg] opacity-40'
+        className='top-[10%] right-[10%] size-7 -rotate-[20deg] opacity-40'
       />
 
       <div className='relative mx-auto max-w-6xl px-4 sm:px-6'>
@@ -870,11 +993,11 @@ function Testimonials() {
       {/* Floating accent icons */}
       <FloatIcon
         icon={Brain}
-        className='size-8 top-[15%] left-[3%] rotate-[10deg] opacity-40'
+        className='top-[15%] left-[3%] size-8 rotate-[10deg] opacity-40'
       />
       <FloatIcon
         icon={Eye}
-        className='size-7 bottom-[12%] right-[4%] -rotate-[15deg] opacity-40'
+        className='right-[4%] bottom-[12%] size-7 -rotate-[15deg] opacity-40'
       />
     </section>
   )
@@ -889,7 +1012,7 @@ function CTA() {
     <section className='relative bg-muted/40 py-20 sm:py-24'>
       <FloatIcon
         icon={Cross}
-        className='size-8 top-8 left-[6%] rotate-45 opacity-30'
+        className='top-8 left-[6%] size-8 rotate-45 opacity-30'
       />
       <div className='mx-auto max-w-6xl px-4 sm:px-6'>
         <div className='relative overflow-hidden rounded-2xl bg-primary px-6 py-14 text-center text-primary-foreground sm:px-12'>
@@ -946,6 +1069,7 @@ export function Landing() {
       <HowItWorks />
       <ClinicFloor />
       <Testimonials />
+      <PricingSection />
       <CTA />
     </>
   )

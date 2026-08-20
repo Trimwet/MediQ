@@ -17,16 +17,18 @@ export function useSupabaseAuthSync() {
             .eq('id', session.user.id)
             .single()
 
+          // Preserve existing clinic fields so auth-sync doesn't wipe the
+          // current clinic context (clinicId, clinicRole, clinicName).
+          const prev = useAuthStore.getState().auth.user
+
           setUser({
             accountNo: session.user.id,
             email: session.user.email ?? '',
             role: profile?.role ? [profile.role] : ['patient'],
-            // expires_at is a Unix timestamp in seconds. Multiplying by 1000
-            // gives ms for comparison with Date.now().
-            // Use Infinity when undefined (e.g. magic-link sessions without
-            // an explicit expiry) so the session isn't immediately invalidated
-            // by the `user.exp < Date.now()` guard in the route loader.
             exp: session.expires_at != null ? session.expires_at * 1000 : Infinity,
+            ...(prev?.clinicId ? { clinicId: prev.clinicId } : {}),
+            ...(prev?.clinicRole ? { clinicRole: prev.clinicRole } : {}),
+            ...(prev?.clinicName ? { clinicName: prev.clinicName } : {}),
           })
         }
       } else if (event === 'SIGNED_OUT') {

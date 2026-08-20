@@ -3,10 +3,10 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link, useNavigate } from '@tanstack/react-router'
-import { supabase } from '@/lib/supabase'
 import { Loader2, LogIn } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuthStore } from '@/stores/auth-store'
+import { supabase } from '@/lib/supabase'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -92,10 +92,9 @@ export function UserAuthForm({
 
       const role = [String(profile.role)]
 
-      const exp =
-        sessionData.session?.expires_at
-          ? sessionData.session.expires_at * 1000
-          : Date.now() + 24 * 60 * 60 * 1000
+      const exp = sessionData.session?.expires_at
+        ? sessionData.session.expires_at * 1000
+        : Date.now() + 24 * 60 * 60 * 1000
 
       auth.setUser({
         accountNo: sessionData.user.id,
@@ -104,6 +103,22 @@ export function UserAuthForm({
         exp,
       })
       auth.setAccessToken(sessionData.session?.access_token ?? '')
+
+      // Resolve clinic membership for multi-tenancy.
+      const { data: memberships } = await supabase
+        .from('clinic_members')
+        .select('clinic_id, role, clinics(name)')
+        .eq('user_id', sessionData.user.id)
+
+      if (memberships?.length) {
+        const m = memberships[0] as Record<string, unknown>
+        const c = m.clinics as Record<string, unknown>
+        auth.setClinic(
+          String(m.clinic_id),
+          String(m.role) as 'admin' | 'front_desk' | 'doctor',
+          String(c.name)
+        )
+      }
 
       const defaultPath = role.includes('patient')
         ? '/patient'

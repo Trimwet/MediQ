@@ -23,8 +23,11 @@ import { useDataStore } from './mock/store'
 const delay = (ms = 200) => new Promise((resolve) => setTimeout(resolve, ms))
 
 export interface AppointmentsRepository {
-  list: () => Promise<Appointment[]>
-  create: (input: Omit<Appointment, 'id' | 'status'>) => Promise<Appointment>
+  list: (clinicId?: string) => Promise<Appointment[]>
+  create: (
+    input: Omit<Appointment, 'id' | 'status'>,
+    clinicId?: string
+  ) => Promise<Appointment>
   updateStatus: (id: string, status: AppointmentStatus) => Promise<void>
   /** Approve a pending request; optionally assign a doctor at the same time. */
   approve: (id: string, doctor?: { id: string; name: string }) => Promise<void>
@@ -33,7 +36,7 @@ export interface AppointmentsRepository {
 }
 
 export interface QueueRepository {
-  list: () => Promise<QueueEntry[]>
+  list: (clinicId?: string) => Promise<QueueEntry[]>
   /** Call the next waiting patient. Pass doctorName to scope to a doctor's queue. */
   callNext: (doctorName?: string) => Promise<void>
   startVisit: (id: string) => Promise<void>
@@ -42,31 +45,31 @@ export interface QueueRepository {
 }
 
 export interface PatientsRepository {
-  list: () => Promise<Patient[]>
-  create: (input: Omit<Patient, 'id'>) => Promise<Patient>
+  list: (clinicId?: string) => Promise<Patient[]>
+  create: (input: Omit<Patient, 'id'>, clinicId?: string) => Promise<Patient>
 }
 
 export interface DoctorsRepository {
-  list: () => Promise<Doctor[]>
-  create: (input: Omit<Doctor, 'id'>) => Promise<Doctor>
+  list: (clinicId?: string) => Promise<Doctor[]>
+  create: (input: Omit<Doctor, 'id'>, clinicId?: string) => Promise<Doctor>
   updateStatus: (id: string, status: DoctorStatus) => Promise<void>
   delete: (id: string) => Promise<void>
 }
 
 export interface StaffRepository {
-  list: () => Promise<Staff[]>
-  create: (input: Omit<Staff, 'id'>) => Promise<Staff>
+  list: (clinicId?: string) => Promise<Staff[]>
+  create: (input: Omit<Staff, 'id'>, clinicId?: string) => Promise<Staff>
   delete: (id: string) => Promise<void>
 }
 
 export interface RoomsRepository {
-  list: () => Promise<Room[]>
-  create: (input: Omit<Room, 'id'>) => Promise<Room>
+  list: (clinicId?: string) => Promise<Room[]>
+  create: (input: Omit<Room, 'id'>, clinicId?: string) => Promise<Room>
   updateStatus: (id: string, status: RoomStatus) => Promise<void>
 }
 
 export interface NotificationsRepository {
-  list: () => Promise<AppNotification[]>
+  list: (clinicId?: string) => Promise<AppNotification[]>
   markRead: (id: string) => Promise<void>
   markAllRead: () => Promise<void>
 }
@@ -110,6 +113,8 @@ export interface BookingInput {
   doctorName?: string
   scheduledFor: string // ISO 8601
   reason?: string
+  /** Clinic ID for multi-tenancy. Resolved from the booking page URL slug. */
+  clinicId?: string
 }
 
 export interface BookingResult {
@@ -142,7 +147,7 @@ export const appointmentsRepository: AppointmentsRepository = {
 }
 
 export const queueRepository: QueueRepository = {
-  async list() {
+  async list(_clinicId?: string) {
     await delay()
     return useDataStore.getState().queue
   },
@@ -165,7 +170,7 @@ export const queueRepository: QueueRepository = {
 }
 
 export const patientsRepository: PatientsRepository = {
-  async list() {
+  async list(_clinicId?: string) {
     await delay()
     return useDataStore.getState().patients
   },
@@ -176,7 +181,7 @@ export const patientsRepository: PatientsRepository = {
 }
 
 export const doctorsRepository: DoctorsRepository = {
-  async list() {
+  async list(_clinicId?: string) {
     await delay()
     return useDataStore.getState().doctors
   },
@@ -195,7 +200,7 @@ export const doctorsRepository: DoctorsRepository = {
 }
 
 export const staffRepository: StaffRepository = {
-  async list() {
+  async list(_clinicId?: string) {
     await delay()
     return useDataStore.getState().staff
   },
@@ -210,7 +215,7 @@ export const staffRepository: StaffRepository = {
 }
 
 export const roomsRepository: RoomsRepository = {
-  async list() {
+  async list(_clinicId?: string) {
     await delay()
     return useDataStore.getState().rooms
   },
@@ -254,7 +259,7 @@ export const authRepository: AuthRepository = {
 }
 
 export const notificationsRepository: NotificationsRepository = {
-  async list() {
+  async list(_clinicId?: string) {
     await delay()
     return useDataStore.getState().notifications
   },

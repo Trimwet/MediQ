@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link } from '@tanstack/react-router'
 import { type BookingResult } from '@/data'
-import { useBookAppointment, useDoctors, useSignUp } from '@/data/hooks'
+import { useBookAppointment, usePublicDoctors, useSignUp } from '@/data/hooks'
 import {
   ArrowLeft,
   CalendarCheck2,
@@ -60,7 +60,13 @@ type FormValues = z.infer<typeof formSchema>
 export function Booking() {
   const [result, setResult] = useState<BookingResult | null>(null)
   const book = useBookAppointment()
-  const doctorsQuery = useDoctors()
+  // Read clinicId from URL search params (?clinicId=...) for the public booking page.
+  const clinicId = useMemo(
+    () => new URLSearchParams(window.location.search).get('clinicId') ?? undefined,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [window.location.search]
+  )
+  const doctorsQuery = usePublicDoctors(clinicId)
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -75,9 +81,7 @@ export function Booking() {
     },
   })
 
-  const activeDoctors = (doctorsQuery.data ?? []).filter(
-    (d) => d.status === 'active'
-  )
+  const activeDoctors = doctorsQuery.data ?? []
 
   // Clinics can have many doctors, so the picker groups them by specialty
   // (with a count per group) while still allowing a name/specialty search.
@@ -143,6 +147,7 @@ export function Booking() {
         doctorName: doctor?.name,
         scheduledFor: scheduledFor.toISOString(),
         reason: values.reason || undefined,
+        clinicId,
       },
       {
         onSuccess: (bookingResult) => {
@@ -380,6 +385,7 @@ function BookingSuccess({
 }) {
   const { appointment, hasAccount } = result
   const [accountCreated, setAccountCreated] = useState(false)
+  const [hasExistingAccount, setHasExistingAccount] = useState(hasAccount)
   const signUp = useSignUp()
   const when = format(
     new Date(appointment.scheduledFor),
@@ -401,11 +407,16 @@ function BookingSuccess({
       {
         onSuccess: () => setAccountCreated(true),
         onError: (error) => {
-          toast.error(
-            error instanceof Error
-              ? error.message
-              : 'Something went wrong creating your account.'
-          )
+          const msg = error instanceof Error ? error.message : ''
+          if (msg.includes('already') || msg.includes('already been registered')) {
+            // Account already exists — inform the user instead of erroring
+            toast.info(
+              'An account already exists with this email. You can sign in with your existing password.'
+            )
+            setHasExistingAccount(true)
+          } else {
+            toast.error(msg || 'Something went wrong creating your account.')
+          }
         },
       }
     )
@@ -460,7 +471,7 @@ function BookingSuccess({
             the schedule. You&apos;ll be able to track it once you sign in.
           </p>
 
-          {hasAccount || accountCreated ? (
+          {hasExistingAccount || accountCreated ? (
             <div className='flex flex-col gap-2'>
               {accountCreated && (
                 <p className='rounded-lg bg-emerald-50 p-3 text-start text-sm text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300'>

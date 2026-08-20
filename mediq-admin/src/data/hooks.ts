@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { hasRole } from '@/config/rbac'
 import { useAuthStore } from '@/stores/auth-store'
+import { useCurrentClinic } from '@/lib/clinic-context'
 import { supabase } from '@/lib/supabase'
 import {
   type Appointment,
@@ -46,24 +47,19 @@ function useDoctorIdentity() {
 // ---- Appointments ----
 
 export function useAppointments() {
-  // Supabase RLS already scopes rows by role server-side:
-  //   - admin / front_desk  → all rows
-  //   - doctor              → only rows where doctor_id matches their linked doctors.id
-  //   - patient             → only rows where patient_email matches their auth email
-  // No client-side filter is needed; doing it here would be a redundant pass
-  // over data that the DB has already scoped correctly (and was causing a
-  // triple-filter bug when combined with the memo in index.tsx).
+  const { clinicId } = useCurrentClinic()
   return useQuery({
-    queryKey: ['appointments'],
-    queryFn: () => appointmentsRepository.list(),
+    queryKey: ['appointments', clinicId ?? 'none'],
+    queryFn: () => appointmentsRepository.list(clinicId ?? undefined),
   })
 }
 
 export function useCreateAppointment() {
   const queryClient = useQueryClient()
+  const { clinicId } = useCurrentClinic()
   return useMutation({
     mutationFn: (input: Omit<Appointment, 'id' | 'status'>) =>
-      appointmentsRepository.create(input),
+      appointmentsRepository.create(input, clinicId ?? undefined),
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: ['appointments'] }),
   })
@@ -190,7 +186,30 @@ export function useSignUp() {
   })
 }
 
-// ---- Self-service booking ----
+// ---- Self-service booking (public / anon-safe) ----
+
+/**
+ * Fetch doctors via the public RPC so anon users on /book can see the list.
+ * RLS blocks direct table access for anon; this RPC bypasses it.
+ */
+export function usePublicDoctors(clinicId?: string) {
+  return useQuery({
+    queryKey: ['public-doctors', clinicId ?? 'none'],
+    queryFn: async (): Promise<{ id: string; name: string; specialization: string }[]> => {
+      if (!clinicId) return []
+      const { data, error } = await supabase.rpc('list_public_doctors', {
+        p_clinic_id: clinicId,
+      })
+      if (error) throw error
+      return (data ?? []).map((d: Record<string, unknown>) => ({
+        id: String(d.id),
+        name: String(d.name),
+        specialization: String(d.specialization),
+      }))
+    },
+    enabled: !!clinicId,
+  })
+}
 
 export function useBookAppointment() {
   const queryClient = useQueryClient()
@@ -208,11 +227,12 @@ export function useBookAppointment() {
 // ---- Queue ----
 
 export function useQueue() {
+  const { clinicId } = useCurrentClinic()
   const { isDoctor, doctor } = useDoctorIdentity()
   return useQuery({
-    queryKey: ['queue', doctor?.id ?? (isDoctor ? 'unresolved' : 'all')],
+    queryKey: ['queue', clinicId ?? 'none', doctor?.id ?? (isDoctor ? 'unresolved' : 'all')],
     queryFn: async () => {
-      const all = await queueRepository.list()
+      const all = await queueRepository.list(clinicId ?? undefined)
       if (!isDoctor) return all
       if (!doctor) return []
       // Prefer matching by appointmentId → doctor.id for accuracy.
@@ -258,13 +278,14 @@ export function useQueueActions() {
 // ---- Patients ----
 
 export function usePatients() {
+  const { clinicId } = useCurrentClinic()
   const { isDoctor, doctor } = useDoctorIdentity()
   return useQuery({
-    queryKey: ['patients', doctor?.id ?? (isDoctor ? 'unresolved' : 'all')],
+    queryKey: ['patients', clinicId ?? 'none', doctor?.id ?? (isDoctor ? 'unresolved' : 'all')],
     queryFn: async () => {
       const [allPatients, allAppointments] = await Promise.all([
-        patientsRepository.list(),
-        appointmentsRepository.list(),
+        patientsRepository.list(clinicId ?? undefined),
+        appointmentsRepository.list(clinicId ?? undefined),
       ])
       if (!isDoctor) return allPatients
       if (!doctor) return []
@@ -289,9 +310,10 @@ export function usePatients() {
 
 export function useCreatePatient() {
   const queryClient = useQueryClient()
+  const { clinicId } = useCurrentClinic()
   return useMutation({
     mutationFn: (input: Omit<Patient, 'id'>) =>
-      patientsRepository.create(input),
+      patientsRepository.create(input, clinicId ?? undefined),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['patients'] }),
   })
 }
@@ -299,16 +321,19 @@ export function useCreatePatient() {
 // ---- Doctors ----
 
 export function useDoctors() {
+  const { clinicId } = useCurrentClinic()
   return useQuery({
-    queryKey: ['doctors'],
-    queryFn: () => doctorsRepository.list(),
+    queryKey: ['doctors', clinicId ?? 'none'],
+    queryFn: () => doctorsRepository.list(clinicId ?? undefined),
   })
 }
 
 export function useCreateDoctor() {
   const queryClient = useQueryClient()
+  const { clinicId } = useCurrentClinic()
   return useMutation({
-    mutationFn: (input: Omit<Doctor, 'id'>) => doctorsRepository.create(input),
+    mutationFn: (input: Omit<Doctor, 'id'>) =>
+      doctorsRepository.create(input, clinicId ?? undefined),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['doctors'] }),
   })
 }
@@ -333,16 +358,19 @@ export function useDeleteDoctor() {
 // ---- Staff ----
 
 export function useStaff() {
+  const { clinicId } = useCurrentClinic()
   return useQuery({
-    queryKey: ['staff'],
-    queryFn: () => staffRepository.list(),
+    queryKey: ['staff', clinicId ?? 'none'],
+    queryFn: () => staffRepository.list(clinicId ?? undefined),
   })
 }
 
 export function useCreateStaff() {
   const queryClient = useQueryClient()
+  const { clinicId } = useCurrentClinic()
   return useMutation({
-    mutationFn: (input: Omit<Staff, 'id'>) => staffRepository.create(input),
+    mutationFn: (input: Omit<Staff, 'id'>) =>
+      staffRepository.create(input, clinicId ?? undefined),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['staff'] }),
   })
 }
@@ -358,16 +386,19 @@ export function useDeleteStaff() {
 // ---- Rooms ----
 
 export function useRooms() {
+  const { clinicId } = useCurrentClinic()
   return useQuery({
-    queryKey: ['rooms'],
-    queryFn: () => roomsRepository.list(),
+    queryKey: ['rooms', clinicId ?? 'none'],
+    queryFn: () => roomsRepository.list(clinicId ?? undefined),
   })
 }
 
 export function useCreateRoom() {
   const queryClient = useQueryClient()
+  const { clinicId } = useCurrentClinic()
   return useMutation({
-    mutationFn: (input: Omit<Room, 'id'>) => roomsRepository.create(input),
+    mutationFn: (input: Omit<Room, 'id'>) =>
+      roomsRepository.create(input, clinicId ?? undefined),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['rooms'] }),
   })
 }
@@ -384,9 +415,10 @@ export function useUpdateRoomStatus() {
 // ---- Notifications ----
 
 export function useNotifications() {
+  const { clinicId } = useCurrentClinic()
   return useQuery({
-    queryKey: ['notifications'],
-    queryFn: () => notificationsRepository.list(),
+    queryKey: ['notifications', clinicId ?? 'none'],
+    queryFn: () => notificationsRepository.list(clinicId ?? undefined),
   })
 }
 
