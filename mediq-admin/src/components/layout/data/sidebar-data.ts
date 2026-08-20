@@ -4,7 +4,6 @@ import {
   DoorOpen,
   LayoutDashboard,
   Settings,
-  ShieldCheck,
   Stethoscope,
   User,
   UserCog,

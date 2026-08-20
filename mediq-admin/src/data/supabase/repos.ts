@@ -5,7 +5,7 @@
  * column mapping is: DB snake_case → frontend camelCase. The `Database`
  * type below mirrors the exact tables and columns from the init migration.
  */
-import { supabase, supabaseAdmin } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'
 import {
   type Appointment,
   type AppointmentStatus,
