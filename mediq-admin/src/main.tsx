@@ -1,4 +1,5 @@
 import { StrictMode } from 'react'
+import { supabase } from '@/lib/supabase'
 import ReactDOM from 'react-dom/client'
 import { AxiosError } from 'axios'
 import {
@@ -91,19 +92,24 @@ declare module '@tanstack/react-router' {
 const rootElement = document.getElementById('root')!
 if (!rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement)
-  root.render(
-    <StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider>
-          <FontProvider>
-            <DirectionProvider>
-              <RouterProvider router={router} />
-            </DirectionProvider>
-          </FontProvider>
-        </ThemeProvider>
-      </QueryClientProvider>
-    </StrictMode>
-  )
+
+  // Wait for Supabase to restore session from localStorage before rendering,
+  // so authenticated queries don't fire with the anon key on reload.
+  supabase.auth.getSession().finally(() => {
+    root.render(
+      <StrictMode>
+        <QueryClientProvider client={queryClient}>
+          <ThemeProvider>
+            <FontProvider>
+              <DirectionProvider>
+                <RouterProvider router={router} />
+              </DirectionProvider>
+            </FontProvider>
+          </ThemeProvider>
+        </QueryClientProvider>
+      </StrictMode>
+    )
+  })
 }
 
 // Remove boot loader now that React has mounted
