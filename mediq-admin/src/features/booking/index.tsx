@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { z } from 'zod'
 import { format, startOfDay, isSameDay } from 'date-fns'
 import { useForm } from 'react-hook-form'
@@ -60,6 +60,8 @@ type FormValues = z.infer<typeof formSchema>
 export function Booking() {
   const [result, setResult] = useState<BookingResult | null>(null)
   const book = useBookAppointment()
+  // Guard against React 19 StrictMode double-mount firing the RPC twice.
+  const submittingRef = useRef(false)
   // Read clinicId from URL search params (?clinicId=...) for the public booking page.
   const clinicId = useMemo(
     () => new URLSearchParams(window.location.search).get('clinicId') ?? undefined,
@@ -124,8 +126,10 @@ export function Booking() {
   }, [selectedDate])
 
   function onSubmit(values: FormValues) {
+    if (submittingRef.current) return
+    submittingRef.current = true
     const slot = TIME_SLOTS.find((s) => s.label === values.time)
-    if (!slot) return
+    if (!slot) { submittingRef.current = false; return }
     // Doctor is optional — patients may not know one by name, so the clinic
     // assigns a suitable doctor when the request is approved.
     const doctor =
@@ -153,6 +157,11 @@ export function Booking() {
         onSuccess: (bookingResult) => {
           setResult(bookingResult)
           form.reset()
+          submittingRef.current = false
+        },
+        onError: (err) => {
+          submittingRef.current = false
+          toast.error(err instanceof Error ? err.message : 'Booking failed — please try again.')
         },
       }
     )
@@ -271,6 +280,11 @@ export function Booking() {
                         emptyText='No doctor matches your search.'
                         groups={doctorGroups}
                       />
+                      {doctorsQuery.isError && (
+                        <p className='text-xs text-destructive'>
+                          Could not load doctors — try again later.
+                        </p>
+                      )}
                       <p className='text-xs text-muted-foreground'>
                         Pick the doctor you&apos;d like to see, or leave it on
                         &ldquo;No preference&rdquo; and we&apos;ll assign the

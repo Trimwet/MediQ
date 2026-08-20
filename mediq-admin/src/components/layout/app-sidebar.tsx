@@ -20,7 +20,12 @@ export function AppSidebar() {
   const { collapsible, variant } = useLayout()
   const { can, hasRole } = useRbac()
   const user = useAuthStore((state) => state.auth.user)
-  const { trackRooms, roomLabel } = useFacilityStore()
+  // Select primitives individually — Zustand v5 / useSyncExternalStore
+  // requires getSnapshot to return a referentially stable value. Destructuring
+  // a whole-store call like `useFacilityStore()` can break that guarantee when
+  // the persist middleware rehydrates, triggering "Maximum update depth exceeded".
+  const trackRooms = useFacilityStore((s) => s.trackRooms)
+  const roomLabel = useFacilityStore((s) => s.roomLabel)
 
   // Hides the Rooms module entirely when the facility does not track rooms,
   // and renames it to match the configured label (e.g. "Offices").

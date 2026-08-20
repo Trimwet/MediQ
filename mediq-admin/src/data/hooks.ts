@@ -191,15 +191,19 @@ export function useSignUp() {
 /**
  * Fetch doctors via the public RPC so anon users on /book can see the list.
  * RLS blocks direct table access for anon; this RPC bypasses it.
+ *
+ * When `clinicId` is omitted the RPC parameter is omitted entirely —
+ * PostgREST sends NULL which makes the SQL function resolve the default
+ * clinic (the function signature has `p_clinic_id uuid DEFAULT NULL`).
  */
 export function usePublicDoctors(clinicId?: string) {
   return useQuery({
     queryKey: ['public-doctors', clinicId ?? 'none'],
     queryFn: async (): Promise<{ id: string; name: string; specialization: string }[]> => {
-      if (!clinicId) return []
-      const { data, error } = await supabase.rpc('list_public_doctors', {
-        p_clinic_id: clinicId,
-      })
+      // Pass {} (empty object) when clinicId is undefined so PostgREST
+      // omits the param and the SQL DEFAULT NULL kicks in.
+      const params = clinicId ? { p_clinic_id: clinicId } : {}
+      const { data, error } = await supabase.rpc('list_public_doctors', params)
       if (error) throw error
       return (data ?? []).map((d: Record<string, unknown>) => ({
         id: String(d.id),
@@ -207,7 +211,7 @@ export function usePublicDoctors(clinicId?: string) {
         specialization: String(d.specialization),
       }))
     },
-    enabled: !!clinicId,
+    // Always enabled — the RPC handles the default clinic when param is NULL.
   })
 }
 
