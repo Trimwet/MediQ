@@ -55,7 +55,6 @@ export function UserAuthForm({
     setIsLoading(true)
 
     try {
-      // 1. Sign in with Supabase Auth.
       const { data: sessionData, error: authError } =
         await supabase.auth.signInWithPassword({
           email: data.email,
@@ -67,7 +66,7 @@ export function UserAuthForm({
         const msg = authError?.message ?? ''
         if (msg.includes('Invalid login credentials')) {
           toast.error(
-            'Wrong email or password. If you haven\'t signed up yet, create an account first.'
+            "Wrong email or password. If you haven't signed up yet, create an account first."
           )
         } else if (msg.includes('Email not confirmed')) {
           toast.error(
@@ -79,7 +78,6 @@ export function UserAuthForm({
         return
       }
 
-      // 2. Fetch the user's profile to get their role.
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('role, full_name')
@@ -94,8 +92,6 @@ export function UserAuthForm({
 
       const role = [String(profile.role)]
 
-      // 3. Persist to the auth store (mirrors the shape the rest of the app
-      //    expects: roles as string[], email, exp from the JWT).
       const exp =
         sessionData.session?.expires_at
           ? sessionData.session.expires_at * 1000
@@ -109,9 +105,6 @@ export function UserAuthForm({
       })
       auth.setAccessToken(sessionData.session?.access_token ?? '')
 
-      // 4. Route based on role — staff land on the dashboard, patients on
-      //    their portal. The landing page is public, so `/` is never the
-      //    post-login destination.
       const defaultPath = role.includes('patient')
         ? '/patient'
         : '/admin/dashboard'
