@@ -16,8 +16,8 @@ const freePlan = {
   yearly: 0,
   features: ['2 staff', '1 location', '50 appointments / mo', 'Basic queue'],
   cta: 'Start free',
-  to: '/sign-up' as const,
-  search: { business: true as const, plan: 'free' as const },
+  to: '/create-clinic' as const,
+  search: { plan: 'free' as const },
 } as const
 
 const plans = [
@@ -34,8 +34,8 @@ const plans = [
       'In-app notifications',
     ],
     cta: 'Choose Starter',
-    to: '/sign-up' as const,
-    search: { business: true as const, plan: 'starter' as const },
+    to: '/create-clinic' as const,
+    search: { plan: 'starter' as const },
     variant: 'outline' as const,
   },
   {
@@ -51,8 +51,8 @@ const plans = [
       'Role-based access control',
     ],
     cta: 'Start 14-day trial',
-    to: '/sign-up' as const,
-    search: { business: true as const, plan: 'professional' as const },
+    to: '/create-clinic' as const,
+    search: { plan: 'professional' as const },
     variant: 'default' as const,
     featured: true,
   },
@@ -69,8 +69,8 @@ const plans = [
       'On-premise deployment option',
     ],
     cta: 'Contact sales',
-    to: '/sign-up' as const,
-    search: { business: true as const, plan: 'enterprise' as const },
+    to: '/create-clinic' as const,
+    search: { plan: 'enterprise' as const },
     variant: 'outline' as const,
   },
 ]
