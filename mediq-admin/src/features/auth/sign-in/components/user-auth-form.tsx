@@ -6,7 +6,8 @@ import { Link, useNavigate } from '@tanstack/react-router'
 import { supabase } from '@/lib/supabase'
 import { Loader2, LogIn } from 'lucide-react'
 import { toast } from 'sonner'
-import { useAuthStore } from '@/stores/auth-store'
+import { sendOtp } from '@/lib/otp'
+import { savePendingSignin } from '@/lib/pending-auth'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -41,7 +42,6 @@ export function UserAuthForm({
 }: UserAuthFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
-  const { auth } = useAuthStore()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -78,40 +78,19 @@ export function UserAuthForm({
         return
       }
 
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('role, full_name')
-        .eq('id', sessionData.user.id)
-        .single()
+      // 2FA: revoke the pre-verification session, send a code to the email,
+      // and hold the credentials until the code is verified on the OTP page.
+      // The session is only re-issued (and the store populated) after
+      // verification, so protected routes stay locked until then.
+      await supabase.auth.signOut()
 
-      if (profileError || !profile) {
-        setIsLoading(false)
-        toast.error('Could not load your profile. Please try again.')
-        return
-      }
+      await sendOtp({ email: data.email, purpose: 'signin' })
+      savePendingSignin({ email: data.email, password: data.password, redirectTo })
 
-      const role = [String(profile.role)]
-
-      const exp =
-        sessionData.session?.expires_at
-          ? sessionData.session.expires_at * 1000
-          : Date.now() + 24 * 60 * 60 * 1000
-
-      auth.setUser({
-        accountNo: sessionData.user.id,
-        email: sessionData.user.email ?? data.email,
-        role,
-        exp,
+      navigate({
+        to: '/otp',
+        search: { email: data.email, purpose: 'signin' },
       })
-      auth.setAccessToken(sessionData.session?.access_token ?? '')
-
-      const defaultPath = role.includes('patient')
-        ? '/patient'
-        : '/admin/dashboard'
-      const targetPath = redirectTo || defaultPath
-      navigate({ to: targetPath, replace: true })
-
-      toast.success(`Welcome back, ${profile.full_name || data.email}!`)
     } catch {
       setIsLoading(false)
       toast.error('An unexpected error occurred. Please try again.')
@@ -159,7 +138,7 @@ export function UserAuthForm({
         />
         <Button className='mt-3' disabled={isLoading}>
           {isLoading ? <Loader2 className='animate-spin' /> : <LogIn />}
-          Sign in
+          {isLoading ? 'Sending verification code...' : 'Sign in'}
         </Button>
         <p className='text-center text-sm text-muted-foreground'>
           Visiting as a patient?{' '}
