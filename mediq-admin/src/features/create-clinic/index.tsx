@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { z } from 'zod'
+import { Logo } from '@/assets/logo'
 import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import { Building2, Check, Loader2, UserPlus } from 'lucide-react'
+import { Check, Loader2, UserPlus } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/auth-store'
@@ -759,9 +760,9 @@ export function CreateClinic() {
     <div className='flex min-h-[calc(100svh-4rem)] items-center justify-center px-4 py-12'>
       <Card className='w-full max-w-lg'>
         <CardHeader className='text-center'>
-          <div className='mx-auto mb-3 flex size-12 items-center justify-center rounded-xl bg-primary/10 text-primary'>
-            <Building2 className='size-6' />
-          </div>
+          <Link to='/' aria-label='MediQ home' className='mx-auto mb-3 flex justify-center'>
+            <Logo className='h-9' />
+          </Link>
           <CardTitle className='font-manrope text-xl font-bold tracking-tight sm:text-2xl'>
             {user ? 'Create your clinic' : 'Get started with MediQ'}
           </CardTitle>
