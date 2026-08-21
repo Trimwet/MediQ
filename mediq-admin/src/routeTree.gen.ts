@@ -23,6 +23,7 @@ import { Route as errors401RouteImport } from './routes/(errors)/401'
 import { Route as errors403RouteImport } from './routes/(errors)/403'
 import { Route as errors404RouteImport } from './routes/(errors)/404'
 import { Route as errors500RouteImport } from './routes/(errors)/500'
+import { Route as AuthenticatedCreateClinicRouteImport } from './routes/_authenticated/create-clinic'
 import { Route as PublicIndexRouteImport } from './routes/_public/index'
 import { Route as PublicAboutRouteImport } from './routes/_public/about'
 import { Route as PublicContactRouteImport } from './routes/_public/contact'
@@ -114,6 +115,12 @@ const errors500Route = errors500RouteImport.update({
   path: '/500',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedCreateClinicRoute =
+  AuthenticatedCreateClinicRouteImport.update({
+    id: '/create-clinic',
+    path: '/create-clinic',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const PublicIndexRoute = PublicIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -252,6 +259,7 @@ export interface FileRoutesByFullPath {
   '/403': typeof errors403Route
   '/404': typeof errors404Route
   '/500': typeof errors500Route
+  '/create-clinic': typeof AuthenticatedCreateClinicRoute
   '/about': typeof PublicAboutRoute
   '/contact': typeof PublicContactRoute
   '/faq': typeof PublicFaqRoute
@@ -288,6 +296,7 @@ export interface FileRoutesByTo {
   '/403': typeof errors403Route
   '/404': typeof errors404Route
   '/500': typeof errors500Route
+  '/create-clinic': typeof AuthenticatedCreateClinicRoute
   '/about': typeof PublicAboutRoute
   '/contact': typeof PublicContactRoute
   '/faq': typeof PublicFaqRoute
@@ -325,6 +334,7 @@ export interface FileRoutesById {
   '/(errors)/403': typeof errors403Route
   '/(errors)/404': typeof errors404Route
   '/(errors)/500': typeof errors500Route
+  '/_authenticated/create-clinic': typeof AuthenticatedCreateClinicRoute
   '/_public/about': typeof PublicAboutRoute
   '/_public/contact': typeof PublicContactRoute
   '/_public/faq': typeof PublicFaqRoute
@@ -364,6 +374,7 @@ export interface FileRouteTypes {
     | '/403'
     | '/404'
     | '/500'
+    | '/create-clinic'
     | '/about'
     | '/contact'
     | '/faq'
@@ -400,6 +411,7 @@ export interface FileRouteTypes {
     | '/403'
     | '/404'
     | '/500'
+    | '/create-clinic'
     | '/about'
     | '/contact'
     | '/faq'
@@ -436,6 +448,7 @@ export interface FileRouteTypes {
     | '/(errors)/403'
     | '/(errors)/404'
     | '/(errors)/500'
+    | '/_authenticated/create-clinic'
     | '/_public/about'
     | '/_public/contact'
     | '/_public/faq'
@@ -576,6 +589,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/500'
       preLoaderRoute: typeof errors500RouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/create-clinic': {
+      id: '/_authenticated/create-clinic'
+      path: '/create-clinic'
+      fullPath: '/create-clinic'
+      preLoaderRoute: typeof AuthenticatedCreateClinicRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_public/': {
       id: '/_public/'
@@ -764,6 +784,7 @@ const AuthenticatedAdminSettingsRouteWithChildren =
   )
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedCreateClinicRoute: typeof AuthenticatedCreateClinicRoute
   AuthenticatedAdminAppointmentsRoute: typeof AuthenticatedAdminAppointmentsRoute
   AuthenticatedAdminDashboardRoute: typeof AuthenticatedAdminDashboardRoute
   AuthenticatedAdminDoctorsRoute: typeof AuthenticatedAdminDoctorsRoute
@@ -777,6 +798,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedCreateClinicRoute: AuthenticatedCreateClinicRoute,
   AuthenticatedAdminAppointmentsRoute: AuthenticatedAdminAppointmentsRoute,
   AuthenticatedAdminDashboardRoute: AuthenticatedAdminDashboardRoute,
   AuthenticatedAdminDoctorsRoute: AuthenticatedAdminDoctorsRoute,

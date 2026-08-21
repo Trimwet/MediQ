@@ -1,10 +1,12 @@
-import { Building2, Check, ChevronsUpDown } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
+import { Building2, Check, ChevronsUpDown, Plus } from 'lucide-react'
 import { useClinicContext } from '@/lib/clinic-context'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import {
@@ -45,38 +47,49 @@ export function TeamSwitcher() {
               )}
             </SidebarMenuButton>
           </DropdownMenuTrigger>
-          {allClinics.length > 1 && (
-            <DropdownMenuContent
-              className='w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg'
-              align='start'
-              side={isMobile ? 'bottom' : 'right'}
-              sideOffset={4}
-            >
-              <DropdownMenuLabel className='text-xs text-muted-foreground'>
-                Clinics
-              </DropdownMenuLabel>
-              {allClinics.map((c) => (
-                <DropdownMenuItem
-                  key={c.clinicId}
-                  onClick={() => switchClinic(c.clinicId)}
-                  className='gap-2 p-2'
-                >
-                  <div className='flex size-6 items-center justify-center rounded-md bg-primary/10'>
-                    <Building2 className='size-3.5 text-primary' />
-                  </div>
-                  <div className='flex flex-col'>
-                    <span className='font-medium'>{c.clinicName}</span>
-                    <span className='text-xs text-muted-foreground capitalize'>
-                      {c.clinicRole.replace('_', ' ')}
-                    </span>
-                  </div>
-                  {c.clinicId === clinic.clinicId && (
-                    <Check className='ms-auto size-4' />
-                  )}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          )}
+          <DropdownMenuContent
+            className='w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg'
+            align='start'
+            side={isMobile ? 'bottom' : 'right'}
+            sideOffset={4}
+          >
+            {allClinics.length > 1 && (
+              <>
+                <DropdownMenuLabel className='text-xs text-muted-foreground'>
+                  Clinics
+                </DropdownMenuLabel>
+                {allClinics.map((c) => (
+                  <DropdownMenuItem
+                    key={c.clinicId}
+                    onClick={() => switchClinic(c.clinicId)}
+                    className='gap-2 p-2'
+                  >
+                    <div className='flex size-6 items-center justify-center rounded-md bg-primary/10'>
+                      <Building2 className='size-3.5 text-primary' />
+                    </div>
+                    <div className='flex flex-col'>
+                      <span className='font-medium'>{c.clinicName}</span>
+                      <span className='text-xs text-muted-foreground capitalize'>
+                        {c.clinicRole.replace('_', ' ')}
+                      </span>
+                    </div>
+                    {c.clinicId === clinic.clinicId && (
+                      <Check className='ms-auto size-4' />
+                    )}
+                  </DropdownMenuItem>
+                ))}
+                <DropdownMenuSeparator />
+              </>
+            )}
+            <DropdownMenuItem asChild className='gap-2 p-2'>
+              <Link to='/create-clinic'>
+                <div className='flex size-6 items-center justify-center rounded-md bg-primary/10'>
+                  <Plus className='size-3.5 text-primary' />
+                </div>
+                <span className='font-medium'>Create clinic</span>
+              </Link>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>

@@ -4,12 +4,10 @@ import {
   Activity,
   ArrowRight,
   BellRing,
-
   CalendarCheck,
   Check,
   Cross,
   Dna,
-
   HeartPulse,
   LineChart,
   ListOrdered,
@@ -64,9 +62,7 @@ const heroStats = [
 
 // Background slides for the hero carousel. The first slide is the waiting
 // room photo; the rest are stock images that keep the rotation varied.
-const heroImages = [
-  '/images/hero-waiting-room.jpg',
-]
+const heroImages = ['/images/hero-waiting-room.jpg']
 
 const HERO_ROTATE_MS = 5000
 
@@ -208,7 +204,7 @@ type Role = {
   headline: string
   description: string
   points: { title: string; text: string }[]
-  cta: { label: string; to: '/book' | '/sign-in' | '/sign-up' }
+  cta: { label: string; to: '/book' | '/sign-in' | '/sign-up' | '/create-clinic' }
 }
 
 const roles: Role[] = [
@@ -282,7 +278,7 @@ const roles: Role[] = [
         text: 'The same smooth journey in every department.',
       },
     ],
-    cta: { label: 'Set up your clinic', to: '/sign-up' },
+    cta: { label: 'Set up your clinic', to: '/create-clinic' },
   },
   {
     id: 'administrators',
@@ -869,8 +865,6 @@ function ClinicFloor() {
     </section>
   )
 }
-
-
 
 /* -------------------------------------------------------------------------- */
 /*  CTA banner                                                                 */
