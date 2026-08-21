@@ -1,0 +1,135 @@
+- generic [ref=f12e2]:
+  - generic [ref=f12e3]:
+    - link "Skip to Main" [ref=f12e4] [cursor=pointer]:
+      - /url: "#content"
+    - generic [ref=f12e7]:
+      - list [ref=f12e9]:
+        - listitem [ref=f12e10]:
+          - button "Default Clinic professional plan" [ref=f12e11] [cursor=pointer]:
+            - generic [ref=f12e17]:
+              - generic [ref=f12e18]: Default Clinic
+              - generic [ref=f12e19]: professional plan
+      - generic [ref=f12e20]:
+        - generic [ref=f12e21]:
+          - generic [ref=f12e22]: General
+          - list [ref=f12e23]:
+            - listitem [ref=f12e24]:
+              - link "Dashboard" [ref=f12e25] [cursor=pointer]:
+                - /url: /admin/dashboard
+            - listitem [ref=f12e32]:
+              - link "Appointments" [ref=f12e33] [cursor=pointer]:
+                - /url: /admin/appointments
+            - listitem [ref=f12e37]:
+              - link "Queue" [ref=f12e38] [cursor=pointer]:
+                - /url: /admin/queue
+            - listitem [ref=f12e45]:
+              - link "Patients" [ref=f12e46] [cursor=pointer]:
+                - /url: /admin/patients
+        - generic [ref=f12e51]:
+          - generic [ref=f12e52]: Management
+          - list [ref=f12e53]:
+            - listitem [ref=f12e54]:
+              - link "Doctors" [ref=f12e55] [cursor=pointer]:
+                - /url: /admin/doctors
+            - listitem [ref=f12e61]:
+              - link "Staff" [ref=f12e62] [cursor=pointer]:
+                - /url: /admin/staff
+            - listitem [ref=f12e76]:
+              - link "Rooms" [ref=f12e77] [cursor=pointer]:
+                - /url: /admin/rooms
+        - generic [ref=f12e82]:
+          - generic [ref=f12e83]: Other
+          - list [ref=f12e84]:
+            - listitem [ref=f12e85]:
+              - link "Notifications" [ref=f12e86] [cursor=pointer]:
+                - /url: /admin/notifications
+            - listitem [ref=f12e91]:
+              - button "Settings" [ref=f12e92] [cursor=pointer]
+      - list [ref=f12e100]:
+        - listitem [ref=f12e101]:
+          - button "J jonahmafuyai jonahmafuyai@gmail.com" [ref=f12e102] [cursor=pointer]:
+            - generic [ref=f12e103]: J
+            - generic [ref=f12e105]:
+              - generic [ref=f12e106]: jonahmafuyai
+              - generic [ref=f12e107]: jonahmafuyai@gmail.com
+      - button "Toggle Sidebar" [ref=f12e111]
+    - generic [ref=f12e112]:
+      - banner [ref=f12e113]:
+        - generic [ref=f12e114]:
+          - button "Toggle Sidebar" [ref=f12e115] [cursor=pointer]
+          - navigation [ref=f12e117]:
+            - link "Overview" [ref=f12e118] [cursor=pointer]:
+              - /url: /admin/dashboard
+            - link "Appointments" [ref=f12e119] [cursor=pointer]:
+              - /url: /admin/appointments
+            - link "Queue" [ref=f12e120] [cursor=pointer]:
+              - /url: /admin/queue
+          - button "Search ⌘ K" [ref=f12e121] [cursor=pointer]:
+            - generic [ref=f12e122]: Search
+            - generic:
+              - generic: ⌘
+              - text: K
+          - button "Notifications" [ref=f12e123] [cursor=pointer]
+          - button "Toggle theme" [ref=f12e124] [cursor=pointer]
+          - button "Open theme settings" [ref=f12e126] [cursor=pointer]
+          - button [ref=f12e127] [cursor=pointer]
+      - main [ref=f12e130]:
+        - generic [ref=f12e131]:
+          - generic [ref=f12e132]:
+            - heading "Doctors" [level=1] [ref=f12e133]
+            - paragraph [ref=f12e134]: Clinic doctors and availability
+          - button "Add doctor" [ref=f12e135] [cursor=pointer]
+        - generic [ref=f12e136]:
+          - generic [ref=f12e137]:
+            - generic [ref=f12e138]:
+              - textbox "Search doctors..." [ref=f12e139]
+              - button "Status" [ref=f12e141] [cursor=pointer]
+            - button "View" [ref=f12e142] [cursor=pointer]
+          - table [ref=f12e145]:
+            - rowgroup [ref=f12e146]:
+              - row [ref=f12e147]:
+                - columnheader [ref=f12e148]:
+                  - button "Doctor" [ref=f12e150] [cursor=pointer]
+                - columnheader [ref=f12e152]:
+                  - button "Specialization" [ref=f12e154] [cursor=pointer]
+                - columnheader [ref=f12e156]:
+                  - button "Today" [ref=f12e158] [cursor=pointer]
+                - columnheader [ref=f12e160]:
+                  - button "Status" [ref=f12e162] [cursor=pointer]
+                - columnheader "Actions" [ref=f12e164]
+            - rowgroup [ref=f12e166]:
+              - row [ref=f12e167]:
+                - cell [ref=f12e168]:
+                  - generic [ref=f12e169]:
+                    - paragraph [ref=f12e170]: jonah mafuyai
+                    - paragraph [ref=f12e171]: jonahmafuyai81@gmail.com
+                - cell "Orthopedics" [ref=f12e172]
+                - cell "0 appointments" [ref=f12e173]
+                - cell "active" [ref=f12e175]
+                - cell [ref=f12e177]:
+                  - button "Open menu" [ref=f12e178] [cursor=pointer]
+          - generic [ref=f12e180]:
+            - generic [ref=f12e182]:
+              - combobox [ref=f12e183] [cursor=pointer]:
+                - generic: "10"
+              - paragraph [ref=f12e184]: Rows per page
+            - generic [ref=f12e185]:
+              - generic [ref=f12e186]: Page 1 of 1
+              - generic [ref=f12e187]:
+                - button "Go to first page" [disabled]
+                - button "Go to previous page" [disabled]
+                - button "Go to page 1 1" [ref=f12e189] [cursor=pointer]:
+                  - generic [ref=f12e190]: Go to page 1
+                  - text: "1"
+                - button "Go to next page" [disabled]
+                - button "Go to last page" [disabled]
+  - generic [ref=f12e191]:
+    - heading "Command Palette" [level=2] [ref=f12e192]
+    - paragraph [ref=f12e193]: Search for a command to run...
+  - region "Notifications alt+T"
+  - button "Open Tanstack query devtools" [ref=f12e244] [cursor=pointer]
+  - generic:
+    - contentinfo:
+      - button "Open TanStack Router Devtools" [ref=f12e293] [cursor=pointer]:
+        - generic [ref=f12e365]: "-"
+        - generic [ref=f12e366]: TanStack Router

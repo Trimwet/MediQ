@@ -1,0 +1,61 @@
+- generic [ref=f16e2]:
+  - generic [ref=f16e590]:
+    - banner [ref=f16e591]:
+      - generic [ref=f16e592]:
+        - link "Back to home" [ref=f16e593] [cursor=pointer]:
+          - /url: /
+        - link "MediQ home" [ref=f16e594] [cursor=pointer]:
+          - /url: /
+          - img "MediQ" [ref=f16e595]
+      - generic [ref=f16e596]:
+        - button "Toggle theme" [ref=f16e597] [cursor=pointer]
+        - link "Sign in" [ref=f16e599] [cursor=pointer]:
+          - /url: /sign-in
+    - main [ref=f16e600]:
+      - generic [ref=f16e601]:
+        - heading "Book an appointment" [level=1] [ref=f16e602]
+        - paragraph [ref=f16e603]: No account needed — book in under a minute. Your request goes to the clinic for approval, and you can set a password to track it.
+      - generic [ref=f16e604]:
+        - generic [ref=f16e605]: Choose your preferred doctor and time
+        - generic [ref=f16e612]:
+          - generic [ref=f16e613]:
+            - generic [ref=f16e614]: Full name
+            - textbox "Full name" [ref=f16e615]:
+              - /placeholder: Aisha Bello
+          - generic [ref=f16e616]:
+            - generic [ref=f16e617]: Email
+            - textbox "Email" [ref=f16e618]:
+              - /placeholder: you@example.com
+          - generic [ref=f16e619]:
+            - generic [ref=f16e620]: Phone
+            - textbox "Phone" [ref=f16e621]:
+              - /placeholder: +234 800 000 0000
+          - generic [ref=f16e622]:
+            - generic [ref=f16e623]:
+              - text: Doctor
+              - generic [ref=f16e624]: (optional)
+            - combobox [disabled]:
+              - generic: Loading...
+            - paragraph [ref=f16e625]: Pick the doctor you'd like to see, or leave it on “No preference” and we'll assign the doctor best suited to your visit.
+          - generic [ref=f16e626]:
+            - generic [ref=f16e627]: Date
+            - button "Pick a date" [ref=f16e628] [cursor=pointer]
+          - generic [ref=f16e630]:
+            - generic [ref=f16e631]: Time
+            - combobox "Time" [ref=f16e632] [cursor=pointer]:
+              - generic: Choose a time
+            - combobox [ref=f16e633]
+          - generic [ref=f16e634]:
+            - generic [ref=f16e635]:
+              - text: Reason for visit
+              - generic [ref=f16e636]: (optional)
+            - textbox "Reason for visit (optional)" [ref=f16e637]:
+              - /placeholder: Briefly describe your symptoms
+          - button "Confirm appointment" [ref=f16e638] [cursor=pointer]
+  - region "Notifications alt+T"
+  - button "Open Tanstack query devtools" [ref=f16e467] [cursor=pointer]
+  - generic:
+    - contentinfo:
+      - button "Open TanStack Router Devtools" [ref=f16e516] [cursor=pointer]:
+        - generic [ref=f16e588]: "-"
+        - generic [ref=f16e589]: TanStack Router

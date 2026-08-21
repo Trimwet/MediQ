@@ -1,0 +1,4 @@
+[     608ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://snvdwamqjreuhtyrrrlg.supabase.co/:0
+[     845ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://snvdwamqjreuhtyrrrlg.supabase.co/favicon.ico:0
+[   11972ms] [ERROR] Failed to load resource: the server responded with a status of 400 () @ https://snvdwamqjreuhtyrrrlg.supabase.co/rest/v1/rpc/book_appointment:0
+[   12263ms] [ERROR] Failed to load resource: the server responded with a status of 400 () @ https://snvdwamqjreuhtyrrrlg.supabase.co/rest/v1/rpc/book_appointment:0

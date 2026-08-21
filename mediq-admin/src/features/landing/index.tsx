@@ -4,12 +4,12 @@ import {
   Activity,
   ArrowRight,
   BellRing,
-  Brain,
+
   CalendarCheck,
   Check,
   Cross,
   Dna,
-  Eye,
+
   HeartPulse,
   LineChart,
   ListOrdered,
@@ -18,10 +18,8 @@ import {
   Microscope,
   Pill,
   QrCode,
-  Quote,
   ShieldCheck,
   Stethoscope,
-  Star,
   Syringe,
   User,
   UserCheck,
@@ -68,8 +66,6 @@ const heroStats = [
 // room photo; the rest are stock images that keep the rotation varied.
 const heroImages = [
   '/images/hero-waiting-room.jpg',
-  'https://images.unsplash.com/photo-1758654860024-9e352f70d1f9?q=80&w=1600&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?q=80&w=1600&auto=format&fit=crop',
 ]
 
 const HERO_ROTATE_MS = 5000
@@ -874,134 +870,7 @@ function ClinicFloor() {
   )
 }
 
-/* -------------------------------------------------------------------------- */
-/*  Testimonials — CSS marquee                                                 */
-/* -------------------------------------------------------------------------- */
 
-const testimonials = [
-  {
-    quote:
-      'MediQ has completely transformed how we handle our morning rush. The interface is intuitive and the support is top-notch.',
-    initials: 'SC',
-    name: 'Dr. Sarah Chen',
-    role: 'Chief of Medicine',
-    rating: 5,
-  },
-  {
-    quote:
-      'I no longer have to sit in a crowded waiting room for hours. Being able to track my place in line from my phone is a game changer.',
-    initials: 'JW',
-    name: 'James Wilson',
-    role: 'Patient',
-    rating: 5,
-  },
-  {
-    quote:
-      'MediQ has eased my work as a desk clerk. Rather than arguing with patients about their place in line, I monitor the live queue and add others to it.',
-    initials: 'MK',
-    name: 'Maria Kostas',
-    role: 'Clinic Administrator',
-    rating: 4,
-  },
-  {
-    quote:
-      'The real-time notifications keep patients informed and reduce no-shows significantly. Best investment our clinic has made.',
-    initials: 'LP',
-    name: 'Dr. Luis Pereira',
-    role: 'General Practitioner',
-    rating: 5,
-  },
-]
-
-function TestimonialCard({
-  quote,
-  initials,
-  name,
-  role,
-  rating,
-}: {
-  quote: string
-  initials: string
-  name: string
-  role: string
-  rating: number
-}) {
-  return (
-    <figure className='flex w-[340px] shrink-0 flex-col justify-between rounded-2xl border border-border bg-card p-6 shadow-sm transition-shadow hover:shadow-md sm:w-[380px]'>
-      <div>
-        <div className='flex items-center justify-between'>
-          <span className='flex size-8 items-center justify-center rounded-full bg-primary/10 text-primary'>
-            <Quote className='size-3.5' />
-          </span>
-          <div
-            className='flex items-center gap-0.5 text-amber-500'
-            aria-label={`${rating} out of 5 stars`}
-          >
-            {Array.from({ length: rating }).map((_, i) => (
-              <Star key={i} className='size-3.5 fill-current' />
-            ))}
-          </div>
-        </div>
-        <blockquote className='mt-4 text-sm leading-relaxed text-foreground/85'>
-          &ldquo;{quote}&rdquo;
-        </blockquote>
-      </div>
-      <figcaption className='mt-6 flex items-center gap-3 border-t border-border/70 pt-5'>
-        <span className='flex size-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary/15 to-primary/5 text-xs font-semibold text-primary ring-1 ring-primary/20'>
-          {initials}
-        </span>
-        <div className='min-w-0'>
-          <div className='truncate text-sm font-semibold'>{name}</div>
-          <div className='truncate text-xs text-muted-foreground'>{role}</div>
-        </div>
-      </figcaption>
-    </figure>
-  )
-}
-
-const marqueeItems = [...testimonials, ...testimonials]
-
-function Testimonials() {
-  return (
-    <section id='stories' className='relative py-16 sm:py-20'>
-      <style>{`
-        @keyframes marquee {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        .animate-marquee:hover {
-          animation-play-state: paused;
-        }
-      `}</style>
-      <div className='mx-auto max-w-6xl px-4 sm:px-6'>
-        <SectionHeading
-          title='What our users say'
-          description='Real feedback from healthcare providers and patients.'
-        />
-      </div>
-      <div className='mt-10 overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]'>
-        <div
-          className='animate-marquee flex w-max items-stretch gap-5 pr-5'
-          style={{ animation: 'marquee 40s linear infinite' }}
-        >
-          {marqueeItems.map((t, i) => (
-            <TestimonialCard key={i} {...t} />
-          ))}
-        </div>
-      </div>
-
-      {/* Floating accent icons */}
-      <FloatIcon
-        icon={Brain}
-        className='top-[15%] left-[3%] size-8 rotate-[10deg] opacity-40'
-      />
-      <FloatIcon
-        icon={Eye}
-        className='right-[4%] bottom-[12%] size-7 -rotate-[15deg] opacity-40'
-      />
-    </section>
-  )
-}
 
 /* -------------------------------------------------------------------------- */
 /*  CTA banner                                                                 */
@@ -1068,7 +937,7 @@ export function Landing() {
       <UnifiedPlatform />
       <HowItWorks />
       <ClinicFloor />
-      <Testimonials />
+
       <PricingSection />
       <CTA />
     </>

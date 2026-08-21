@@ -1,0 +1,152 @@
+- generic [ref=f11e2]:
+  - generic [ref=f11e3]:
+    - link "Skip to Main" [ref=f11e4] [cursor=pointer]:
+      - /url: "#content"
+    - generic [ref=f11e7]:
+      - list [ref=f11e9]:
+        - listitem [ref=f11e10]:
+          - button "Default Clinic professional plan" [ref=f11e11] [cursor=pointer]:
+            - generic [ref=f11e17]:
+              - generic [ref=f11e18]: Default Clinic
+              - generic [ref=f11e19]: professional plan
+      - generic [ref=f11e20]:
+        - generic [ref=f11e21]:
+          - generic [ref=f11e22]: General
+          - list [ref=f11e23]:
+            - listitem [ref=f11e24]:
+              - link "Dashboard" [ref=f11e25] [cursor=pointer]:
+                - /url: /admin/dashboard
+            - listitem [ref=f11e32]:
+              - link "Appointments" [ref=f11e33] [cursor=pointer]:
+                - /url: /admin/appointments
+            - listitem [ref=f11e37]:
+              - link "Queue" [ref=f11e38] [cursor=pointer]:
+                - /url: /admin/queue
+            - listitem [ref=f11e45]:
+              - link "Patients" [ref=f11e46] [cursor=pointer]:
+                - /url: /admin/patients
+        - generic [ref=f11e51]:
+          - generic [ref=f11e52]: Management
+          - list [ref=f11e53]:
+            - listitem [ref=f11e54]:
+              - link "Doctors" [ref=f11e55] [cursor=pointer]:
+                - /url: /admin/doctors
+            - listitem [ref=f11e61]:
+              - link "Staff" [ref=f11e62] [cursor=pointer]:
+                - /url: /admin/staff
+            - listitem [ref=f11e76]:
+              - link "Rooms" [ref=f11e77] [cursor=pointer]:
+                - /url: /admin/rooms
+        - generic [ref=f11e82]:
+          - generic [ref=f11e83]: Other
+          - list [ref=f11e84]:
+            - listitem [ref=f11e85]:
+              - link "Notifications" [ref=f11e86] [cursor=pointer]:
+                - /url: /admin/notifications
+            - listitem [ref=f11e91]:
+              - button "Settings" [ref=f11e92] [cursor=pointer]
+      - list [ref=f11e100]:
+        - listitem [ref=f11e101]:
+          - button "J jonahmafuyai jonahmafuyai@gmail.com" [ref=f11e102] [cursor=pointer]:
+            - generic [ref=f11e103]: J
+            - generic [ref=f11e105]:
+              - generic [ref=f11e106]: jonahmafuyai
+              - generic [ref=f11e107]: jonahmafuyai@gmail.com
+      - button "Toggle Sidebar" [ref=f11e111]
+    - generic [ref=f11e112]:
+      - banner [ref=f11e113]:
+        - generic [ref=f11e114]:
+          - button "Toggle Sidebar" [ref=f11e115] [cursor=pointer]
+          - navigation [ref=f11e117]:
+            - link "Overview" [ref=f11e118] [cursor=pointer]:
+              - /url: /admin/dashboard
+            - link "Appointments" [ref=f11e119] [cursor=pointer]:
+              - /url: /admin/appointments
+            - link "Queue" [ref=f11e120] [cursor=pointer]:
+              - /url: /admin/queue
+          - button "Search ⌘ K" [ref=f11e121] [cursor=pointer]:
+            - generic [ref=f11e122]: Search
+            - generic:
+              - generic: ⌘
+              - text: K
+          - button "Notifications" [ref=f11e123] [cursor=pointer]
+          - button "Toggle theme" [ref=f11e124] [cursor=pointer]
+          - button "Open theme settings" [ref=f11e126] [cursor=pointer]
+          - button [ref=f11e127] [cursor=pointer]
+      - main [ref=f11e130]:
+        - generic [ref=f11e131]:
+          - generic [ref=f11e132]:
+            - heading "Patients" [level=1] [ref=f11e133]
+            - paragraph [ref=f11e134]: Clinic patient directory
+          - button "Add patient" [ref=f11e135] [cursor=pointer]
+        - generic [ref=f11e136]:
+          - generic [ref=f11e137]:
+            - textbox "Search patients..." [ref=f11e139]
+            - button "View" [ref=f11e140] [cursor=pointer]
+          - table [ref=f11e143]:
+            - rowgroup [ref=f11e144]:
+              - row [ref=f11e145]:
+                - columnheader [ref=f11e146]:
+                  - button "Patient" [ref=f11e148] [cursor=pointer]
+                - columnheader "Phone" [ref=f11e150]
+                - columnheader "Email" [ref=f11e152]
+                - columnheader [ref=f11e153]:
+                  - button "Last visit" [ref=f11e155] [cursor=pointer]
+                - columnheader [ref=f11e157]:
+                  - button "Visits" [ref=f11e159] [cursor=pointer]
+            - rowgroup [ref=f11e161]:
+              - row [ref=f11e162]:
+                - cell "David" [ref=f11e163]
+                - cell "08137592694" [ref=f11e164]
+                - cell "davidagharandu@gmail.com" [ref=f11e165]
+                - cell "Never" [ref=f11e166]
+                - cell "0" [ref=f11e167]
+              - row [ref=f11e168]:
+                - cell "Flow Test User" [ref=f11e169]
+                - cell "5551234" [ref=f11e170]
+                - cell "flow.test@example.com" [ref=f11e171]
+                - cell "Never" [ref=f11e172]
+                - cell "0" [ref=f11e173]
+              - row [ref=f11e174]:
+                - cell "Isaac Yakubu" [ref=f11e175]
+                - cell "+2347010055727" [ref=f11e176]
+                - cell "isaacyakubu544@gmail.com" [ref=f11e177]
+                - cell "Never" [ref=f11e178]
+                - cell "0" [ref=f11e179]
+              - row [ref=f11e180]:
+                - cell "jonah mafuyai" [ref=f11e181]
+                - cell "+2349063546728" [ref=f11e182]
+                - cell "jonahmafuyai81@gmail.com" [ref=f11e183]
+                - cell "Never" [ref=f11e184]
+                - cell "0" [ref=f11e185]
+              - row [ref=f11e186]:
+                - cell "mohammed zakari" [ref=f11e187]
+                - cell "+234 7015702584" [ref=f11e188]
+                - cell "zakarimohammed995@gmail.com" [ref=f11e189]
+                - cell "Never" [ref=f11e190]
+                - cell "0" [ref=f11e191]
+          - generic [ref=f11e192]:
+            - generic [ref=f11e194]:
+              - combobox [ref=f11e195] [cursor=pointer]:
+                - generic: "10"
+              - paragraph [ref=f11e196]: Rows per page
+            - generic [ref=f11e197]:
+              - generic [ref=f11e198]: Page 1 of 1
+              - generic [ref=f11e199]:
+                - button "Go to first page" [disabled]
+                - button "Go to previous page" [disabled]
+                - button "Go to page 1 1" [ref=f11e201] [cursor=pointer]:
+                  - generic [ref=f11e202]: Go to page 1
+                  - text: "1"
+                - button "Go to next page" [disabled]
+                - button "Go to last page" [disabled]
+  - generic [ref=f11e203]:
+    - heading "Command Palette" [level=2] [ref=f11e204]
+    - paragraph [ref=f11e205]: Search for a command to run...
+  - region "Notifications alt+T"
+  - button "Open Tanstack query devtools" [ref=f11e256] [cursor=pointer]
+  - generic:
+    - contentinfo:
+      - button "Open TanStack Router Devtools" [ref=f11e305] [cursor=pointer]:
+        - generic [ref=f11e377]: "-"
+        - generic [ref=f11e378]: TanStack Router

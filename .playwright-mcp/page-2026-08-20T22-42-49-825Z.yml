@@ -1,0 +1,193 @@
+- generic:
+  - generic:
+    - generic:
+      - banner:
+        - generic:
+          - link:
+            - /url: /
+          - link:
+            - /url: /
+        - generic:
+          - button:
+            - generic: Toggle theme
+          - link:
+            - /url: /sign-in
+            - text: Sign in
+      - main:
+        - generic:
+          - heading [level=1]: Book an appointment
+          - paragraph: No account needed — book in under a minute. Your request goes to the clinic for approval, and you can set a password to track it.
+        - generic:
+          - generic: Choose your preferred doctor and time
+          - generic:
+            - generic:
+              - generic:
+                - generic: Full name
+                - textbox:
+                  - /placeholder: Aisha Bello
+                  - text: Flow Test User
+              - generic:
+                - generic: Email
+                - textbox:
+                  - /placeholder: you@example.com
+                  - text: flow.test@example.com
+              - generic:
+                - generic: Phone
+                - textbox:
+                  - /placeholder: +234 800 000 0000
+                  - text: "5551234"
+              - generic:
+                - generic:
+                  - text: Doctor
+                  - generic: (optional)
+                - combobox: jonah mafuyai — Orthopedics
+                - paragraph: Pick the doctor you'd like to see, or leave it on “No preference” and we'll assign the doctor best suited to your visit.
+              - generic:
+                - generic: Date
+                - button: Aug 21, 2026
+              - generic:
+                - generic: Time
+                - combobox [expanded]:
+                  - generic: Choose a time
+                - combobox
+              - generic:
+                - generic:
+                  - text: Reason for visit
+                  - generic: (optional)
+                - textbox:
+                  - /placeholder: Briefly describe your symptoms
+                  - text: E2E flow test
+              - button: Confirm appointment
+    - region "Notifications alt+T"
+    - generic:
+      - button
+    - button [ref=f8e440] [cursor=pointer]:
+      - generic [ref=f8e224]: "-"
+      - generic [ref=f8e225]: TanStack Router
+  - generic:
+    - dialog:
+      - generic:
+        - generic:
+          - navigation:
+            - button
+            - button
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - combobox
+                  - generic: Aug
+                - generic:
+                  - combobox
+                  - generic: "2026"
+                - status: August 2026
+            - grid:
+              - rowgroup:
+                - row:
+                  - columnheader: Su
+                  - columnheader: Mo
+                  - columnheader: Tu
+                  - columnheader: We
+                  - columnheader: Th
+                  - columnheader: Fr
+                  - columnheader: Sa
+              - rowgroup:
+                - row:
+                  - gridcell:
+                    - button [disabled]: "26"
+                  - gridcell:
+                    - button [disabled]: "27"
+                  - gridcell:
+                    - button [disabled]: "28"
+                  - gridcell:
+                    - button [disabled]: "29"
+                  - gridcell:
+                    - button [disabled]: "30"
+                  - gridcell:
+                    - button [disabled]: "31"
+                  - gridcell:
+                    - button [disabled]: "1"
+                - row:
+                  - gridcell:
+                    - button [disabled]: "2"
+                  - gridcell:
+                    - button [disabled]: "3"
+                  - gridcell:
+                    - button [disabled]: "4"
+                  - gridcell:
+                    - button [disabled]: "5"
+                  - gridcell:
+                    - button [disabled]: "6"
+                  - gridcell:
+                    - button [disabled]: "7"
+                  - gridcell:
+                    - button [disabled]: "8"
+                - row:
+                  - gridcell:
+                    - button [disabled]: "9"
+                  - gridcell:
+                    - button [disabled]: "10"
+                  - gridcell:
+                    - button [disabled]: "11"
+                  - gridcell:
+                    - button [disabled]: "12"
+                  - gridcell:
+                    - button [disabled]: "13"
+                  - gridcell:
+                    - button [disabled]: "14"
+                  - gridcell:
+                    - button [disabled]: "15"
+                - row:
+                  - gridcell:
+                    - button [disabled]: "16"
+                  - gridcell:
+                    - button [disabled]: "17"
+                  - gridcell:
+                    - button [disabled]: "18"
+                  - gridcell:
+                    - button [disabled]: "19"
+                  - gridcell:
+                    - button: "20"
+                  - gridcell [selected]:
+                    - button: "21"
+                  - gridcell:
+                    - button: "22"
+                - row:
+                  - gridcell:
+                    - button: "23"
+                  - gridcell:
+                    - button: "24"
+                  - gridcell:
+                    - button: "25"
+                  - gridcell:
+                    - button: "26"
+                  - gridcell:
+                    - button: "27"
+                  - gridcell:
+                    - button: "28"
+                  - gridcell:
+                    - button: "29"
+                - row:
+                  - gridcell:
+                    - button: "30"
+                  - gridcell:
+                    - button: "31"
+                  - gridcell:
+                    - button: "1"
+                  - gridcell:
+                    - button: "2"
+                  - gridcell:
+                    - button: "3"
+                  - gridcell:
+                    - button: "4"
+                  - gridcell:
+                    - button: "5"
+  - listbox [ref=f8e441]:
+    - option "9:00 AM" [active] [ref=f8e442]
+    - option "10:00 AM" [ref=f8e445]
+    - option "11:00 AM" [ref=f8e448]
+    - option "12:00 PM" [ref=f8e451]
+    - option "1:00 PM" [ref=f8e454]
+    - option "2:00 PM" [ref=f8e457]
+    - option "3:00 PM" [ref=f8e460]
+    - option "4:00 PM" [ref=f8e463]

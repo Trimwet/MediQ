@@ -1,0 +1,50 @@
+- generic [ref=f8e2]:
+  - generic [ref=f8e468]:
+    - link "MediQ home" [ref=f8e469] [cursor=pointer]:
+      - /url: /
+      - img "MediQ" [ref=f8e470]
+    - link "Back to home" [ref=f8e471] [cursor=pointer]:
+      - /url: /
+    - generic [ref=f8e475]:
+      - generic [ref=f8e479]:
+        - heading "Booking request sent" [level=1] [ref=f8e480]
+        - paragraph [ref=f8e481]: Reference 342ab564-d5db-4be4-bb33-eb857dd28834
+      - generic [ref=f8e482]:
+        - generic [ref=f8e483]:
+          - term [ref=f8e484]: Patient
+          - definition [ref=f8e485]: Flow Test User
+        - generic [ref=f8e486]:
+          - term [ref=f8e487]: Doctor
+          - definition [ref=f8e488]: jonah mafuyai
+        - generic [ref=f8e489]:
+          - term [ref=f8e490]: When
+          - definition [ref=f8e491]: Friday, Aug 21 • 10:00 AM
+      - paragraph [ref=f8e492]: The clinic reviews your request and confirms before it appears on the schedule. You'll be able to track it once you sign in.
+      - generic [ref=f8e493]:
+        - paragraph [ref=f8e498]: Create your password
+        - paragraph [ref=f8e499]: We use the email you provided. Set a password now to sign in and track your booking — the rest of your details can be completed at sign-up.
+        - generic [ref=f8e500]:
+          - generic [ref=f8e501]:
+            - generic [ref=f8e502]: Email
+            - textbox "Email" [disabled]: flow.test@example.com
+          - generic [ref=f8e503]:
+            - generic [ref=f8e504]: Password
+            - generic [ref=f8e505]:
+              - textbox "Password" [ref=f8e506]:
+                - /placeholder: ••••••••
+              - button "Show password" [ref=f8e507] [cursor=pointer]
+          - generic [ref=f8e509]:
+            - generic [ref=f8e510]: Confirm password
+            - generic [ref=f8e511]:
+              - textbox "Confirm password" [ref=f8e512]:
+                - /placeholder: ••••••••
+              - button "Show password" [ref=f8e513] [cursor=pointer]
+          - button "Create account & password" [ref=f8e515] [cursor=pointer]
+        - button "Book another appointment" [ref=f8e516] [cursor=pointer]
+  - region "Notifications alt+T"
+  - button "Open Tanstack query devtools" [ref=f8e103] [cursor=pointer]
+  - generic:
+    - contentinfo:
+      - button "Open TanStack Router Devtools" [ref=f8e467] [cursor=pointer]:
+        - generic [ref=f8e224]: "-"
+        - generic [ref=f8e225]: TanStack Router

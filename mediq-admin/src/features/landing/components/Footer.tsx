@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import { Globe, MessageCircle, Share2, ExternalLink, Mail, Phone, MapPin } from 'lucide-react'
+import { Globe, MessageCircle, Mail } from 'lucide-react'
 import { Logo } from '@/assets/logo'
 
 const quickLinks = [
@@ -17,10 +17,8 @@ const patientLinks = [
 ]
 
 const socials = [
-  { icon: Globe, label: 'Website' },
-  { icon: MessageCircle, label: 'WhatsApp' },
-  { icon: Share2, label: 'Share' },
-  { icon: ExternalLink, label: 'More' },
+  { icon: Globe, label: 'Website', href: 'https://mediq.clinic' },
+  { icon: MessageCircle, label: 'WhatsApp', href: 'https://wa.me/2348000000000' },
 ]
 
 export function Footer() {
@@ -38,10 +36,12 @@ export function Footer() {
               clinics. Powering smarter healthcare experiences.
             </p>
             <div className='flex gap-3'>
-              {socials.map(({ icon: Icon, label }) => (
+              {socials.map(({ icon: Icon, label, href }) => (
                 <a
                   key={label}
-                  href='#'
+                  href={href}
+                  target='_blank'
+                  rel='noopener noreferrer'
                   aria-label={label}
                   className='flex size-8 items-center justify-center rounded-full bg-muted/60 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary'
                 >
@@ -89,25 +89,9 @@ export function Footer() {
               Contact Us
             </h4>
             <ul className='mt-3 flex flex-col gap-3 text-sm text-muted-foreground'>
-              <li className='flex items-start gap-2'>
-                <MapPin className='mt-0.5 size-4 shrink-0 text-primary' />
-                <span>
-                  14 Rayfield Road,
-                  <br />
-                  Jos, Plateau State, Nigeria
-                </span>
-              </li>
-              <li className='flex items-center gap-2'>
-                <Phone className='size-4 shrink-0 text-primary' />
-                <span>
-                  +234 803 123 4567
-                  <br />
-                  +234 807 234 5678
-                </span>
-              </li>
               <li className='flex items-center gap-2'>
                 <Mail className='size-4 shrink-0 text-primary' />
-                <span>info@mediq.clinic</span>
+                <span>hello@mediq.clinic</span>
               </li>
             </ul>
           </div>

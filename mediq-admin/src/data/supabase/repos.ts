@@ -27,6 +27,10 @@ import {
   type RoomsRepository,
   type StaffRepository,
 } from '../repos'
+import {
+  aggregateByStatus,
+  calcAvgWaitMinutes,
+} from '@/features/dashboard/components/analytics-helpers'
 
 // ---------------------------------------------------------------------------
 // Row → frontend mappers
@@ -649,5 +653,157 @@ export const authRepository: AuthRepository = {
       email: data.user.email ?? input.email,
       role: profile ? [String(profile.role)] : ['patient'],
     }
+  },
+}
+
+// ---------------------------------------------------------------------------
+// Analytics (pure aggregations over existing tables — no new tables)
+// ---------------------------------------------------------------------------
+
+export type AnalyticsRange = 'today' | '7d' | '30d'
+
+export interface AnalyticsSummary {
+  today: {
+    booked: number
+    completed: number
+    pending: number
+    noShow: number
+    cancelled: number
+    rejected: number
+    total: number
+  }
+  trend: Array<{ date: string; booked: number; completed: number }>
+  byStatus: Array<{ name: string; value: number }>
+  byDoctor: Array<{ name: string; completed: number }>
+  avgWaitMinutes: number | null
+}
+
+function rangeToInterval(range: AnalyticsRange) {
+  const now = new Date()
+  switch (range) {
+    case 'today': {
+      const start = new Date(now)
+      start.setHours(0, 0, 0, 0)
+      return { start, end: now }
+    }
+    case '7d': {
+      const start = new Date(now)
+      start.setDate(start.getDate() - 7)
+      return { start, end: now }
+    }
+    case '30d': {
+      const start = new Date(now)
+      start.setDate(start.getDate() - 30)
+      return { start, end: now }
+    }
+  }
+}
+
+export const analyticsRepository = {
+  async getSummary(
+    clinicId?: string,
+    range: AnalyticsRange = 'today',
+  ): Promise<AnalyticsSummary> {
+    const { start, end } = rangeToInterval(range)
+
+    // --- Appointments in range ---
+    let aptQuery = supabase
+      .from('appointments')
+      .select('status, doctor_name, scheduled_for')
+      .gte('scheduled_for', start.toISOString())
+      .lte('scheduled_for', end.toISOString())
+
+    if (clinicId) aptQuery = aptQuery.eq('clinic_id', clinicId)
+
+    const { data: apts, error: aptErr } = await aptQuery
+    if (aptErr) throw aptErr
+
+    const rows = (apts ?? []) as Array<{
+      status: string
+      doctor_name: string
+      scheduled_for: string
+    }>
+
+    // Today counts (for "today" range the query already scopes to today;
+    // for other ranges we still want today's snapshot separately).
+    const todayStart = new Date()
+    todayStart.setHours(0, 0, 0, 0)
+    const todayEnd = new Date()
+    todayEnd.setHours(23, 59, 59, 999)
+
+    let todayQuery = supabase
+      .from('appointments')
+      .select('status')
+      .gte('scheduled_for', todayStart.toISOString())
+      .lte('scheduled_for', todayEnd.toISOString())
+    if (clinicId) todayQuery = todayQuery.eq('clinic_id', clinicId)
+
+    const { data: todayRows } = await todayQuery
+    const todayList = (todayRows ?? []) as Array<{ status: string }>
+
+    const today = {
+      booked: todayList.filter((r) => r.status === 'booked').length,
+      completed: todayList.filter((r) => r.status === 'completed').length,
+      pending: todayList.filter((r) => r.status === 'pending').length,
+      noShow: todayList.filter((r) => r.status === 'no_show').length,
+      cancelled: todayList.filter((r) => r.status === 'cancelled').length,
+      rejected: todayList.filter((r) => r.status === 'rejected').length,
+      total: todayList.length,
+    }
+
+    // Trend: group by date (YYYY-MM-DD)
+    const trendMap = new Map<
+      string,
+      { booked: number; completed: number }
+    >()
+    for (const r of rows) {
+      const day = r.scheduled_for.slice(0, 10)
+      const entry = trendMap.get(day) ?? { booked: 0, completed: 0 }
+      if (r.status === 'booked') entry.booked++
+      if (r.status === 'completed') entry.completed++
+      trendMap.set(day, entry)
+    }
+    const trend = [...trendMap.entries()]
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([date, counts]) => ({ date, ...counts }))
+
+    // By status (from range rows)
+    const byStatus = aggregateByStatus(rows)
+
+    // By doctor: completed count per doctor
+    const doctorMap = new Map<string, number>()
+    for (const r of rows) {
+      if (r.status === 'completed' && r.doctor_name) {
+        doctorMap.set(
+          r.doctor_name,
+          (doctorMap.get(r.doctor_name) ?? 0) + 1,
+        )
+      }
+    }
+    const byDoctor = [...doctorMap.entries()]
+      .map(([name, completed]) => ({ name, completed }))
+      .sort((a, b) => b.completed - a.completed)
+
+    // Average wait minutes from queue_entries in range
+    let queueQuery = supabase
+      .from('queue_entries')
+      .select('checked_in_at, called_at, status')
+      .gte('checked_in_at', start.toISOString())
+      .lte('checked_in_at', end.toISOString())
+
+    if (clinicId) queueQuery = queueQuery.eq('clinic_id', clinicId)
+
+    const { data: queueRows, error: queueErr } = await queueQuery
+    if (queueErr) throw queueErr
+
+    const avgWaitMinutes = calcAvgWaitMinutes(
+      (queueRows ?? []) as Array<{
+        checked_in_at: string
+        called_at: string | null
+        status: string
+      }>,
+    )
+
+    return { today, trend, byStatus, byDoctor, avgWaitMinutes }
   },
 }
