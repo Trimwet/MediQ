@@ -7,7 +7,12 @@ import {
   startOfDay,
   subDays,
 } from 'date-fns'
-import { useAppointments, useDoctors, useQueue } from '@/data/hooks'
+import {
+  useAnalytics,
+  useAppointments,
+  useDoctors,
+  useQueue,
+} from '@/data/hooks'
 import {
   CalendarDays,
   Users,
@@ -47,6 +52,10 @@ import { ThemeSwitch } from '@/components/theme-switch'
 import { confirmedStatuses } from '@/features/appointments/schema'
 import { minutesBetween } from '@/features/queue/data'
 import { queueStatusBadge, type QueueEntry } from '@/features/queue/schema'
+import { AnalyticsCards } from './components/analytics-cards'
+import { AppointmentsTrendChart } from './components/appointments-trend-chart'
+import { StatusDonut } from './components/status-donut'
+import { DoctorUtilizationChart } from './components/doctor-utilization-chart'
 import {
   DashboardDateRange,
   type DashboardRange,
@@ -64,6 +73,8 @@ export function Dashboard() {
   const [range, setRange] = useState<DashboardRange>('today')
   const [customFrom, setCustomFrom] = useState<Date>()
   const [customTo, setCustomTo] = useState<Date>()
+
+  const analyticsQuery = useAnalytics(range === 'custom' ? 'today' : range)
 
   const isPending =
     appointmentsQuery.isPending ||
@@ -289,6 +300,31 @@ export function Dashboard() {
           />
         ) : (
           <div className='space-y-4'>
+            {/* Analytics KPI Cards */}
+            <AnalyticsCards
+              data={analyticsQuery.data}
+              isLoading={analyticsQuery.isLoading}
+            />
+
+            {/* Analytics Charts */}
+            <div className='grid grid-cols-1 gap-4 lg:grid-cols-2'>
+              <div className='lg:col-span-2'>
+                <AppointmentsTrendChart
+                  data={analyticsQuery.data?.trend}
+                  isLoading={analyticsQuery.isLoading}
+                />
+              </div>
+              <StatusDonut
+                data={analyticsQuery.data?.byStatus}
+                isLoading={analyticsQuery.isLoading}
+              />
+              <DoctorUtilizationChart
+                data={analyticsQuery.data?.byDoctor}
+                isLoading={analyticsQuery.isLoading}
+              />
+            </div>
+
+            {/* Existing dashboard stats */}
             <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
               {stats.map((stat) => (
                 <Card key={stat.label}>
