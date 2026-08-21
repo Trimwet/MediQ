@@ -3,7 +3,6 @@ import {
   useAppointments,
   useApproveAppointment,
   useCreateAppointment,
-  useRealtimeAppointments,
   useRejectAppointment,
   useUpdateAppointmentStatus,
 } from '@/data/hooks'
@@ -29,7 +28,6 @@ export function Appointments() {
   const { can } = useRbac()
   const canBook = can('appointments:book')
   const canManage = can('appointments:manage')
-  useRealtimeAppointments()
 
   const [dialogOpen, setDialogOpen] = useState(false)
   const [approveTarget, setApproveTarget] = useState<Appointment | null>(null)

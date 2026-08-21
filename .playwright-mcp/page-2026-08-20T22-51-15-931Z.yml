@@ -1,0 +1,106 @@
+- generic [ref=f16e2]:
+  - generic [ref=f16e3]:
+    - link "Skip to Main" [ref=f16e4] [cursor=pointer]:
+      - /url: "#content"
+    - generic [ref=f16e7]:
+      - list [ref=f16e9]:
+        - listitem [ref=f16e10]:
+          - button "Default Clinic professional plan" [ref=f16e11] [cursor=pointer]:
+            - generic [ref=f16e17]:
+              - generic [ref=f16e18]: Default Clinic
+              - generic [ref=f16e19]: professional plan
+      - generic [ref=f16e20]:
+        - generic [ref=f16e21]:
+          - generic [ref=f16e22]: General
+          - list [ref=f16e23]:
+            - listitem [ref=f16e24]:
+              - link "Dashboard" [ref=f16e25] [cursor=pointer]:
+                - /url: /admin/dashboard
+            - listitem [ref=f16e32]:
+              - link "Appointments" [ref=f16e33] [cursor=pointer]:
+                - /url: /admin/appointments
+            - listitem [ref=f16e37]:
+              - link "Queue" [ref=f16e38] [cursor=pointer]:
+                - /url: /admin/queue
+            - listitem [ref=f16e45]:
+              - link "Patients" [ref=f16e46] [cursor=pointer]:
+                - /url: /admin/patients
+        - generic [ref=f16e51]:
+          - generic [ref=f16e52]: Management
+          - list [ref=f16e53]:
+            - listitem [ref=f16e54]:
+              - link "Doctors" [ref=f16e55] [cursor=pointer]:
+                - /url: /admin/doctors
+            - listitem [ref=f16e61]:
+              - link "Staff" [ref=f16e62] [cursor=pointer]:
+                - /url: /admin/staff
+            - listitem [ref=f16e76]:
+              - link "Rooms" [ref=f16e77] [cursor=pointer]:
+                - /url: /admin/rooms
+        - generic [ref=f16e82]:
+          - generic [ref=f16e83]: Other
+          - list [ref=f16e84]:
+            - listitem [ref=f16e85]:
+              - link "Notifications" [ref=f16e86] [cursor=pointer]:
+                - /url: /admin/notifications
+            - listitem [ref=f16e91]:
+              - button "Settings" [ref=f16e92] [cursor=pointer]
+      - list [ref=f16e100]:
+        - listitem [ref=f16e101]:
+          - button "J jonahmafuyai jonahmafuyai@gmail.com" [ref=f16e102] [cursor=pointer]:
+            - generic [ref=f16e103]: J
+            - generic [ref=f16e105]:
+              - generic [ref=f16e106]: jonahmafuyai
+              - generic [ref=f16e107]: jonahmafuyai@gmail.com
+      - button "Toggle Sidebar" [ref=f16e111]
+    - generic [ref=f16e112]:
+      - banner [ref=f16e113]:
+        - generic [ref=f16e114]:
+          - button "Toggle Sidebar" [ref=f16e115] [cursor=pointer]
+          - navigation [ref=f16e117]:
+            - link "Overview" [ref=f16e118] [cursor=pointer]:
+              - /url: /admin/dashboard
+            - link "Appointments" [ref=f16e119] [cursor=pointer]:
+              - /url: /admin/appointments
+            - link "Queue" [ref=f16e120] [cursor=pointer]:
+              - /url: /admin/queue
+          - button "Search ⌘ K" [ref=f16e121] [cursor=pointer]:
+            - generic [ref=f16e122]: Search
+            - generic:
+              - generic: ⌘
+              - text: K
+          - button "Notifications" [ref=f16e123] [cursor=pointer]
+          - button "Toggle theme" [ref=f16e124] [cursor=pointer]
+          - button "Open theme settings" [ref=f16e126] [cursor=pointer]
+          - button [ref=f16e127] [cursor=pointer]
+      - main [ref=f16e130]:
+        - generic [ref=f16e132]:
+          - heading "Notifications" [level=1] [ref=f16e133]
+          - paragraph [ref=f16e134]: Reminders and updates sent to you
+        - generic [ref=f16e135]:
+          - tablist [ref=f16e137]:
+            - tab "All 0" [selected] [ref=f16e138] [cursor=pointer]:
+              - text: All
+              - generic [ref=f16e139]: "0"
+            - tab "Unread 0" [ref=f16e140] [cursor=pointer]:
+              - text: Unread
+              - generic [ref=f16e141]: "0"
+            - tab "Read 0" [ref=f16e142] [cursor=pointer]:
+              - text: Read
+              - generic [ref=f16e143]: "0"
+          - generic [ref=f16e144]:
+            - combobox [ref=f16e145] [cursor=pointer]:
+              - generic: All types
+            - combobox [ref=f16e146] [cursor=pointer]:
+              - generic: All channels
+        - paragraph [ref=f16e151]: No notifications yet.
+  - generic [ref=f16e152]:
+    - heading "Command Palette" [level=2] [ref=f16e153]
+    - paragraph [ref=f16e154]: Search for a command to run...
+  - region "Notifications alt+T"
+  - button "Open Tanstack query devtools" [ref=f16e205] [cursor=pointer]
+  - generic:
+    - contentinfo:
+      - button "Open TanStack Router Devtools" [ref=f16e254] [cursor=pointer]:
+        - generic [ref=f16e326]: "-"
+        - generic [ref=f16e327]: TanStack Router

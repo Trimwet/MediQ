@@ -11,6 +11,12 @@ interface AuthUser {
   email: string
   role: string[]
   exp: number
+  /** Multi-tenancy: the clinic this user is currently working in. */
+  clinicId?: string
+  /** The user's role within the current clinic (from clinic_members). */
+  clinicRole?: 'admin' | 'front_desk' | 'doctor'
+  /** Display name of the current clinic. */
+  clinicName?: string
 }
 
 function safeJsonParse(value: string | undefined): unknown {
@@ -26,6 +32,12 @@ interface AuthState {
   auth: {
     user: AuthUser | null
     setUser: (user: AuthUser | null) => void
+    /** Update just the clinic context on the existing user (no full re-login). */
+    setClinic: (
+      clinicId: string,
+      clinicRole: 'admin' | 'front_desk' | 'doctor',
+      clinicName: string
+    ) => void
     accessToken: string
     setAccessToken: (accessToken: string) => void
     resetAccessToken: () => void
@@ -35,7 +47,7 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>()((set) => {
   const cookieState = getCookie(ACCESS_TOKEN)
-  const initToken = cookieState ? JSON.parse(cookieState) : ''
+  const initToken = (safeJsonParse(cookieState) as string) || ''
   const userState = getCookie(USER_COOKIE)
   const initUser = (safeJsonParse(userState) as AuthUser | null) ?? null
   return {
@@ -48,6 +60,14 @@ export const useAuthStore = create<AuthState>()((set) => {
           } else {
             removeCookie(USER_COOKIE)
           }
+          return { ...state, auth: { ...state.auth, user } }
+        }),
+      setClinic: (clinicId, clinicRole, clinicName) =>
+        set((state) => {
+          const user = state.auth.user
+            ? { ...state.auth.user, clinicId, clinicRole, clinicName }
+            : null
+          if (user) setCookie(USER_COOKIE, JSON.stringify(user))
           return { ...state, auth: { ...state.auth, user } }
         }),
       accessToken: initToken,

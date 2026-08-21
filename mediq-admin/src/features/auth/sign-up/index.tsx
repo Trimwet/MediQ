@@ -2,15 +2,20 @@ import { Link } from '@tanstack/react-router'
 import { AuthLayout } from '../auth-layout'
 import { SignUpForm } from './components/sign-up-form'
 
+const search = new URLSearchParams(window.location.search)
+const isBusiness = search.get('business') === 'true'
+
 export function SignUp() {
   return (
     <AuthLayout
-      title='Create an account'
+      title={isBusiness ? 'Create your clinic account' : 'Create an account'}
       back={{ to: '/sign-in', label: 'Back to sign in' }}
       description={
         <>
-          Enter your email and password to get started. Already have an
-          account?{' '}
+          {isBusiness
+            ? 'Set up your clinic and admin account in one step.'
+            : 'Enter your email and password to get started.'}{' '}
+          Already have an account?{' '}
           <Link
             to='/sign-in'
             className='text-nowrap underline underline-offset-4 hover:text-primary'

@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react'
-import { useQueue, useQueueActions, useRealtimeQueue } from '@/data/hooks'
+import { useQueue, useQueueActions } from '@/data/hooks'
 import { Megaphone } from 'lucide-react'
 import { toast } from 'sonner'
 import { useRbac } from '@/hooks/use-rbac'
@@ -23,7 +23,6 @@ export function Queue() {
   const { can } = useRbac()
   const canManage = can('queue:manage')
 
-  useRealtimeQueue()
   const queueQuery = useQueue()
   const actions = useQueueActions()
 

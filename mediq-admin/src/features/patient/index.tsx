@@ -7,8 +7,6 @@ import {
   useCancelAppointment,
   useDoctors,
   useQueue,
-  useRealtimeAppointments,
-  useRealtimeQueue,
 } from '@/data/hooks'
 import {
   ArrowLeft,
@@ -20,6 +18,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Logo } from '@/assets/logo'
+import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/auth-store'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -31,6 +30,7 @@ import {
   type Appointment,
   appointmentStatusBadge,
 } from '@/features/appointments/schema'
+import { GettingStartedChecklist } from './components/getting-started-checklist'
 
 const CANCELLABLE_STATUSES = ['pending', 'booked'] as const
 
@@ -39,8 +39,6 @@ export function PatientPortal() {
   const user = useAuthStore((state) => state.auth.user)
   const reset = useAuthStore((state) => state.auth.reset)
 
-  useRealtimeAppointments()
-  useRealtimeQueue()
   const appointmentsQuery = useAppointments()
   const queueQuery = useQueue()
   const doctorsQuery = useDoctors()
@@ -116,8 +114,10 @@ export function PatientPortal() {
   }
 
   function handleSignOut() {
-    reset()
-    navigate({ to: '/', replace: true })
+    supabase.auth.signOut().finally(() => {
+      reset()
+      navigate({ to: '/', replace: true })
+    })
   }
 
   return (
@@ -198,6 +198,9 @@ export function PatientPortal() {
             Track your care or book a new visit below.
           </p>
         </div>
+
+        {/* Getting started checklist */}
+        <GettingStartedChecklist />
 
         {appointmentsQuery.isPending ? (
           <div className='space-y-3'>

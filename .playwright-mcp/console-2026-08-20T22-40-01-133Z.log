@@ -1,0 +1,2 @@
+[     616ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=feb1977c:14333
+[  206801ms] [VERBOSE] [DOM] Input elements should have autocomplete attributes (suggested: "username"): (More info: https://goo.gl/9p2vKq) %o @ http://localhost:3000/book?clinicId=68062b03-3a03-4be3-a420-9033268b5fee:0

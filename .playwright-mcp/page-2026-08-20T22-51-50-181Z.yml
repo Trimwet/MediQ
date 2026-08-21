@@ -1,0 +1,135 @@
+- generic:
+  - generic:
+    - generic:
+      - link:
+        - /url: "#content"
+        - text: Skip to Main
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - list:
+                - listitem:
+                  - button:
+                    - generic:
+                      - generic: Default Clinic
+                      - generic: professional plan
+            - generic:
+              - generic:
+                - generic: General
+                - list:
+                  - listitem:
+                    - link:
+                      - /url: /admin/dashboard
+                      - generic: Dashboard
+                  - listitem:
+                    - link:
+                      - /url: /admin/appointments
+                      - generic: Appointments
+                  - listitem:
+                    - link:
+                      - /url: /admin/queue
+                      - generic: Queue
+                  - listitem:
+                    - link:
+                      - /url: /admin/patients
+                      - generic: Patients
+              - generic:
+                - generic: Management
+                - list:
+                  - listitem:
+                    - link:
+                      - /url: /admin/doctors
+                      - generic: Doctors
+                  - listitem:
+                    - link:
+                      - /url: /admin/staff
+                      - generic: Staff
+                  - listitem:
+                    - link:
+                      - /url: /admin/rooms
+                      - generic: Rooms
+              - generic:
+                - generic: Other
+                - list:
+                  - listitem:
+                    - link:
+                      - /url: /admin/notifications
+                      - generic: Notifications
+                  - listitem:
+                    - button:
+                      - generic: Settings
+            - generic:
+              - list:
+                - listitem:
+                  - button:
+                    - generic: J
+                    - generic:
+                      - generic: jonahmafuyai
+                      - generic: jonahmafuyai@gmail.com
+            - button
+      - generic:
+        - banner:
+          - generic:
+            - button:
+              - generic: Toggle Sidebar
+            - navigation:
+              - link:
+                - /url: /admin/dashboard
+                - text: Overview
+              - link:
+                - /url: /admin/appointments
+                - text: Appointments
+              - link:
+                - /url: /admin/queue
+                - text: Queue
+            - button:
+              - generic: Search
+              - generic:
+                - generic: ⌘
+                - text: K
+            - button
+            - button:
+              - generic: Toggle theme
+            - button
+            - button
+        - main:
+          - generic:
+            - generic:
+              - heading [level=1]: Notifications
+              - paragraph: Reminders and updates sent to you
+          - generic:
+            - generic:
+              - tablist:
+                - tab [selected]:
+                  - text: All
+                  - generic: "0"
+                - tab:
+                  - text: Unread
+                  - generic: "0"
+                - tab:
+                  - text: Read
+                  - generic: "0"
+            - generic:
+              - combobox:
+                - generic: All types
+              - combobox:
+                - generic: All channels
+          - generic:
+            - paragraph: No notifications yet.
+    - generic:
+      - heading [level=2]: Command Palette
+      - paragraph: Search for a command to run...
+    - region "Notifications alt+T"
+    - generic:
+      - button
+    - button [ref=f16e328] [cursor=pointer]:
+      - generic [ref=f16e326]: "-"
+      - generic [ref=f16e327]: TanStack Router
+  - alertdialog [ref=f16e345]:
+    - generic [ref=f16e346]:
+      - heading "Sign out" [level=2] [ref=f16e347]
+      - generic [ref=f16e348]: Are you sure you want to sign out? You will need to sign in again to access your account.
+    - generic [ref=f16e349]:
+      - button "Cancel" [active] [ref=f16e350] [cursor=pointer]
+      - button "Sign out" [ref=f16e351] [cursor=pointer]

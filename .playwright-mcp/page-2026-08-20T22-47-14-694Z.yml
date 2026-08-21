@@ -1,0 +1,198 @@
+- generic [ref=f10e2]:
+  - generic [ref=f10e3]:
+    - link "Skip to Main" [ref=f10e4] [cursor=pointer]:
+      - /url: "#content"
+    - generic [ref=f10e7]:
+      - list [ref=f10e9]:
+        - listitem [ref=f10e10]:
+          - button "Default Clinic professional plan" [ref=f10e11] [cursor=pointer]:
+            - generic [ref=f10e17]:
+              - generic [ref=f10e18]: Default Clinic
+              - generic [ref=f10e19]: professional plan
+      - generic [ref=f10e20]:
+        - generic [ref=f10e21]:
+          - generic [ref=f10e22]: General
+          - list [ref=f10e23]:
+            - listitem [ref=f10e24]:
+              - link "Dashboard" [ref=f10e25] [cursor=pointer]:
+                - /url: /admin/dashboard
+            - listitem [ref=f10e32]:
+              - link "Appointments" [ref=f10e33] [cursor=pointer]:
+                - /url: /admin/appointments
+            - listitem [ref=f10e37]:
+              - link "Queue" [ref=f10e38] [cursor=pointer]:
+                - /url: /admin/queue
+            - listitem [ref=f10e45]:
+              - link "Patients" [ref=f10e46] [cursor=pointer]:
+                - /url: /admin/patients
+        - generic [ref=f10e51]:
+          - generic [ref=f10e52]: Management
+          - list [ref=f10e53]:
+            - listitem [ref=f10e54]:
+              - link "Doctors" [ref=f10e55] [cursor=pointer]:
+                - /url: /admin/doctors
+            - listitem [ref=f10e61]:
+              - link "Staff" [ref=f10e62] [cursor=pointer]:
+                - /url: /admin/staff
+            - listitem [ref=f10e76]:
+              - link "Rooms" [ref=f10e77] [cursor=pointer]:
+                - /url: /admin/rooms
+        - generic [ref=f10e82]:
+          - generic [ref=f10e83]: Other
+          - list [ref=f10e84]:
+            - listitem [ref=f10e85]:
+              - link "Notifications" [ref=f10e86] [cursor=pointer]:
+                - /url: /admin/notifications
+            - listitem [ref=f10e91]:
+              - button "Settings" [ref=f10e92] [cursor=pointer]
+      - list [ref=f10e100]:
+        - listitem [ref=f10e101]:
+          - button "J jonahmafuyai jonahmafuyai@gmail.com" [ref=f10e102] [cursor=pointer]:
+            - generic [ref=f10e103]: J
+            - generic [ref=f10e105]:
+              - generic [ref=f10e106]: jonahmafuyai
+              - generic [ref=f10e107]: jonahmafuyai@gmail.com
+      - button "Toggle Sidebar" [ref=f10e111]
+    - generic [ref=f10e112]:
+      - banner [ref=f10e113]:
+        - generic [ref=f10e114]:
+          - button "Toggle Sidebar" [ref=f10e115] [cursor=pointer]
+          - navigation [ref=f10e117]:
+            - link "Overview" [ref=f10e118] [cursor=pointer]:
+              - /url: /admin/dashboard
+            - link "Appointments" [ref=f10e119] [cursor=pointer]:
+              - /url: /admin/appointments
+            - link "Queue" [ref=f10e120] [cursor=pointer]:
+              - /url: /admin/queue
+          - button "Search ⌘ K" [ref=f10e121] [cursor=pointer]:
+            - generic [ref=f10e122]: Search
+            - generic:
+              - generic: ⌘
+              - text: K
+          - button "Notifications" [ref=f10e123] [cursor=pointer]
+          - button "Toggle theme" [ref=f10e124] [cursor=pointer]
+          - button "Open theme settings" [ref=f10e126] [cursor=pointer]
+          - button [ref=f10e127] [cursor=pointer]
+      - main [ref=f10e130]:
+        - generic [ref=f10e131]:
+          - generic [ref=f10e132]:
+            - heading "Appointments" [level=1] [ref=f10e133]
+            - paragraph [ref=f10e134]: Book and manage patient visits
+          - button "New appointment" [ref=f10e135] [cursor=pointer]
+        - generic [ref=f10e136]:
+          - generic [ref=f10e137]:
+            - generic [ref=f10e138]:
+              - textbox "Search patients, doctors..." [ref=f10e139]
+              - button "Status" [ref=f10e141] [cursor=pointer]
+            - button "View" [ref=f10e142] [cursor=pointer]
+          - table [ref=f10e145]:
+            - rowgroup [ref=f10e146]:
+              - row [ref=f10e147]:
+                - columnheader [ref=f10e148]:
+                  - button "Patient" [ref=f10e150] [cursor=pointer]
+                - columnheader [ref=f10e152]:
+                  - button "Doctor" [ref=f10e154] [cursor=pointer]
+                - columnheader [ref=f10e156]:
+                  - button "Date • Time" [ref=f10e158] [cursor=pointer]
+                - columnheader "Reason" [ref=f10e160]
+                - columnheader [ref=f10e161]:
+                  - button "Status" [ref=f10e163] [cursor=pointer]
+                - columnheader "Actions" [ref=f10e165]
+            - rowgroup [ref=f10e167]:
+              - row [ref=f10e168]:
+                - cell "mohammed zakari" [ref=f10e169]
+                - cell [ref=f10e170]
+                - cell "Sep 5 · 09:00 AM" [ref=f10e171]
+                - cell "—" [ref=f10e173]
+                - cell "pending" [ref=f10e174]
+                - cell [ref=f10e176]:
+                  - button "Open menu" [ref=f10e178] [cursor=pointer]
+              - row [ref=f10e180]:
+                - cell "mohammed zakari" [ref=f10e181]
+                - cell [ref=f10e182]
+                - cell "Sep 5 · 09:00 AM" [ref=f10e183]
+                - cell "—" [ref=f10e185]
+                - cell "pending" [ref=f10e186]
+                - cell [ref=f10e188]:
+                  - button "Open menu" [ref=f10e190] [cursor=pointer]
+              - row [ref=f10e192]:
+                - cell "Isaac Yakubu" [ref=f10e193]
+                - cell [ref=f10e194]
+                - cell "Aug 29 · 03:00 PM" [ref=f10e195]
+                - cell "—" [ref=f10e197]
+                - cell "pending" [ref=f10e198]
+                - cell [ref=f10e200]:
+                  - button "Open menu" [ref=f10e202] [cursor=pointer]
+              - row [ref=f10e204]:
+                - cell "David" [ref=f10e205]
+                - cell [ref=f10e206]
+                - cell "Aug 29 · 03:00 PM" [ref=f10e207]
+                - cell "Headache" [ref=f10e209]
+                - cell "pending" [ref=f10e210]
+                - cell [ref=f10e212]:
+                  - button "Open menu" [ref=f10e214] [cursor=pointer]
+              - row [ref=f10e216]:
+                - cell "Isaac Yakubu" [ref=f10e217]
+                - cell [ref=f10e218]
+                - cell "Aug 22 · 03:00 PM" [ref=f10e219]
+                - cell "knhuguyftxdfcg" [ref=f10e221]
+                - cell "pending" [ref=f10e222]
+                - cell [ref=f10e224]:
+                  - button "Open menu" [ref=f10e226] [cursor=pointer]
+              - row [ref=f10e228]:
+                - cell "jonah mafuyai" [ref=f10e229]
+                - cell [ref=f10e230]
+                - cell "Aug 22 · 01:00 PM" [ref=f10e231]
+                - cell "—" [ref=f10e233]
+                - cell "rejected" [ref=f10e234]
+                - cell [ref=f10e236]:
+                  - button "Open menu" [ref=f10e238] [cursor=pointer]
+              - row [ref=f10e240]:
+                - cell "jonah mafuyai" [ref=f10e241]
+                - cell [ref=f10e242]
+                - cell "Aug 22 · 01:00 PM" [ref=f10e243]
+                - cell "—" [ref=f10e245]
+                - cell "rejected" [ref=f10e246]
+                - cell [ref=f10e248]:
+                  - button "Open menu" [ref=f10e250] [cursor=pointer]
+              - row [ref=f10e252]:
+                - cell "jonah mafuyai" [ref=f10e253]
+                - cell [ref=f10e254]
+                - cell "Aug 21 · 01:00 PM" [ref=f10e255]
+                - cell "—" [ref=f10e257]
+                - cell "rejected" [ref=f10e258]
+                - cell [ref=f10e260]:
+                  - button "Open menu" [ref=f10e262] [cursor=pointer]
+              - row [ref=f10e264]:
+                - cell "Flow Test User" [ref=f10e265]
+                - cell "jonah mafuyai" [ref=f10e266]
+                - cell "Aug 21 · 10:00 AM" [ref=f10e267]
+                - cell "E2E flow test" [ref=f10e269]
+                - cell "pending" [ref=f10e270]
+                - cell [ref=f10e272]:
+                  - button "Open menu" [ref=f10e274] [cursor=pointer]
+          - generic [ref=f10e276]:
+            - generic [ref=f10e278]:
+              - combobox [ref=f10e279] [cursor=pointer]:
+                - generic: "10"
+              - paragraph [ref=f10e280]: Rows per page
+            - generic [ref=f10e281]:
+              - generic [ref=f10e282]: Page 1 of 1
+              - generic [ref=f10e283]:
+                - button "Go to first page" [disabled]
+                - button "Go to previous page" [disabled]
+                - button "Go to page 1 1" [ref=f10e285] [cursor=pointer]:
+                  - generic [ref=f10e286]: Go to page 1
+                  - text: "1"
+                - button "Go to next page" [disabled]
+                - button "Go to last page" [disabled]
+  - generic [ref=f10e287]:
+    - heading "Command Palette" [level=2] [ref=f10e288]
+    - paragraph [ref=f10e289]: Search for a command to run...
+  - region "Notifications alt+T"
+  - button "Open Tanstack query devtools" [ref=f10e340] [cursor=pointer]
+  - generic:
+    - contentinfo:
+      - button "Open TanStack Router Devtools" [ref=f10e389] [cursor=pointer]:
+        - generic [ref=f10e461]: "-"
+        - generic [ref=f10e462]: TanStack Router

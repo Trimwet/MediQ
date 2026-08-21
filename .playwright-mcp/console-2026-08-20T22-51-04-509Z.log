@@ -1,0 +1,20 @@
+[     816ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=feb1977c:14333
+[   92729ms] [ERROR] The result of getSnapshot should be cached to avoid an infinite loop @ http://localhost:3000/@vite/client:528
+[   93336ms] [ERROR] %o
+
+%s
+
+%s
+ Error: Maximum update depth exceeded. This can happen when a component repeatedly calls setState inside componentWillUpdate or componentDidUpdate. React limits the number of nested updates to prevent infinite loops.
+    at getRootForUpdatedFiber (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=feb1977c:2631:166)
+    at enqueueConcurrentRenderForLane (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=feb1977c:2621:11)
+    at forceStoreRerender (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=feb1977c:4579:15)
+    at updateStoreInstance (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=feb1977c:4561:36)
+    at Object.react_stack_bottom_frame (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=feb1977c:12900:13)
+    at runWithFiberInDEV (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=feb1977c:850:66)
+    at commitHookEffectListMount (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=feb1977c:6615:153)
+    at commitHookPassiveMountEffects (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=feb1977c:6650:55)
+    at commitPassiveMountOnFiber (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=feb1977c:7616:22)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=feb1977c:7604:5) The above error occurred in the <AppSidebar> component. React will try to recreate this component tree from scratch using the error boundary you provided, CatchBoundaryImpl. @ http://localhost:3000/@vite/client:528
+[   93343ms] [WARNING] Warning: Error in route match: __root__/ @ http://localhost:3000/@vite/client:528
+[   93875ms] [VERBOSE] [DOM] Input elements should have autocomplete attributes (suggested: "current-password"): (More info: https://goo.gl/9p2vKq) %o @ http://localhost:3000/sign-in?redirect=%2Fadmin%2Fnotifications:0

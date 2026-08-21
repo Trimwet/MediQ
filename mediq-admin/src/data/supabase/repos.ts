@@ -27,6 +27,10 @@ import {
   type RoomsRepository,
   type StaffRepository,
 } from '../repos'
+import {
+  aggregateByStatus,
+  calcAvgWaitMinutes,
+} from '@/features/dashboard/components/analytics-helpers'
 
 // ---------------------------------------------------------------------------
 // Row → frontend mappers
@@ -126,17 +130,23 @@ function mapNotification(
 // ---------------------------------------------------------------------------
 
 export const appointmentsRepository: AppointmentsRepository = {
-  async list() {
-    const { data, error } = await supabase
+  async list(clinicId?: string) {
+    let query = supabase
       .from('appointments')
       .select('*')
       .order('scheduled_for', { ascending: false })
+
+    if (clinicId) {
+      query = query.eq('clinic_id', clinicId)
+    }
+
+    const { data, error } = await query
 
     if (error) throw error
     return (data ?? []).map(mapAppointment)
   },
 
-  async create(input) {
+  async create(input, clinicId?: string) {
     const { data, error } = await supabase
       .from('appointments')
       .insert({
@@ -146,16 +156,39 @@ export const appointmentsRepository: AppointmentsRepository = {
         doctor_name: input.doctorName,
         scheduled_for: input.scheduledFor,
         reason: input.reason ?? null,
-        // Staff-created appointments start as 'booked' immediately.
-        // Self-service bookings go through book_appointment() RPC which
-        // locks status to 'pending' for staff approval.
         status: 'booked',
+        ...(clinicId ? { clinic_id: clinicId } : {}),
       })
       .select()
       .single()
 
     if (error) throw error
     return mapAppointment(data)
+  },
+
+  async getBookedHours(
+    date: Date,
+    clinicId?: string,
+    doctorId?: string
+  ): Promise<number[]> {
+    const start = new Date(date)
+    start.setHours(0, 0, 0, 0)
+    const end = new Date(date)
+    end.setHours(23, 59, 59, 999)
+    let query = supabase
+      .from('appointments')
+      .select('scheduled_for, doctor_id, status')
+      .gte('scheduled_for', start.toISOString())
+      .lte('scheduled_for', end.toISOString())
+      .in('status', ['pending', 'booked', 'arrived', 'in_progress'])
+    if (clinicId) query = query.eq('clinic_id', clinicId)
+    if (doctorId && doctorId !== 'no_preference')
+      query = query.eq('doctor_id', doctorId)
+    const { data, error } = await query
+    if (error) throw error
+    return (data ?? []).map(
+      (r) => new Date(r.scheduled_for as string).getHours()
+    )
   },
 
   async updateStatus(id, status) {
@@ -196,12 +229,18 @@ export const appointmentsRepository: AppointmentsRepository = {
 // ---------------------------------------------------------------------------
 
 export const queueRepository: QueueRepository = {
-  async list() {
+  async list(clinicId?: string) {
     // Join rooms to get the room number for display.
-    const { data, error } = await supabase
+    let query = supabase
       .from('queue_entries')
       .select('*, rooms!queue_entries_room_id_fkey(number)')
       .order('checked_in_at', { ascending: true })
+
+    if (clinicId) {
+      query = query.eq('clinic_id', clinicId)
+    }
+
+    const { data, error } = await query
 
     if (error) throw error
 
@@ -269,17 +308,23 @@ export const queueRepository: QueueRepository = {
 // ---------------------------------------------------------------------------
 
 export const patientsRepository: PatientsRepository = {
-  async list() {
-    const { data, error } = await supabase
+  async list(clinicId?: string) {
+    let query = supabase
       .from('patients')
       .select('*')
       .order('name')
+
+    if (clinicId) {
+      query = query.eq('clinic_id', clinicId)
+    }
+
+    const { data, error } = await query
 
     if (error) throw error
     return (data ?? []).map(mapPatient)
   },
 
-  async create(input) {
+  async create(input, clinicId?: string) {
     const { data, error } = await supabase
       .from('patients')
       .insert({
@@ -288,6 +333,7 @@ export const patientsRepository: PatientsRepository = {
         email: input.email ?? null,
         last_visit: input.lastVisit ?? null,
         visits: input.visits,
+        ...(clinicId ? { clinic_id: clinicId } : {}),
       })
       .select()
       .single()
@@ -302,22 +348,26 @@ export const patientsRepository: PatientsRepository = {
 // ---------------------------------------------------------------------------
 
 export const doctorsRepository: DoctorsRepository = {
-  async list() {
-    // Compute todayAppointments via a count subquery.
+  async list(clinicId?: string) {
     const todayStart = new Date()
     todayStart.setHours(0, 0, 0, 0)
     const todayEnd = new Date()
     todayEnd.setHours(23, 59, 59, 999)
 
-    const { data: doctors, error } = await supabase
+    let query = supabase
       .from('doctors')
       .select('*')
       .order('name')
 
+    if (clinicId) {
+      query = query.eq('clinic_id', clinicId)
+    }
+
+    const { data: doctors, error } = await query
+
     if (error) throw error
     if (!doctors?.length) return []
 
-    // Batch-count today's appointments per doctor.
     const doctorIds = doctors.map((d: Record<string, unknown>) => d.id)
     const { data: counts } = await supabase
       .from('appointments')
@@ -337,7 +387,7 @@ export const doctorsRepository: DoctorsRepository = {
     )
   },
 
-  async create(input) {
+  async create(input, clinicId?: string) {
     const { data, error } = await supabase
       .from('doctors')
       .insert({
@@ -345,6 +395,7 @@ export const doctorsRepository: DoctorsRepository = {
         specialization: input.specialization,
         email: input.email,
         status: input.status,
+        ...(clinicId ? { clinic_id: clinicId } : {}),
       })
       .select()
       .single()
@@ -373,17 +424,23 @@ export const doctorsRepository: DoctorsRepository = {
 // ---------------------------------------------------------------------------
 
 export const staffRepository: StaffRepository = {
-  async list() {
-    const { data, error } = await supabase
+  async list(clinicId?: string) {
+    let query = supabase
       .from('staff')
       .select('*')
       .order('name')
+
+    if (clinicId) {
+      query = query.eq('clinic_id', clinicId)
+    }
+
+    const { data, error } = await query
 
     if (error) throw error
     return (data ?? []).map(mapStaff)
   },
 
-  async create(input) {
+  async create(input, clinicId?: string) {
     const { data, error } = await supabase
       .from('staff')
       .upsert(
@@ -393,6 +450,7 @@ export const staffRepository: StaffRepository = {
           phone: input.phone,
           email: input.email,
           status: input.status,
+          ...(clinicId ? { clinic_id: clinicId } : {}),
         },
         { onConflict: 'email' }
       )
@@ -414,13 +472,17 @@ export const staffRepository: StaffRepository = {
 // ---------------------------------------------------------------------------
 
 export const roomsRepository: RoomsRepository = {
-  async list() {
-    // Rooms don't store doctor/patient names — derive from queue_entries
-    // where a queue entry is in_room for this room.
-    const { data: rooms, error } = await supabase
+  async list(clinicId?: string) {
+    let query = supabase
       .from('rooms')
       .select('*')
       .order('number')
+
+    if (clinicId) {
+      query = query.eq('clinic_id', clinicId)
+    }
+
+    const { data: rooms, error } = await query
 
     if (error) throw error
     if (!rooms?.length) return []
@@ -457,13 +519,14 @@ export const roomsRepository: RoomsRepository = {
     })
   },
 
-  async create(input) {
+  async create(input, clinicId?: string) {
     const { data, error } = await supabase
       .from('rooms')
       .insert({
         number: input.number,
         type: input.type,
         status: input.status,
+        ...(clinicId ? { clinic_id: clinicId } : {}),
       })
       .select()
       .single()
@@ -487,7 +550,7 @@ export const roomsRepository: RoomsRepository = {
 // ---------------------------------------------------------------------------
 
 export const notificationsRepository: NotificationsRepository = {
-  async list() {
+  async list(_clinicId?: string) {
     const {
       data: { user },
     } = await supabase.auth.getUser()
@@ -502,8 +565,11 @@ export const notificationsRepository: NotificationsRepository = {
 
     if (notifErr) throw notifErr
 
+    const allNotifs = notifs ?? []
+    if (allNotifs.length === 0) return []
+
     // Fetch the user's read status for these notifications.
-    const notifIds = (notifs ?? []).map((n: { id: string }) => n.id)
+    const notifIds = allNotifs.map((n: { id: string }) => n.id)
     const { data: recipients } = await supabase
       .from('notification_recipients')
       .select('notification_id, read')
@@ -542,9 +608,6 @@ export const notificationsRepository: NotificationsRepository = {
 
 export const bookingRepository: BookingRepository = {
   async book(input) {
-    // Call the book_appointment() RPC — status is locked to 'pending'
-    // server-side, email is lowercased, doctor name resolved from DB.
-    // The RPC now returns the full appointment record, bypassing RLS issues.
     const { data: apt, error } = await supabase.rpc('book_appointment', {
       p_name: input.patientName,
       p_email: input.email,
@@ -552,18 +615,12 @@ export const bookingRepository: BookingRepository = {
       p_scheduled_for: input.scheduledFor,
       p_doctor_id: input.doctorId ?? null,
       p_reason: input.reason ?? null,
+      p_clinic_id: input.clinicId ?? null,
     })
 
     if (error) throw error
     if (!apt) throw new Error('Booking failed to return appointment data.')
 
-    // We cannot safely check whether an arbitrary email already has an auth
-    // account from the frontend (supabase.auth.getUser() only returns the
-    // *currently signed-in* user, not a lookup by email). The sign-up step
-    // that follows booking handles the "already has account" case via the
-    // error thrown by supabase.auth.signUp() for duplicate emails — the
-    // sign-up page redirects existing users to sign-in instead.
-    // Always return false here; the post-booking flow handles it.
     return {
       appointment: mapAppointment(apt),
       hasAccount: false,
@@ -601,21 +658,177 @@ export const authRepository: AuthRepository = {
 
     // Also create a patient directory record so the patient appears in the
     // admin Patients page immediately — not just after their first booking.
+    // Use a plain insert; if the patient already exists (duplicate email), we
+    // silently ignore the conflict rather than using onConflict which fails
+    // against a partial unique index on lower(email).
     if (input.name && input.phone) {
-      await supabase.from('patients').upsert(
-        {
-          name: input.name,
-          phone: input.phone,
-          email: input.email,
-          visits: 0,
-        },
-        { onConflict: 'email' }
-      )
+      const { error: patientErr } = await supabase.from('patients').insert({
+        name: input.name,
+        phone: input.phone,
+        email: input.email,
+        visits: 0,
+      })
+      // Duplicate email is expected — the patient was already in the directory.
+      if (patientErr && !patientErr.message?.includes('duplicate')) {
+        console.error('Failed to create patient record:', patientErr)
+      }
     }
 
     return {
       email: data.user.email ?? input.email,
       role: profile ? [String(profile.role)] : ['patient'],
     }
+  },
+}
+
+// ---------------------------------------------------------------------------
+// Analytics (pure aggregations over existing tables — no new tables)
+// ---------------------------------------------------------------------------
+
+export type AnalyticsRange = 'today' | '7d' | '30d'
+
+export interface AnalyticsSummary {
+  today: {
+    booked: number
+    completed: number
+    pending: number
+    noShow: number
+    cancelled: number
+    rejected: number
+    total: number
+  }
+  trend: Array<{ date: string; booked: number; completed: number }>
+  byStatus: Array<{ name: string; value: number }>
+  byDoctor: Array<{ name: string; completed: number }>
+  avgWaitMinutes: number | null
+}
+
+function rangeToInterval(range: AnalyticsRange) {
+  const now = new Date()
+  switch (range) {
+    case 'today': {
+      const start = new Date(now)
+      start.setHours(0, 0, 0, 0)
+      return { start, end: now }
+    }
+    case '7d': {
+      const start = new Date(now)
+      start.setDate(start.getDate() - 7)
+      return { start, end: now }
+    }
+    case '30d': {
+      const start = new Date(now)
+      start.setDate(start.getDate() - 30)
+      return { start, end: now }
+    }
+  }
+}
+
+export const analyticsRepository = {
+  async getSummary(
+    clinicId?: string,
+    range: AnalyticsRange = 'today',
+  ): Promise<AnalyticsSummary> {
+    const { start, end } = rangeToInterval(range)
+
+    // --- Appointments in range ---
+    let aptQuery = supabase
+      .from('appointments')
+      .select('status, doctor_name, scheduled_for')
+      .gte('scheduled_for', start.toISOString())
+      .lte('scheduled_for', end.toISOString())
+
+    if (clinicId) aptQuery = aptQuery.eq('clinic_id', clinicId)
+
+    const { data: apts, error: aptErr } = await aptQuery
+    if (aptErr) throw aptErr
+
+    const rows = (apts ?? []) as Array<{
+      status: string
+      doctor_name: string
+      scheduled_for: string
+    }>
+
+    // Today counts (for "today" range the query already scopes to today;
+    // for other ranges we still want today's snapshot separately).
+    const todayStart = new Date()
+    todayStart.setHours(0, 0, 0, 0)
+    const todayEnd = new Date()
+    todayEnd.setHours(23, 59, 59, 999)
+
+    let todayQuery = supabase
+      .from('appointments')
+      .select('status')
+      .gte('scheduled_for', todayStart.toISOString())
+      .lte('scheduled_for', todayEnd.toISOString())
+    if (clinicId) todayQuery = todayQuery.eq('clinic_id', clinicId)
+
+    const { data: todayRows } = await todayQuery
+    const todayList = (todayRows ?? []) as Array<{ status: string }>
+
+    const today = {
+      booked: todayList.filter((r) => r.status === 'booked').length,
+      completed: todayList.filter((r) => r.status === 'completed').length,
+      pending: todayList.filter((r) => r.status === 'pending').length,
+      noShow: todayList.filter((r) => r.status === 'no_show').length,
+      cancelled: todayList.filter((r) => r.status === 'cancelled').length,
+      rejected: todayList.filter((r) => r.status === 'rejected').length,
+      total: todayList.length,
+    }
+
+    // Trend: group by date (YYYY-MM-DD)
+    const trendMap = new Map<
+      string,
+      { booked: number; completed: number }
+    >()
+    for (const r of rows) {
+      const day = r.scheduled_for.slice(0, 10)
+      const entry = trendMap.get(day) ?? { booked: 0, completed: 0 }
+      if (r.status === 'booked') entry.booked++
+      if (r.status === 'completed') entry.completed++
+      trendMap.set(day, entry)
+    }
+    const trend = [...trendMap.entries()]
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([date, counts]) => ({ date, ...counts }))
+
+    // By status (from range rows)
+    const byStatus = aggregateByStatus(rows)
+
+    // By doctor: completed count per doctor
+    const doctorMap = new Map<string, number>()
+    for (const r of rows) {
+      if (r.status === 'completed' && r.doctor_name) {
+        doctorMap.set(
+          r.doctor_name,
+          (doctorMap.get(r.doctor_name) ?? 0) + 1,
+        )
+      }
+    }
+    const byDoctor = [...doctorMap.entries()]
+      .map(([name, completed]) => ({ name, completed }))
+      .sort((a, b) => b.completed - a.completed)
+
+    // Average wait minutes from queue_entries in range
+    let queueQuery = supabase
+      .from('queue_entries')
+      .select('checked_in_at, called_at, status')
+      .gte('checked_in_at', start.toISOString())
+      .lte('checked_in_at', end.toISOString())
+
+    if (clinicId) queueQuery = queueQuery.eq('clinic_id', clinicId)
+
+    const { data: queueRows, error: queueErr } = await queueQuery
+    if (queueErr) throw queueErr
+
+    const avgWaitMinutes = calcAvgWaitMinutes(
+      (queueRows ?? []) as Array<{
+        checked_in_at: string
+        called_at: string | null
+        status: string
+      }>,
+    )
+
+    return { today, trend, byStatus, byDoctor, avgWaitMinutes }
   },
 }

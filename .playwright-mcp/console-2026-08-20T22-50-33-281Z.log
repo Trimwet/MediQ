@@ -1,0 +1,7 @@
+[    1304ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=feb1977c:14333
+[    3372ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_CLOSED @ https://snvdwamqjreuhtyrrrlg.supabase.co/auth/v1/user:0
+[    3377ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_CLOSED @ https://snvdwamqjreuhtyrrrlg.supabase.co/rest/v1/doctors?select=*&order=name.asc:0
+[    3378ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_CLOSED @ https://snvdwamqjreuhtyrrrlg.supabase.co/rest/v1/queue_entries?select=*%2Crooms%21queue_entries_room_id_fkey%28number%29&order=checked_in_at.asc:0
+[    3378ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_CLOSED @ https://snvdwamqjreuhtyrrrlg.supabase.co/rest/v1/doctors?select=*&order=name.asc&clinic_id=eq.68062b03-3a03-4be3-a420-9033268b5fee:0
+[    3378ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_CLOSED @ https://snvdwamqjreuhtyrrrlg.supabase.co/rest/v1/queue_entries?select=*%2Crooms%21queue_entries_room_id_fkey%28number%29&order=checked_in_at.asc&clinic_id=eq.68062b03-3a03-4be3-a420-9033268b5fee:0
+[    3378ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_CLOSED @ https://snvdwamqjreuhtyrrrlg.supabase.co/rest/v1/profiles?select=role&id=eq.2aa42400-de63-4549-a413-704d4b6d49c7:0

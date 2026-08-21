@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useCreateDoctor, useDoctors } from '@/data/hooks'
 import { Check, Copy, UserPlus } from 'lucide-react'
 import { toast } from 'sonner'
+import { useCurrentClinic } from '@/lib/clinic-context'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import {
@@ -88,13 +89,14 @@ export function StaffDialog({
   const role = form.watch('role')
   const doctorsQuery = useDoctors()
   const createDoctor = useCreateDoctor()
+  const { clinicId } = useCurrentClinic()
   const tempPassword = useMemo(generateTempPassword, [invite])
 
   async function onSubmit(values: StaffForm) {
     // Create the Supabase Auth account with a temporary password.
     // The handle_new_user trigger auto-creates a profile with role 'patient';
     // in production the role is set via an Edge Function or admin action.
-    const { error: authError } = await supabase.auth.signUp({
+    const { data: authData, error: authError } = await supabase.auth.signUp({
       email: values.email,
       password: tempPassword,
       options: {
@@ -113,6 +115,18 @@ export function StaffDialog({
       return
     }
 
+    // Look up the auth user ID (new or existing) to create clinic_members link.
+    // For existing users we query by email; for new ones the signup response has the ID.
+    let userId: string | null = null
+    if (!authError) {
+      userId = authData?.user?.id ?? null
+    } else {
+      // User already exists — find them by email via admin lookup (not available
+      // from anon client). We'll create the clinic_members row via a function
+      // or skip for now; the user can be linked manually.
+      // For the mock flow this is fine — the user is already in the system.
+    }
+
     // Create the staff directory record.
     onCreated({
       name: values.name,
@@ -121,6 +135,26 @@ export function StaffDialog({
       email: values.email,
       status: 'active',
     })
+
+    // Link the new user to this clinic via clinic_members.
+    if (userId && clinicId) {
+      const memberRole =
+        values.role === 'doctor'
+          ? 'doctor'
+          : values.role === 'admin'
+            ? 'admin'
+            : 'front_desk'
+      const { error: memberErr } = await supabase
+        .from('clinic_members')
+        .insert({
+          clinic_id: clinicId,
+          user_id: userId,
+          role: memberRole,
+        })
+      if (memberErr && !memberErr.message?.includes('duplicate')) {
+        console.error('Failed to create clinic membership:', memberErr)
+      }
+    }
 
     // Doctors also need a directory record so their account can be matched
     // to appointments (row-level scoping). Skip if one already exists.
