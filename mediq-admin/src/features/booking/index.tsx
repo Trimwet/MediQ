@@ -17,6 +17,7 @@ import { toast } from 'sonner'
 import { Logo } from '@/assets/logo'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { QrTicket } from '@/features/appointments/components/qr-ticket'
 import {
   Form,
   FormControl,
@@ -479,6 +480,13 @@ function BookingSuccess({
               <dd className='font-medium'>{when}</dd>
             </div>
           </dl>
+
+          <QrTicket
+            appointmentId={appointment.id}
+            patientName={appointment.patientName}
+            scheduledFor={appointment.scheduledFor}
+            doctorName={appointment.doctorName}
+          />
 
           <p className='rounded-lg bg-muted/60 p-3 text-start text-xs text-muted-foreground'>
             The clinic reviews your request and confirms before it appears on
