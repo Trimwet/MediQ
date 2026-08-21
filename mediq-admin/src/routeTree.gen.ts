@@ -13,6 +13,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as PublicRouteRouteImport } from './routes/_public/route'
 import { Route as BookRouteImport } from './routes/book'
 import { Route as ChangePasswordRouteImport } from './routes/change-password'
+import { Route as CheckInRouteImport } from './routes/check-in'
 import { Route as PatientRouteImport } from './routes/patient'
 import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
 import { Route as authOtpRouteImport } from './routes/(auth)/otp'
@@ -61,6 +62,11 @@ const BookRoute = BookRouteImport.update({
 const ChangePasswordRoute = ChangePasswordRouteImport.update({
   id: '/change-password',
   path: '/change-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckInRoute = CheckInRouteImport.update({
+  id: '/check-in',
+  path: '/check-in',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PatientRoute = PatientRouteImport.update({
@@ -236,6 +242,7 @@ export interface FileRoutesByFullPath {
   '/': typeof PublicIndexRoute
   '/book': typeof BookRoute
   '/change-password': typeof ChangePasswordRoute
+  '/check-in': typeof CheckInRoute
   '/patient': typeof PatientRoute
   '/forgot-password': typeof authForgotPasswordRoute
   '/otp': typeof authOtpRoute
@@ -271,6 +278,7 @@ export interface FileRoutesByTo {
   '/': typeof PublicIndexRoute
   '/book': typeof BookRoute
   '/change-password': typeof ChangePasswordRoute
+  '/check-in': typeof CheckInRoute
   '/patient': typeof PatientRoute
   '/forgot-password': typeof authForgotPasswordRoute
   '/otp': typeof authOtpRoute
@@ -307,6 +315,7 @@ export interface FileRoutesById {
   '/_public': typeof PublicRouteRouteWithChildren
   '/book': typeof BookRoute
   '/change-password': typeof ChangePasswordRoute
+  '/check-in': typeof CheckInRoute
   '/patient': typeof PatientRoute
   '/(auth)/forgot-password': typeof authForgotPasswordRoute
   '/(auth)/otp': typeof authOtpRoute
@@ -345,6 +354,7 @@ export interface FileRouteTypes {
     | '/'
     | '/book'
     | '/change-password'
+    | '/check-in'
     | '/patient'
     | '/forgot-password'
     | '/otp'
@@ -380,6 +390,7 @@ export interface FileRouteTypes {
     | '/'
     | '/book'
     | '/change-password'
+    | '/check-in'
     | '/patient'
     | '/forgot-password'
     | '/otp'
@@ -415,6 +426,7 @@ export interface FileRouteTypes {
     | '/_public'
     | '/book'
     | '/change-password'
+    | '/check-in'
     | '/patient'
     | '/(auth)/forgot-password'
     | '/(auth)/otp'
@@ -453,6 +465,7 @@ export interface RootRouteChildren {
   PublicRouteRoute: typeof PublicRouteRouteWithChildren
   BookRoute: typeof BookRoute
   ChangePasswordRoute: typeof ChangePasswordRoute
+  CheckInRoute: typeof CheckInRoute
   PatientRoute: typeof PatientRoute
   authForgotPasswordRoute: typeof authForgotPasswordRoute
   authOtpRoute: typeof authOtpRoute
@@ -492,6 +505,13 @@ declare module '@tanstack/react-router' {
       path: '/change-password'
       fullPath: '/change-password'
       preLoaderRoute: typeof ChangePasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/check-in': {
+      id: '/check-in'
+      path: '/check-in'
+      fullPath: '/check-in'
+      preLoaderRoute: typeof CheckInRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/patient': {
@@ -799,6 +819,7 @@ const rootRouteChildren: RootRouteChildren = {
   PublicRouteRoute: PublicRouteRouteWithChildren,
   BookRoute: BookRoute,
   ChangePasswordRoute: ChangePasswordRoute,
+  CheckInRoute: CheckInRoute,
   PatientRoute: PatientRoute,
   authForgotPasswordRoute: authForgotPasswordRoute,
   authOtpRoute: authOtpRoute,
