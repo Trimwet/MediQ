@@ -5,7 +5,12 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link } from '@tanstack/react-router'
 import { type BookingResult } from '@/data'
-import { useBookAppointment, useBookedSlots, usePublicDoctors, useSignUp } from '@/data/hooks'
+import {
+  useBookAppointment,
+  useBookedSlots,
+  usePublicDoctors,
+  useSignUp,
+} from '@/data/hooks'
 import {
   ArrowLeft,
   CalendarCheck2,
@@ -21,7 +26,6 @@ import { toast } from 'sonner'
 import { Logo } from '@/assets/logo'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { QrTicket } from '@/features/appointments/components/qr-ticket'
 import {
   Form,
   FormControl,
@@ -36,6 +40,7 @@ import { PasswordInput } from '@/components/password-input'
 import { SearchableSelect } from '@/components/searchable-select'
 import { SelectDropdown } from '@/components/select-dropdown'
 import { ThemeSwitch } from '@/components/theme-switch'
+import { QrTicket } from '@/features/appointments/components/qr-ticket'
 
 const TIME_SLOTS = [
   { label: '9:00 AM', hour: 9 },
@@ -69,7 +74,8 @@ export function Booking() {
   const submittingRef = useRef(false)
   // Read clinicId from URL search params (?clinicId=...) for the public booking page.
   const clinicId = useMemo(
-    () => new URLSearchParams(window.location.search).get('clinicId') ?? undefined,
+    () =>
+      new URLSearchParams(window.location.search).get('clinicId') ?? undefined,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [window.location.search]
   )
@@ -131,7 +137,10 @@ export function Booking() {
     if (submittingRef.current) return
     submittingRef.current = true
     const slot = TIME_SLOTS.find((s) => s.label === values.time)
-    if (!slot) { submittingRef.current = false; return }
+    if (!slot) {
+      submittingRef.current = false
+      return
+    }
     // Doctor is optional — patients may not know one by name, so the clinic
     // assigns a suitable doctor when the request is approved.
     const doctor =
@@ -163,7 +172,11 @@ export function Booking() {
         },
         onError: (err) => {
           submittingRef.current = false
-          toast.error(err instanceof Error ? err.message : 'Booking failed — please try again.')
+          toast.error(
+            err instanceof Error
+              ? err.message
+              : 'Booking failed — please try again.'
+          )
         },
       }
     )
@@ -214,11 +227,11 @@ export function Booking() {
           </CardHeader>
           <CardContent>
             <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className='grid gap-4 sm:grid-cols-2'
-                noValidate
-              >
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className='grid gap-4 sm:grid-cols-2 items-start'
+                  noValidate
+                >
                 <FormField
                   control={form.control}
                   name='patientName'
@@ -326,6 +339,7 @@ export function Booking() {
                         defaultValue={field.value}
                         onValueChange={field.onChange}
                         placeholder='Choose a time'
+                        className='w-full'
                         items={TIME_SLOTS.map((slot) => {
                           const isPast =
                             selectedDate &&
@@ -344,14 +358,14 @@ export function Booking() {
                           }
                         })}
                       />
-                      <p className='text-xs text-muted-foreground'>
-                        We&apos;ll confirm within hours — if your slot isn&apos;t
-                        available we&apos;ll propose the closest alternative.
-                      </p>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+                <p className='sm:col-span-2 -mt-1 text-xs text-muted-foreground'>
+                  We&apos;ll confirm within hours — if your slot isn&apos;t
+                  available we&apos;ll propose the closest alternative.
+                </p>
                 <FormField
                   control={form.control}
                   name='reason'
@@ -447,7 +461,10 @@ function BookingSuccess({
         },
         onError: (error) => {
           const msg = error instanceof Error ? error.message : ''
-          if (msg.includes('already') || msg.includes('already been registered')) {
+          if (
+            msg.includes('already') ||
+            msg.includes('already been registered')
+          ) {
             toast.info(
               'An account already exists with this email. You can sign in with your existing password.'
             )
@@ -519,7 +536,8 @@ function BookingSuccess({
             </div>
             {allDone && (
               <p className='mb-3 rounded-md bg-emerald-50 px-3 py-2 text-center text-xs font-medium text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300'>
-                🎉 All set — present your QR at reception or track your booking after signing in.
+                🎉 All set — present your QR at reception or track your booking
+                after signing in.
               </p>
             )}
             <ul className='space-y-1'>
@@ -532,7 +550,9 @@ function BookingSuccess({
                   <span className='flex-1 text-muted-foreground line-through decoration-muted-foreground/40'>
                     Booking request sent
                   </span>
-                  <span className='shrink-0 text-xs text-muted-foreground'>Ref {appointment.id.slice(0, 8)}</span>
+                  <span className='shrink-0 text-xs text-muted-foreground'>
+                    Ref {appointment.id.slice(0, 8)}
+                  </span>
                 </div>
               </li>
               {/* 2 — Save ticket */}
@@ -568,7 +588,7 @@ function BookingSuccess({
                       View
                     </span>
                   ) : (
-                    <span className='flex items-center gap-1 shrink-0 text-xs text-muted-foreground'>
+                    <span className='flex shrink-0 items-center gap-1 text-xs text-muted-foreground'>
                       <QrCodeIcon className='size-3' />
                       {showQr ? 'Hide' : 'Show'}
                     </span>
@@ -716,7 +736,9 @@ function BookingSuccess({
               </Button>
             )}
             <Button
-              variant={hasExistingAccount || accountCreated ? 'outline' : 'ghost'}
+              variant={
+                hasExistingAccount || accountCreated ? 'outline' : 'ghost'
+              }
               onClick={onBookAnother}
               className='flex-1'
             >
