@@ -9,23 +9,17 @@ import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { TimelineAnimation } from '@/components/ui/timeline-animation'
 
+const freePlan = {
+  name: 'Free',
+  description: 'Try MediQ with your small practice',
+  monthly: 0,
+  yearly: 0,
+  features: ['2 staff', '1 location', '50 appointments / mo', 'Basic queue'],
+  cta: 'Start free',
+  to: '/create-clinic' as const,
+} as const
+
 const plans = [
-  {
-    name: 'Free',
-    description: 'Try MediQ with your small practice',
-    monthly: 0,
-    yearly: 0,
-    features: [
-      'Up to 2 staff members',
-      '1 clinic location',
-      '50 appointments / month',
-      'Basic queue management',
-      'Community support',
-    ],
-    cta: 'Start free',
-    to: '/create-clinic' as const,
-    variant: 'outline' as const,
-  },
   {
     name: 'Starter',
     description: 'Perfect for small clinics getting started',
@@ -149,11 +143,37 @@ export function PricingSection() {
           </TimelineAnimation>
         </div>
 
-        <div className='mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-4'>
+        {/* Free — horizontal banner, not a 4th card */}
+        <TimelineAnimation
+          animationNum={4}
+          timelineRef={timelineRef}
+          className='mx-auto mt-10 flex max-w-4xl flex-col items-center justify-between gap-4 rounded-2xl border border-dashed border-border bg-card px-6 py-5 shadow-sm sm:flex-row sm:gap-6'
+        >
+          <div className='flex flex-1 items-center gap-4 text-left'>
+            <span className='hidden size-10 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground sm:flex'>₦0</span>
+            <div>
+              <p className='text-sm font-bold'>
+                Free <span className='font-normal text-muted-foreground'>— {freePlan.description}</span>
+              </p>
+              <p className='mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground'>
+                {freePlan.features.map((f) => (
+                  <span key={f} className='inline-flex items-center gap-1'>
+                    <Check className='size-3 text-primary' /> {f}
+                  </span>
+                ))}
+              </p>
+            </div>
+          </div>
+          <Button variant='outline' className='h-10 shrink-0 rounded-xl px-6' asChild>
+            <Link to={freePlan.to}>{freePlan.cta}</Link>
+          </Button>
+        </TimelineAnimation>
+
+        <div className='mt-6 grid gap-6 lg:grid-cols-3'>
           {plans.map((plan, index) => (
             <TimelineAnimation
               key={plan.name}
-              animationNum={4 + index}
+              animationNum={5 + index}
               timelineRef={timelineRef}
               className={cn(
                 'flex flex-col rounded-2xl border p-6 transition-all',
