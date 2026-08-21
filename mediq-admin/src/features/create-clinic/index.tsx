@@ -211,7 +211,7 @@ function useSlugField(
     }
   }, [])
 
-  // Debounced slug availability check
+  // Debounced slug availability check with 3 s timeout
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current)
 
@@ -222,25 +222,49 @@ function useSlugField(
 
     setSlugStatus('checking')
 
+    const controller = new AbortController()
+
     debounceRef.current = setTimeout(async () => {
-      const { data, error } = await supabase
-        .from('clinics')
-        .select('id')
-        .eq('slug', slug)
-        .maybeSingle()
+      try {
+        const query = supabase
+          .from('clinics')
+          .select('id')
+          .eq('slug', slug)
+          .maybeSingle()
 
-      if (!mountedRef.current) return
+        // Race the real query against a 3-second timeout
+        const result = await Promise.race([
+          query,
+          new Promise<{ data: null; error: Error }>((resolve) =>
+            setTimeout(
+              () =>
+                resolve({
+                  data: null,
+                  error: new Error('Slug check timed out'),
+                }),
+              3000
+            )
+          ),
+        ])
 
-      if (error) {
-        console.error('Slug check failed:', error)
+        if (!mountedRef.current || controller.signal.aborted) return
+
+        if (result.error) {
+          console.error('Slug check failed / timed out:', result.error.message)
+          setSlugStatus('idle')
+          return
+        }
+
+        setSlugStatus(result.data ? 'taken' : 'available')
+      } catch (err) {
+        if (!mountedRef.current) return
+        console.error('Slug check error:', err)
         setSlugStatus('idle')
-        return
       }
-
-      setSlugStatus(data ? 'taken' : 'available')
     }, 400)
 
     return () => {
+      controller.abort()
       if (debounceRef.current) clearTimeout(debounceRef.current)
     }
   }, [slug])
@@ -370,8 +394,7 @@ function CombinedForm() {
     }
   }
 
-  const isFormSubmitting =
-    isLoading || slugStatus === 'taken' || slugStatus === 'checking'
+  const isFormSubmitting = isLoading || slugStatus === 'taken'
 
   return (
     <FormProvider {...methods}>
@@ -647,8 +670,7 @@ function ClinicOnlyForm() {
     }
   }
 
-  const isFormSubmitting =
-    isLoading || slugStatus === 'taken' || slugStatus === 'checking'
+  const isFormSubmitting = isLoading || slugStatus === 'taken'
 
   return (
     <FormProvider {...methods}>
