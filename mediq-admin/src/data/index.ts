@@ -6,6 +6,7 @@
  * interfaces as the mock repos; swapping back to mock is a one-line change.
  */
 export {
+  analyticsRepository,
   appointmentsRepository,
   authRepository,
   bookingRepository,

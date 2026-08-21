@@ -13,6 +13,7 @@ import { type Patient } from '@/features/patients/schema'
 import { type Room, type RoomStatus } from '@/features/rooms/schema'
 import { type Staff } from '@/features/staff/schema'
 import {
+  analyticsRepository,
   appointmentsRepository,
   authRepository,
   bookingRepository,
@@ -441,6 +442,16 @@ export function useMarkAllNotificationsRead() {
     mutationFn: () => notificationsRepository.markAllRead(),
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: ['notifications'] }),
+  })
+}
+
+// ---- Analytics ----
+
+export function useAnalytics(range: 'today' | '7d' | '30d' = 'today') {
+  const { clinicId } = useCurrentClinic()
+  return useQuery({
+    queryKey: ['analytics', clinicId ?? 'none', range],
+    queryFn: () => analyticsRepository.getSummary(clinicId ?? undefined, range),
   })
 }
 
