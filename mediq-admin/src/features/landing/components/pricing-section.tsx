@@ -16,7 +16,8 @@ const freePlan = {
   yearly: 0,
   features: ['2 staff', '1 location', '50 appointments / mo', 'Basic queue'],
   cta: 'Start free',
-  to: '/create-clinic' as const,
+  to: '/sign-up' as const,
+  search: { business: true as const, plan: 'free' as const },
 } as const
 
 const plans = [
@@ -33,7 +34,8 @@ const plans = [
       'In-app notifications',
     ],
     cta: 'Choose Starter',
-    to: '/create-clinic' as const,
+    to: '/sign-up' as const,
+    search: { business: true as const, plan: 'starter' as const },
     variant: 'outline' as const,
   },
   {
@@ -49,7 +51,8 @@ const plans = [
       'Role-based access control',
     ],
     cta: 'Start 14-day trial',
-    to: '/create-clinic' as const,
+    to: '/sign-up' as const,
+    search: { business: true as const, plan: 'professional' as const },
     variant: 'default' as const,
     featured: true,
   },
@@ -67,6 +70,7 @@ const plans = [
     ],
     cta: 'Contact sales',
     to: '/sign-up' as const,
+    search: { business: true as const, plan: 'enterprise' as const },
     variant: 'outline' as const,
   },
 ]
@@ -165,7 +169,7 @@ export function PricingSection() {
             </div>
           </div>
           <Button variant='outline' className='h-10 shrink-0 rounded-xl px-6' asChild>
-            <Link to={freePlan.to}>{freePlan.cta}</Link>
+            <Link to={freePlan.to} search={freePlan.search}>{freePlan.cta}</Link>
           </Button>
         </TimelineAnimation>
 
@@ -237,7 +241,7 @@ export function PricingSection() {
                 )}
                 asChild
               >
-                <Link to={plan.to}>{plan.cta}</Link>
+                <Link to={plan.to} search={plan.search}>{plan.cta}</Link>
               </Button>
 
               <div
