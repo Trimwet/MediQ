@@ -35,20 +35,19 @@ export function RejectDialog({
         <DialogHeader>
           <DialogTitle>Reject booking request</DialogTitle>
           <DialogDescription>
-            {appointment?.patientName}&apos;s request will be marked as
-            declined. Optionally tell them why — the reason is shown to the
-            patient.
+            This will notify the patient with your reason and proposed
+            alternative.
           </DialogDescription>
         </DialogHeader>
         <div className='space-y-2'>
           <p className='text-sm font-medium'>
             Reason{' '}
-            <span className='font-normal text-muted-foreground'>(optional)</span>
+            <span className='font-normal text-muted-foreground'>(required)</span>
           </p>
           <Textarea
             value={reason}
             onChange={(event) => setReason(event.target.value)}
-            placeholder='e.g. The clinic is fully booked for that time.'
+            placeholder="e.g. Fully booked at 2pm — would 3pm work? We'll notify the patient."
             rows={3}
           />
         </div>
@@ -58,7 +57,8 @@ export function RejectDialog({
           </Button>
           <Button
             variant='destructive'
-            onClick={() => onConfirm(reason.trim() || undefined)}
+            disabled={!reason.trim()}
+            onClick={() => onConfirm(reason.trim())}
           >
             Reject request
           </Button>

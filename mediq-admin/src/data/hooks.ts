@@ -216,6 +216,25 @@ export function usePublicDoctors(clinicId?: string) {
   })
 }
 
+export function useBookedSlots(date: Date | undefined, doctorId?: string) {
+  const { clinicId } = useCurrentClinic()
+  return useQuery({
+    queryKey: [
+      'booked-slots',
+      date?.toISOString().slice(0, 10) ?? 'none',
+      clinicId ?? 'none',
+      doctorId ?? 'none',
+    ],
+    queryFn: () =>
+      appointmentsRepository.getBookedHours(
+        date!,
+        clinicId ?? undefined,
+        doctorId
+      ),
+    enabled: !!date,
+  })
+}
+
 export function useBookAppointment() {
   const queryClient = useQueryClient()
   return useMutation({

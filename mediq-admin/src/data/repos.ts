@@ -33,6 +33,12 @@ export interface AppointmentsRepository {
   approve: (id: string, doctor?: { id: string; name: string }) => Promise<void>
   /** Reject a pending request, with an optional reason for the patient. */
   reject: (id: string, reason?: string) => Promise<void>
+  /** Get the booked hours for a given date, optionally scoped to clinic/doctor. */
+  getBookedHours: (
+    date: Date,
+    clinicId?: string,
+    doctorId?: string
+  ) => Promise<number[]>
 }
 
 export interface QueueRepository {
@@ -143,6 +149,26 @@ export const appointmentsRepository: AppointmentsRepository = {
   async reject(id, reason) {
     await delay(150)
     useDataStore.getState().rejectAppointment(id, reason)
+  },
+  async getBookedHours(date, _clinicId, doctorId) {
+    await delay(150)
+    const all = useDataStore.getState().appointments
+    const start = new Date(date)
+    start.setHours(0, 0, 0, 0)
+    const end = new Date(date)
+    end.setHours(23, 59, 59, 999)
+    return all
+      .filter((a) => {
+        const d = new Date(a.scheduledFor)
+        if (d < start || d > end) return false
+        if (!['pending', 'booked', 'arrived', 'in_progress'].includes(a.status))
+          return false
+        // Mock data has no clinicId — skip clinic filtering for demo
+        if (doctorId && doctorId !== 'no_preference' && a.doctorId !== doctorId)
+          return false
+        return true
+      })
+      .map((a) => new Date(a.scheduledFor).getHours())
   },
 }
 

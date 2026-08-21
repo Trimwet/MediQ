@@ -166,6 +166,31 @@ export const appointmentsRepository: AppointmentsRepository = {
     return mapAppointment(data)
   },
 
+  async getBookedHours(
+    date: Date,
+    clinicId?: string,
+    doctorId?: string
+  ): Promise<number[]> {
+    const start = new Date(date)
+    start.setHours(0, 0, 0, 0)
+    const end = new Date(date)
+    end.setHours(23, 59, 59, 999)
+    let query = supabase
+      .from('appointments')
+      .select('scheduled_for, doctor_id, status')
+      .gte('scheduled_for', start.toISOString())
+      .lte('scheduled_for', end.toISOString())
+      .in('status', ['pending', 'booked', 'arrived', 'in_progress'])
+    if (clinicId) query = query.eq('clinic_id', clinicId)
+    if (doctorId && doctorId !== 'no_preference')
+      query = query.eq('doctor_id', doctorId)
+    const { data, error } = await query
+    if (error) throw error
+    return (data ?? []).map(
+      (r) => new Date(r.scheduled_for as string).getHours()
+    )
+  },
+
   async updateStatus(id, status) {
     const { error } = await supabase
       .from('appointments')

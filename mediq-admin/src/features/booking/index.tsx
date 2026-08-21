@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link } from '@tanstack/react-router'
 import { type BookingResult } from '@/data'
-import { useBookAppointment, usePublicDoctors, useSignUp } from '@/data/hooks'
+import { useBookAppointment, useBookedSlots, usePublicDoctors, useSignUp } from '@/data/hooks'
 import {
   ArrowLeft,
   CalendarCheck2,
@@ -124,11 +124,8 @@ export function Booking() {
   }, [activeDoctors])
 
   const selectedDate = form.watch('date')
-  const availableTimeSlots = useMemo(() => {
-    const isToday = selectedDate && isSameDay(selectedDate, new Date())
-    const currentHour = new Date().getHours()
-    return TIME_SLOTS.filter((slot) => !isToday || slot.hour > currentHour)
-  }, [selectedDate])
+  const selectedDoctorId = form.watch('doctorId')
+  const bookedSlotsQuery = useBookedSlots(selectedDate, selectedDoctorId)
 
   function onSubmit(values: FormValues) {
     if (submittingRef.current) return
@@ -329,11 +326,28 @@ export function Booking() {
                         defaultValue={field.value}
                         onValueChange={field.onChange}
                         placeholder='Choose a time'
-                        items={availableTimeSlots.map((slot) => ({
-                          label: slot.label,
-                          value: slot.label,
-                        }))}
+                        items={TIME_SLOTS.map((slot) => {
+                          const isPast =
+                            selectedDate &&
+                            isSameDay(selectedDate, new Date()) &&
+                            slot.hour <= new Date().getHours()
+                          const isBooked = (
+                            bookedSlotsQuery.data ?? []
+                          ).includes(slot.hour)
+                          const unavailable = isPast || isBooked
+                          return {
+                            label: unavailable
+                              ? `${slot.label} — ${isBooked ? 'Fully booked' : 'Passed'}`
+                              : slot.label,
+                            value: slot.label,
+                            disabled: unavailable,
+                          }
+                        })}
                       />
+                      <p className='text-xs text-muted-foreground'>
+                        We&apos;ll confirm within hours — if your slot isn&apos;t
+                        available we&apos;ll propose the closest alternative.
+                      </p>
                       <FormMessage />
                     </FormItem>
                   )}
