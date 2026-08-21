@@ -40,7 +40,7 @@ async function main() {
   console.log('\n1. Renaming Default Clinic...')
   const { data: clinic, error: clinicErr } = await supabase
     .from('clinics')
-    .update({ name: 'Lagos General Hospital', slug: 'lagos-general' })
+    .update({ name: 'JUTH', slug: 'juth' })
     .eq('slug', 'default')
     .select('id, name, slug')
     .single()
@@ -388,19 +388,19 @@ async function main() {
   │ 1. ADMIN (existing)                                     │
   │    📧 jonahmafuyai@gmail.com                            │
   │    🔐 permitted                                         │
-  │    👤 Role: admin | 🏥 Lagos General Hospital            │
+  │    👤 Role: admin | 🏥 JUTH                              │
   │    🎯 Demo: Full dashboard, all analytics, settings     │
   ├─────────────────────────────────────────────────────────┤
   │ 2. FRONT DESK                                           │
   │    📧 frontdesk.demo@mediq.test                         │
   │    🔐 Demo123!                                          │
-  │    👤 Role: front_desk | 🏥 Lagos General Hospital      │
+  │    👤 Role: front_desk | 🏥 JUTH                        │
   │    🎯 Demo: Check-in, queue mgmt, appointment triage    │
   ├─────────────────────────────────────────────────────────┤
   │ 3. DOCTOR                                               │
   │    📧 doctor.demo@mediq.test                            │
   │    🔐 Demo123!                                          │
-  │    👤 Role: doctor | 🏥 Lagos General Hospital          │
+  │    👤 Role: doctor | 🏥 JUTH                            │
   │    🎯 Demo: Patient list, schedule, appointment view    │
   └─────────────────────────────────────────────────────────┘
 `)

@@ -1,7 +1,7 @@
 # MediQ Pitch Demo — Account Credentials
 
 **Generated:** August 21, 2026  
-**Clinic:** Lagos General Hospital (slug: `lagos-general`)
+**Clinic:** JUTH (slug: `juth`)
 
 ---
 
@@ -40,7 +40,7 @@
 
 | Table | Count | Notes |
 |-------|-------|-------|
-| clinics | 1 | Lagos General Hospital |
+| clinics | 1 | JUTH |
 | clinic_members | 5 | admin, front_desk, doctor×2, admin(demo) |
 | profiles | 6 | admin, front_desk, doctor×2, patient×2 |
 | doctors | 2 | jonah mafuyai (Orthopedics), Dr. Emeka Obi (General Practice) |
@@ -81,6 +81,6 @@ WHERE email IN ('frontdesk.demo@mediq.test', 'doctor.demo@mediq.test');
 ## Notes
 
 - **Doctor's patient record:** "jonah mafuyai" (`jonahmafuyai81@gmail.com`) exists in patients table with 0 linked appointments — this is the doctor's own test record, harmless
-- **Clinic rename:** Successfully renamed from "Default Clinic" → "Lagos General Hospital" (slug: `lagos-general`)
+- **Clinic rename:** Successfully renamed from "Default Clinic" → "JUTH" (slug: `juth`)
 - **Room Pitch-99:** Pre-existing room from earlier testing, now alongside the 2 new rooms
 - **Seed script:** `mediq-admin/seed-pitch.mjs` — can be re-run if needed (idempotent for most operations)
