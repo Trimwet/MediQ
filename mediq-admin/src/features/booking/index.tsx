@@ -9,9 +9,13 @@ import { useBookAppointment, usePublicDoctors, useSignUp } from '@/data/hooks'
 import {
   ArrowLeft,
   CalendarCheck2,
+  Check,
   CheckCircle2,
+  Circle,
   KeyRound,
   Loader2,
+  PartyPopper,
+  QrCode as QrCodeIcon,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Logo } from '@/assets/logo'
@@ -401,6 +405,9 @@ function BookingSuccess({
   const { appointment, hasAccount } = result
   const [accountCreated, setAccountCreated] = useState(false)
   const [hasExistingAccount, setHasExistingAccount] = useState(hasAccount)
+  const [ticketDone, setTicketDone] = useState(false)
+  const [showQr, setShowQr] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
   const signUp = useSignUp()
   const when = format(
     new Date(appointment.scheduledFor),
@@ -420,15 +427,18 @@ function BookingSuccess({
     signUp.mutate(
       { email, password: values.password },
       {
-        onSuccess: () => setAccountCreated(true),
+        onSuccess: () => {
+          setAccountCreated(true)
+          setShowPassword(false)
+        },
         onError: (error) => {
           const msg = error instanceof Error ? error.message : ''
           if (msg.includes('already') || msg.includes('already been registered')) {
-            // Account already exists — inform the user instead of erroring
             toast.info(
               'An account already exists with this email. You can sign in with your existing password.'
             )
             setHasExistingAccount(true)
+            setShowPassword(false)
           } else {
             toast.error(msg || 'Something went wrong creating your account.')
           }
@@ -437,93 +447,182 @@ function BookingSuccess({
     )
   }
 
+  const total = 3
+  const doneCount =
+    1 + (ticketDone ? 1 : 0) + (hasExistingAccount || accountCreated ? 1 : 0)
+  const allDone = doneCount === total
+  const pct = Math.round((doneCount / total) * 100)
+
   return (
-    <div className='flex min-h-svh flex-col items-center justify-center gap-6 bg-muted/40 px-4 py-10'>
+    <div className='flex min-h-svh flex-col items-center justify-center gap-4 bg-muted/40 px-4 py-6'>
       <Link to='/' aria-label='MediQ home'>
-        <Logo className='h-10' />
+        <Logo className='h-8' />
       </Link>
 
-      <Link
-        to='/'
-        className='inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground'
-      >
-        <ArrowLeft className='size-4' />
-        Back to home
-      </Link>
-
-      <Card className='w-full max-w-md'>
-        <CardContent className='flex flex-col gap-4 pt-6 text-center'>
-          <CheckCircle2 className='mx-auto size-10 text-emerald-500' />
+      <Card className='w-full max-w-md overflow-hidden'>
+        <CardContent className='flex flex-col gap-3 pt-5 text-center'>
+          <CheckCircle2 className='mx-auto size-9 text-emerald-500' />
           <div className='space-y-1'>
-            <h1 className='text-xl font-bold tracking-tight'>
+            <h1 className='text-lg font-bold tracking-tight'>
               Booking request sent
             </h1>
-            <p className='text-sm text-muted-foreground'>
-              Reference{' '}
+            <p className='text-xs text-muted-foreground'>
+              Ref{' '}
               <span className='font-mono text-foreground'>
-                {appointment.id}
+                {appointment.id.slice(0, 8)}…
               </span>
+              <span className='mx-1.5'>•</span>
+              {appointment.patientName} • {appointment.doctorName || 'Any doctor'} • {when}
             </p>
           </div>
 
-          <dl className='space-y-2 rounded-lg border bg-muted/40 p-4 text-start text-sm'>
-            <div className='flex justify-between gap-4'>
-              <dt className='text-muted-foreground'>Patient</dt>
-              <dd className='font-medium'>{appointment.patientName}</dd>
-            </div>
-            <div className='flex justify-between gap-4'>
-              <dt className='text-muted-foreground'>Doctor</dt>
-              <dd className='font-medium'>{appointment.doctorName}</dd>
-            </div>
-            <div className='flex justify-between gap-4'>
-              <dt className='text-muted-foreground'>When</dt>
-              <dd className='font-medium'>{when}</dd>
-            </div>
-          </dl>
-
-          <QrTicket
-            appointmentId={appointment.id}
-            patientName={appointment.patientName}
-            scheduledFor={appointment.scheduledFor}
-            doctorName={appointment.doctorName}
-          />
-
-          <p className='rounded-lg bg-muted/60 p-3 text-start text-xs text-muted-foreground'>
-            The clinic reviews your request and confirms before it appears on
-            the schedule. You&apos;ll be able to track it once you sign in.
-          </p>
-
-          {hasExistingAccount || accountCreated ? (
-            <div className='flex flex-col gap-2'>
-              {accountCreated && (
-                <p className='rounded-lg bg-emerald-50 p-3 text-start text-sm text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300'>
-                  Account created — you can now sign in and track your
-                  appointment.
-                </p>
+          {/* Getting-started checklist — compact next steps */}
+          <div className='rounded-xl border bg-card p-4 text-left'>
+            <div className='mb-3 flex items-center justify-between'>
+              <h3 className='text-sm font-semibold'>Next steps</h3>
+              {allDone ? (
+                <span className='flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400'>
+                  <PartyPopper className='size-3.5' />
+                  All done!
+                </span>
+              ) : (
+                <span className='text-xs text-muted-foreground'>
+                  {doneCount} of {total} done
+                </span>
               )}
-              <Button asChild>
-                <Link
-                  to='/sign-in'
-                  search={{ redirect: '/patient' }}
-                  className='w-full'
-                >
-                  Sign in to view your appointments
-                </Link>
-              </Button>
-              <Button variant='ghost' onClick={onBookAnother}>
-                Book another appointment
-              </Button>
             </div>
-          ) : (
-            <div className='rounded-lg border bg-muted/40 p-4 text-start'>
+            <div className='mb-3 h-1.5 w-full overflow-hidden rounded-full bg-muted'>
+              <div
+                className={`h-full rounded-full transition-all duration-500 ease-out ${allDone ? 'bg-emerald-500' : 'bg-primary'}`}
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+            {allDone && (
+              <p className='mb-3 rounded-md bg-emerald-50 px-3 py-2 text-center text-xs font-medium text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300'>
+                🎉 All set — present your QR at reception or track your booking after signing in.
+              </p>
+            )}
+            <ul className='space-y-1'>
+              {/* 1 — Request sent (always done, not toggleable) */}
+              <li>
+                <div className='flex w-full items-center gap-3 rounded-md px-2 py-2 text-left text-sm'>
+                  <span className='flex size-5 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground'>
+                    <Check className='size-3' strokeWidth={3} />
+                  </span>
+                  <span className='flex-1 text-muted-foreground line-through decoration-muted-foreground/40'>
+                    Booking request sent
+                  </span>
+                  <span className='shrink-0 text-xs text-muted-foreground'>Ref {appointment.id.slice(0, 8)}</span>
+                </div>
+              </li>
+              {/* 2 — Save ticket */}
+              <li>
+                <button
+                  type='button'
+                  onClick={() => {
+                    if (!ticketDone) {
+                      setTicketDone(true)
+                      setShowQr(true)
+                    } else {
+                      setShowQr((v) => !v)
+                    }
+                  }}
+                  className='flex w-full items-center gap-3 rounded-md px-2 py-2 text-left text-sm transition-colors hover:bg-muted/60'
+                >
+                  <span className='flex size-5 shrink-0 items-center justify-center'>
+                    {ticketDone ? (
+                      <span className='flex size-5 items-center justify-center rounded-full bg-primary text-primary-foreground'>
+                        <Check className='size-3' strokeWidth={3} />
+                      </span>
+                    ) : (
+                      <Circle className='size-5 text-muted-foreground/40' />
+                    )}
+                  </span>
+                  <span
+                    className={`flex-1 transition-all duration-300 ${ticketDone ? 'text-muted-foreground line-through decoration-muted-foreground/40' : ''}`}
+                  >
+                    Save your ticket
+                  </span>
+                  {!ticketDone ? (
+                    <span className='shrink-0 text-xs font-medium text-primary underline-offset-2 hover:underline'>
+                      View
+                    </span>
+                  ) : (
+                    <span className='flex items-center gap-1 shrink-0 text-xs text-muted-foreground'>
+                      <QrCodeIcon className='size-3' />
+                      {showQr ? 'Hide' : 'Show'}
+                    </span>
+                  )}
+                </button>
+              </li>
+              {/* 3 — Create account */}
+              <li>
+                <button
+                  type='button'
+                  onClick={() => {
+                    if (hasExistingAccount || accountCreated) return
+                    setShowPassword((v) => !v)
+                  }}
+                  disabled={hasExistingAccount || accountCreated}
+                  className={`flex w-full items-center gap-3 rounded-md px-2 py-2 text-left text-sm transition-colors ${hasExistingAccount || accountCreated ? '' : 'hover:bg-muted/60'}`}
+                >
+                  <span className='flex size-5 shrink-0 items-center justify-center'>
+                    {hasExistingAccount || accountCreated ? (
+                      <span className='flex size-5 items-center justify-center rounded-full bg-primary text-primary-foreground'>
+                        <Check className='size-3' strokeWidth={3} />
+                      </span>
+                    ) : (
+                      <Circle className='size-5 text-muted-foreground/40' />
+                    )}
+                  </span>
+                  <span
+                    className={`flex-1 transition-all duration-300 ${hasExistingAccount || accountCreated ? 'text-muted-foreground line-through decoration-muted-foreground/40' : ''}`}
+                  >
+                    {hasExistingAccount
+                      ? 'Account ready'
+                      : accountCreated
+                        ? 'Account created'
+                        : 'Create account to track'}
+                  </span>
+                  {!hasExistingAccount && !accountCreated && (
+                    <span className='shrink-0 text-xs font-medium text-primary underline-offset-2 hover:underline'>
+                      {showPassword ? 'Hide' : 'Set password'}
+                    </span>
+                  )}
+                  {(hasExistingAccount || accountCreated) && (
+                    <Link
+                      to='/sign-in'
+                      search={{ redirect: '/patient' }}
+                      onClick={(e) => e.stopPropagation()}
+                      className='shrink-0 text-xs font-medium text-primary underline-offset-2 hover:underline'
+                    >
+                      Sign in
+                    </Link>
+                  )}
+                </button>
+              </li>
+            </ul>
+          </div>
+
+          {/* Expandable: QR ticket */}
+          {showQr && (
+            <QrTicket
+              appointmentId={appointment.id}
+              patientName={appointment.patientName}
+              scheduledFor={appointment.scheduledFor}
+              doctorName={appointment.doctorName}
+            />
+          )}
+
+          {/* Expandable: password form */}
+          {showPassword && !hasExistingAccount && !accountCreated && (
+            <div className='rounded-xl border bg-muted/20 p-4 text-left'>
               <div className='flex items-center gap-2'>
                 <KeyRound className='size-4 text-primary' />
-                <p className='text-sm font-medium'>Create your password</p>
+                <p className='text-sm font-medium'>Set a password</p>
               </div>
               <p className='mt-1 text-xs text-muted-foreground'>
-                We use the email you provided. Set a password now to sign in and
-                track your booking — the rest of your details can be completed
-                at sign-up.
+                Use {email} to sign in and track your booking.
               </p>
               <Form {...passwordForm}>
                 <form
@@ -531,16 +630,6 @@ function BookingSuccess({
                   className='mt-3 grid gap-3'
                   noValidate
                 >
-                  <div>
-                    <FormLabel>Email</FormLabel>
-                    <Input
-                      type='email'
-                      value={email}
-                      disabled
-                      className='mt-1'
-                      aria-label='Email'
-                    />
-                  </div>
                   <FormField
                     control={passwordForm.control}
                     name='password'
@@ -575,29 +664,45 @@ function BookingSuccess({
                       </FormItem>
                     )}
                   />
-                  <Button
-                    type='submit'
-                    className='mt-1'
-                    disabled={signUp.isPending}
-                  >
+                  <Button type='submit' disabled={signUp.isPending}>
                     {signUp.isPending ? (
                       <Loader2 className='animate-spin' />
                     ) : (
                       <KeyRound />
                     )}
-                    Create account &amp; password
+                    Create account
                   </Button>
                 </form>
               </Form>
-              <Button
-                variant='ghost'
-                onClick={onBookAnother}
-                className='mt-2 w-full'
-              >
-                Book another appointment
-              </Button>
             </div>
           )}
+
+          {accountCreated && (
+            <p className='rounded-lg bg-emerald-50 px-3 py-2 text-left text-xs font-medium text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300'>
+              Account created — you can now sign in and track your appointment.
+            </p>
+          )}
+
+          <p className='text-center text-xs text-muted-foreground'>
+            The clinic reviews your request before it appears on the schedule.
+          </p>
+
+          <div className='flex gap-2'>
+            {(hasExistingAccount || accountCreated) && (
+              <Button asChild className='flex-1'>
+                <Link to='/sign-in' search={{ redirect: '/patient' }}>
+                  Sign in
+                </Link>
+              </Button>
+            )}
+            <Button
+              variant={hasExistingAccount || accountCreated ? 'outline' : 'ghost'}
+              onClick={onBookAnother}
+              className='flex-1'
+            >
+              Book another
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>
