@@ -50,7 +50,7 @@ const createClinicSchema = z.object({
       /^[a-z0-9]+(-[a-z0-9]+)*$/,
       'Slug can only contain lowercase letters, numbers, and hyphens (no leading/trailing hyphens).'
     ),
-  plan: z.enum(['starter', 'professional', 'enterprise'], {
+  plan: z.enum(['free', 'starter', 'professional', 'enterprise'], {
     message: 'Please select a plan.',
   }),
 })
@@ -62,6 +62,7 @@ type CreateClinicValues = z.infer<typeof createClinicSchema>
 // ---------------------------------------------------------------------------
 
 const plans = [
+  { value: 'free' as const, label: 'Free — ₦0/mo' },
   { value: 'starter' as const, label: 'Starter — ₦15,000/mo' },
   { value: 'professional' as const, label: 'Professional — ₦50,000/mo' },
   { value: 'enterprise' as const, label: 'Enterprise — ₦150,000/mo' },

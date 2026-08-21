@@ -11,6 +11,22 @@ import { TimelineAnimation } from '@/components/ui/timeline-animation'
 
 const plans = [
   {
+    name: 'Free',
+    description: 'Try MediQ with your small practice',
+    monthly: 0,
+    yearly: 0,
+    features: [
+      'Up to 2 staff members',
+      '1 clinic location',
+      '50 appointments / month',
+      'Basic queue management',
+      'Community support',
+    ],
+    cta: 'Start free',
+    to: '/create-clinic' as const,
+    variant: 'outline' as const,
+  },
+  {
     name: 'Starter',
     description: 'Perfect for small clinics getting started',
     monthly: 15000,
@@ -22,8 +38,8 @@ const plans = [
       'Live queue management',
       'In-app notifications',
     ],
-    cta: 'Get started free',
-    to: '/sign-up' as const,
+    cta: 'Choose Starter',
+    to: '/create-clinic' as const,
     variant: 'outline' as const,
   },
   {
@@ -39,7 +55,7 @@ const plans = [
       'Role-based access control',
     ],
     cta: 'Start 14-day trial',
-    to: '/sign-up' as const,
+    to: '/create-clinic' as const,
     variant: 'default' as const,
     featured: true,
   },
@@ -133,7 +149,7 @@ export function PricingSection() {
           </TimelineAnimation>
         </div>
 
-        <div className='mt-14 grid gap-6 lg:grid-cols-3'>
+        <div className='mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-4'>
           {plans.map((plan, index) => (
             <TimelineAnimation
               key={plan.name}
