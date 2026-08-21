@@ -472,7 +472,13 @@ function BookingSuccess({
                 {appointment.id.slice(0, 8)}…
               </span>
               <span className='mx-1.5'>•</span>
-              {appointment.patientName} • {appointment.doctorName || 'Any doctor'} • {when}
+              {appointment.patientName}
+              {appointment.doctorName &&
+                appointment.doctorName.toLowerCase() !==
+                  appointment.patientName.toLowerCase() &&
+                ` • Dr. ${appointment.doctorName}`}
+              <span className='mx-1.5'>•</span>
+              {when}
             </p>
           </div>
 
