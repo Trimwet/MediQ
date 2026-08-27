@@ -3,11 +3,9 @@ import { z } from 'zod'
 import { format, startOfDay, isSameDay } from 'date-fns'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Link, useNavigate } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
 import { type BookingResult } from '@/data'
-import { useBookAppointment, useDoctors } from '@/data/hooks'
-import { sendOtp } from '@/lib/otp'
-import { savePendingSignup } from '@/lib/pending-auth'
+import { useBookAppointment, useDoctors, useSignUp } from '@/data/hooks'
 import {
   ArrowLeft,
   CalendarCheck2,
@@ -381,8 +379,8 @@ function BookingSuccess({
   onBookAnother: () => void
 }) {
   const { appointment, hasAccount } = result
-  const [isSendingCode, setIsSendingCode] = useState(false)
-  const navigate = useNavigate()
+  const [accountCreated, setAccountCreated] = useState(false)
+  const signUp = useSignUp()
   const when = format(
     new Date(appointment.scheduledFor),
     'EEEE, MMM d • h:mm a'
@@ -397,30 +395,20 @@ function BookingSuccess({
     },
   })
 
-  async function onCreatePassword(values: PasswordValues) {
-    // 2FA: send a code to the booking email first. The account is only
-    // created after the code is verified on the OTP page.
-    setIsSendingCode(true)
-    try {
-      await sendOtp({ email, purpose: 'signup' })
-      savePendingSignup({
-        email,
-        password: values.password,
-        source: 'booking',
-      })
-
-      navigate({
-        to: '/otp',
-        search: { email, purpose: 'signup' },
-      })
-    } catch (error) {
-      setIsSendingCode(false)
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : 'Could not send the verification code. Please try again.'
-      )
-    }
+  function onCreatePassword(values: PasswordValues) {
+    signUp.mutate(
+      { email, password: values.password },
+      {
+        onSuccess: () => setAccountCreated(true),
+        onError: (error) => {
+          toast.error(
+            error instanceof Error
+              ? error.message
+              : 'Something went wrong creating your account.'
+          )
+        },
+      }
+    )
   }
 
   return (
@@ -472,8 +460,14 @@ function BookingSuccess({
             the schedule. You&apos;ll be able to track it once you sign in.
           </p>
 
-          {hasAccount ? (
+          {hasAccount || accountCreated ? (
             <div className='flex flex-col gap-2'>
+              {accountCreated && (
+                <p className='rounded-lg bg-emerald-50 p-3 text-start text-sm text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300'>
+                  Account created — you can now sign in and track your
+                  appointment.
+                </p>
+              )}
               <Button asChild>
                 <Link
                   to='/sign-in'
@@ -494,9 +488,9 @@ function BookingSuccess({
                 <p className='text-sm font-medium'>Create your password</p>
               </div>
               <p className='mt-1 text-xs text-muted-foreground'>
-                We use the email you provided. Set a password now to sign in
-                and track your booking — we&apos;ll send a verification code to
-                your email to confirm it.
+                We use the email you provided. Set a password now to sign in and
+                track your booking — the rest of your details can be completed
+                at sign-up.
               </p>
               <Form {...passwordForm}>
                 <form
@@ -548,19 +542,17 @@ function BookingSuccess({
                       </FormItem>
                     )}
                   />
-<Button
+                  <Button
                     type='submit'
                     className='mt-1'
-                    disabled={isSendingCode}
+                    disabled={signUp.isPending}
                   >
-                    {isSendingCode ? (
+                    {signUp.isPending ? (
                       <Loader2 className='animate-spin' />
                     ) : (
                       <KeyRound />
                     )}
-                    {isSendingCode
-                      ? 'Sending verification code...'
-                      : 'Send code & create account'}
+                    Create account &amp; password
                   </Button>
                 </form>
               </Form>

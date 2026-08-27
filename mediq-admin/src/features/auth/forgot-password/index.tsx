@@ -7,7 +7,7 @@ export function ForgotPassword() {
     <AuthLayout
       title='Forgot password'
       back={{ to: '/sign-in', label: 'Back to sign in' }}
-      description='Enter your registered email and we will send you a verification code to reset your password.'
+      description='Enter your registered email and we will send you a link to reset your password.'
       footer={
         <>
           Don't have an account?{' '}

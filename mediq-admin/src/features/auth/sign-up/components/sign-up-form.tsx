@@ -3,10 +3,9 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from '@tanstack/react-router'
+import { authRepository } from '@/data'
 import { Loader2, UserPlus } from 'lucide-react'
 import { toast } from 'sonner'
-import { sendOtp } from '@/lib/otp'
-import { savePendingSignup } from '@/lib/pending-auth'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -57,34 +56,30 @@ export function SignUpForm({
     },
   })
 
-  async function onSubmit(data: z.infer<typeof formSchema>) {
+  function onSubmit(data: z.infer<typeof formSchema>) {
     setIsLoading(true)
 
-    try {
-      // 2FA: send a code to the email first. The account is only created
-      // after the code is verified on the OTP page, using the pending
-      // payload held in sessionStorage.
-      await sendOtp({ email: data.email, purpose: 'signup' })
-      savePendingSignup({
-        email: data.email,
-        password: data.password,
-        name: data.name,
-        phone: data.phone,
-        source: 'sign-up',
-      })
+    const promise = authRepository.signUp({
+      name: data.name,
+      email: data.email,
+      password: data.password,
+      phone: data.phone,
+    })
 
-      navigate({
-        to: '/otp',
-        search: { email: data.email, purpose: 'signup' },
-      })
-    } catch (error) {
-      setIsLoading(false)
-      toast.error(
-        error instanceof Error
+    toast.promise(promise, {
+      loading: 'Creating account...',
+      success: () => {
+        setIsLoading(false)
+        navigate({ to: '/sign-in' })
+        return `Account created for ${data.email}. Sign in to continue.`
+      },
+      error: (error) => {
+        setIsLoading(false)
+        return error instanceof Error
           ? error.message
-          : 'Could not send the verification code. Please try again.'
-      )
-    }
+          : 'Error creating account.'
+      },
+    })
   }
 
   return (
@@ -165,7 +160,7 @@ export function SignUpForm({
         />
         <Button className='mt-3' disabled={isLoading}>
           {isLoading ? <Loader2 className='animate-spin' /> : <UserPlus />}
-          {isLoading ? 'Sending verification code...' : 'Create Account'}
+          Create Account
         </Button>
       </form>
     </Form>

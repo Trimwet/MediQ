@@ -17,7 +17,6 @@ import { Route as CheckInRouteImport } from './routes/check-in'
 import { Route as CreateClinicRouteImport } from './routes/create-clinic'
 import { Route as PatientRouteImport } from './routes/patient'
 import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
-import { Route as authOtpRouteImport } from './routes/(auth)/otp'
 import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
 import { Route as authSignUpRouteImport } from './routes/(auth)/sign-up'
 import { Route as errors401RouteImport } from './routes/(errors)/401'
@@ -83,11 +82,6 @@ const PatientRoute = PatientRouteImport.update({
 const authForgotPasswordRoute = authForgotPasswordRouteImport.update({
   id: '/(auth)/forgot-password',
   path: '/forgot-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const authOtpRoute = authOtpRouteImport.update({
-  id: '/(auth)/otp',
-  path: '/otp',
   getParentRoute: () => rootRouteImport,
 } as any)
 const authSignInRoute = authSignInRouteImport.update({
@@ -252,7 +246,6 @@ export interface FileRoutesByFullPath {
   '/create-clinic': typeof CreateClinicRoute
   '/patient': typeof PatientRoute
   '/forgot-password': typeof authForgotPasswordRoute
-  '/otp': typeof authOtpRoute
   '/sign-in': typeof authSignInRoute
   '/sign-up': typeof authSignUpRoute
   '/401': typeof errors401Route
@@ -289,7 +282,6 @@ export interface FileRoutesByTo {
   '/create-clinic': typeof CreateClinicRoute
   '/patient': typeof PatientRoute
   '/forgot-password': typeof authForgotPasswordRoute
-  '/otp': typeof authOtpRoute
   '/sign-in': typeof authSignInRoute
   '/sign-up': typeof authSignUpRoute
   '/401': typeof errors401Route
@@ -327,7 +319,6 @@ export interface FileRoutesById {
   '/create-clinic': typeof CreateClinicRoute
   '/patient': typeof PatientRoute
   '/(auth)/forgot-password': typeof authForgotPasswordRoute
-  '/(auth)/otp': typeof authOtpRoute
   '/(auth)/sign-in': typeof authSignInRoute
   '/(auth)/sign-up': typeof authSignUpRoute
   '/(errors)/401': typeof errors401Route
@@ -367,7 +358,6 @@ export interface FileRouteTypes {
     | '/create-clinic'
     | '/patient'
     | '/forgot-password'
-    | '/otp'
     | '/sign-in'
     | '/sign-up'
     | '/401'
@@ -404,7 +394,6 @@ export interface FileRouteTypes {
     | '/create-clinic'
     | '/patient'
     | '/forgot-password'
-    | '/otp'
     | '/sign-in'
     | '/sign-up'
     | '/401'
@@ -441,7 +430,6 @@ export interface FileRouteTypes {
     | '/create-clinic'
     | '/patient'
     | '/(auth)/forgot-password'
-    | '/(auth)/otp'
     | '/(auth)/sign-in'
     | '/(auth)/sign-up'
     | '/(errors)/401'
@@ -481,7 +469,6 @@ export interface RootRouteChildren {
   CreateClinicRoute: typeof CreateClinicRoute
   PatientRoute: typeof PatientRoute
   authForgotPasswordRoute: typeof authForgotPasswordRoute
-  authOtpRoute: typeof authOtpRoute
   authSignInRoute: typeof authSignInRoute
   authSignUpRoute: typeof authSignUpRoute
   errors401Route: typeof errors401Route
@@ -546,13 +533,6 @@ declare module '@tanstack/react-router' {
       path: '/forgot-password'
       fullPath: '/forgot-password'
       preLoaderRoute: typeof authForgotPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/(auth)/otp': {
-      id: '/(auth)/otp'
-      path: '/otp'
-      fullPath: '/otp'
-      preLoaderRoute: typeof authOtpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(auth)/sign-in': {
@@ -843,7 +823,6 @@ const rootRouteChildren: RootRouteChildren = {
   CreateClinicRoute: CreateClinicRoute,
   PatientRoute: PatientRoute,
   authForgotPasswordRoute: authForgotPasswordRoute,
-  authOtpRoute: authOtpRoute,
   authSignInRoute: authSignInRoute,
   authSignUpRoute: authSignUpRoute,
   errors401Route: errors401Route,

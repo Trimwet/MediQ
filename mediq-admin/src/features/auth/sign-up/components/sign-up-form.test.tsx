@@ -3,34 +3,30 @@ import { render, type RenderResult } from 'vitest-browser-react'
 import { type Locator, userEvent } from 'vitest/browser'
 import { SignUpForm } from './sign-up-form'
 
-const FORM_MESSAGES = {
-  emailEmpty: 'Please enter your email.',
-  passwordEmpty: 'Please enter your password.',
-  confirmPasswordEmpty: 'Please confirm your password.',
-  passwordMismatch: "Passwords don't match.",
-} as const
-
-const sendOtpMock = vi.hoisted(() => vi.fn())
-const savePendingSignupMock = vi.hoisted(() => vi.fn())
+const signUpMock = vi.hoisted(() => vi.fn())
 const navigate = vi.hoisted(() => vi.fn())
-const toastError = vi.hoisted(() => vi.fn())
+const toastPromise = vi.hoisted(() =>
+  vi.fn((p: Promise<unknown>, opts: { success?: () => unknown }) => {
+    p.then(() => opts.success?.())
+  })
+)
 
-vi.mock('@/lib/otp', () => ({
-  sendOtp: (...args: unknown[]) => sendOtpMock(...args),
-}))
-
-vi.mock('@/lib/pending-auth', () => ({
-  savePendingSignup: (...args: unknown[]) => savePendingSignupMock(...args),
+vi.mock('@/data', () => ({
+  authRepository: { signUp: (...args: unknown[]) => signUpMock(...args) },
 }))
 
 vi.mock('@tanstack/react-router', () => ({
   useNavigate: () => navigate,
 }))
 
-vi.mock('sonner', () => ({ toast: { error: toastError } }))
+vi.mock('sonner', () => ({
+  toast: { promise: toastPromise },
+}))
 
 describe('SignUpForm', () => {
   let screen: RenderResult
+  let nameInput: Locator
+  let phoneInput: Locator
   let emailInput: Locator
   let passwordInput: Locator
   let confirmPasswordInput: Locator
@@ -38,13 +34,11 @@ describe('SignUpForm', () => {
 
   beforeEach(async () => {
     vi.clearAllMocks()
-    sendOtpMock.mockResolvedValue({
-      message: 'Verification code sent.',
-      expiresIn: 600,
-      cooldown: 60,
-    })
+    signUpMock.mockResolvedValue({ email: 'a@b.com', role: ['patient'] })
 
     screen = await render(<SignUpForm />)
+    nameInput = screen.getByRole('textbox', { name: /^Full name$/i })
+    phoneInput = screen.getByRole('textbox', { name: /^Phone$/i })
     emailInput = screen.getByRole('textbox', { name: /^Email$/i })
     passwordInput = screen.getByLabelText(/^Password$/i)
     confirmPasswordInput = screen.getByLabelText(/^Confirm Password$/i)
@@ -52,6 +46,8 @@ describe('SignUpForm', () => {
   })
 
   it('renders fields and submit button', async () => {
+    await expect.element(nameInput).toBeInTheDocument()
+    await expect.element(phoneInput).toBeInTheDocument()
     await expect.element(emailInput).toBeInTheDocument()
     await expect.element(passwordInput).toBeInTheDocument()
     await expect.element(confirmPasswordInput).toBeInTheDocument()
@@ -62,30 +58,32 @@ describe('SignUpForm', () => {
     await userEvent.click(submitButton)
 
     await expect
-      .element(screen.getByText(FORM_MESSAGES.emailEmpty))
+      .element(screen.getByText(/^Please enter your full name/i))
       .toBeInTheDocument()
     await expect
-      .element(screen.getByText(FORM_MESSAGES.passwordEmpty))
+      .element(screen.getByText(/^Please enter your email\.$/i))
       .toBeInTheDocument()
     await expect
-      .element(screen.getByText(FORM_MESSAGES.confirmPasswordEmpty))
+      .element(screen.getByText(/^Please enter your password\.$/i))
       .toBeInTheDocument()
   })
 
   it('shows a mismatch error when passwords do not match', async () => {
+    await userEvent.fill(nameInput, 'Isaac')
+    await userEvent.fill(phoneInput, '+2348000000000')
     await userEvent.fill(emailInput, 'a@b.com')
     await userEvent.fill(passwordInput, '1234567')
     await userEvent.fill(confirmPasswordInput, '7654321')
 
     await userEvent.click(submitButton)
     await expect
-      .element(screen.getByText(FORM_MESSAGES.passwordMismatch))
+      .element(screen.getByText(/Passwords don't match/i))
       .toBeInTheDocument()
   })
 
-  it('sends an OTP and navigates to the verification page on submit', async () => {
-    await userEvent.fill(screen.getByRole('textbox', { name: /^Full name$/i }), 'Aisha Bello')
-    await userEvent.fill(screen.getByRole('textbox', { name: /^Phone$/i }), '+2348000000000')
+  it('creates the account and navigates to sign-in on success', async () => {
+    await userEvent.fill(nameInput, 'Isaac Yakubu')
+    await userEvent.fill(phoneInput, '+2348000000000')
     await userEvent.fill(emailInput, 'a@b.com')
     await userEvent.fill(passwordInput, '1234567')
     await userEvent.fill(confirmPasswordInput, '1234567')
@@ -93,41 +91,32 @@ describe('SignUpForm', () => {
     await userEvent.click(submitButton)
 
     await vi.waitFor(() =>
-      expect(sendOtpMock).toHaveBeenCalledWith({
+      expect(signUpMock).toHaveBeenCalledWith({
+        name: 'Isaac Yakubu',
         email: 'a@b.com',
-        purpose: 'signup',
+        password: '1234567',
+        phone: '+2348000000000',
       })
     )
-    expect(savePendingSignupMock).toHaveBeenCalledWith({
-      email: 'a@b.com',
-      password: '1234567',
-      name: 'Aisha Bello',
-      phone: '+2348000000000',
-      source: 'sign-up',
-    })
     await vi.waitFor(() =>
-      expect(navigate).toHaveBeenCalledWith({
-        to: '/otp',
-        search: { email: 'a@b.com', purpose: 'signup' },
-      })
+      expect(navigate).toHaveBeenCalledWith({ to: '/sign-in' })
     )
   })
 
-  it('shows an error toast when the OTP cannot be sent', async () => {
-    sendOtpMock.mockRejectedValue(new Error('Could not send the email.'))
+  it('disables submit while submitting and re-enables after', async () => {
+    let resolve!: (value: unknown) => void
+    signUpMock.mockReturnValue(new Promise((r) => (resolve = r)))
 
-    await userEvent.fill(screen.getByRole('textbox', { name: /^Full name$/i }), 'Aisha Bello')
-    await userEvent.fill(screen.getByRole('textbox', { name: /^Phone$/i }), '+2348000000000')
+    await userEvent.fill(nameInput, 'Isaac')
+    await userEvent.fill(phoneInput, '+2348000000000')
     await userEvent.fill(emailInput, 'a@b.com')
     await userEvent.fill(passwordInput, '1234567')
     await userEvent.fill(confirmPasswordInput, '1234567')
 
     await userEvent.click(submitButton)
+    await expect.element(submitButton).toBeDisabled()
 
-    await vi.waitFor(() =>
-      expect(toastError).toHaveBeenCalledWith('Could not send the email.')
-    )
-    expect(savePendingSignupMock).not.toHaveBeenCalled()
-    expect(navigate).not.toHaveBeenCalled()
+resolve({ email: 'a@b.com', role: ['patient'] })
+    await expect.element(submitButton).toBeEnabled()
   })
 })

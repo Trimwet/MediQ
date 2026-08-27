@@ -1,9 +1,10 @@
+import { useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useNavigate } from '@tanstack/react-router'
-import { ArrowRight } from 'lucide-react'
-import { savePendingReset } from '@/lib/pending-auth'
+import { ArrowRight, Loader2 } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
+import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -26,22 +27,29 @@ export function ForgotPasswordForm({
   className,
   ...props
 }: React.HTMLAttributes<HTMLFormElement>) {
-  const navigate = useNavigate()
+  const [isLoading, setIsLoading] = useState(false)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: { email: '' },
   })
 
-  function onSubmit(data: z.infer<typeof formSchema>) {
-    // No edge function call here: the user is taken straight to the OTP
-    // page, which sends the Brevo verification code when it loads.
-    savePendingReset({ email: data.email })
+  async function onSubmit(data: z.infer<typeof formSchema>) {
+    setIsLoading(true)
 
-    navigate({
-      to: '/otp',
-      search: { email: data.email, purpose: 'reset' },
+    const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
+      redirectTo: `${window.location.origin}/change-password`,
     })
+
+    setIsLoading(false)
+
+    if (error) {
+      toast.error('Failed to send reset email. ' + error.message)
+      return
+    }
+
+    form.reset()
+    toast.success(`Reset link sent to ${data.email} if the account exists.`)
   }
 
   return (
@@ -64,9 +72,9 @@ export function ForgotPasswordForm({
             </FormItem>
           )}
         />
-        <Button className='mt-2' type='submit'>
+        <Button className='mt-2' disabled={isLoading}>
           Continue
-          <ArrowRight />
+          {isLoading ? <Loader2 className='animate-spin' /> : <ArrowRight />}
         </Button>
       </form>
     </Form>
