@@ -250,27 +250,13 @@ export const queueRepository: QueueRepository = {
     })
   },
 
-  async callNext(doctorName?: string) {
-    // Find the earliest waiting entry, optionally scoped to a specific doctor.
-    let query = supabase
-      .from('queue_entries')
-      .select('id')
-      .eq('status', 'waiting')
-      .order('checked_in_at', { ascending: true })
-      .limit(1)
-
-    if (doctorName) {
-      query = query.eq('doctor_name', doctorName)
-    }
-
-    const { data: next, error: findErr } = await query.single()
-
-    if (findErr || !next) return
-
-    const { error } = await supabase
-      .from('queue_entries')
-      .update({ status: 'called', called_at: new Date().toISOString() })
-      .eq('id', next.id)
+  async callNext(doctorName?: string, clinicId?: string) {
+    // Use the atomic RPC (FOR UPDATE SKIP LOCKED) to prevent two desks
+    // from calling the same patient simultaneously.
+    const { error } = await supabase.rpc('call_next_in_queue', {
+      p_clinic_id: clinicId ?? null,
+      p_doctor_name: doctorName ?? null,
+    })
 
     if (error) throw error
   },

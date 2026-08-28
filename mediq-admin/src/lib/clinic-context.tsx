@@ -155,19 +155,30 @@ export function ClinicProvider({ children }: { children: React.ReactNode }) {
 
     // If the user already has a clinic in the auth store, use it immediately
     if (user.clinicId && user.clinicRole && user.clinicName) {
-      setClinic({
-        clinicId: user.clinicId,
-        clinicRole: user.clinicRole,
-        clinicName: user.clinicName,
-        clinicSlug: 'default', // will be refreshed below
-        plan: 'professional',
-      })
-      // Still fetch the full list for the switcher, but skip if already fetched
-      if (lastFetchedEmail.current !== user.email) {
+      // Set the clinic with real values if available from the allClinics list,
+      // otherwise set a temporary entry so the UI can render while we fetch.
+      const real = allClinics.find((c) => c.clinicId === user.clinicId)
+      setClinic(
+        real ?? {
+          clinicId: user.clinicId,
+          clinicRole: user.clinicRole,
+          clinicName: user.clinicName,
+          clinicSlug: '',
+          plan: '',
+        }
+      )
+
+      // Always fetch memberships to get the real slug/plan and populate the
+      // clinic switcher. Debounce: skip only if we already have real data
+      // for this email AND the clinic already has a slug (not the empty sentinel).
+      if (
+        lastFetchedEmail.current === user.email &&
+        real?.clinicSlug
+      ) {
+        setIsLoading(false)
+      } else {
         lastFetchedEmail.current = user.email
         fetchMemberships(user.email)
-      } else {
-        setIsLoading(false)
       }
       return
     }

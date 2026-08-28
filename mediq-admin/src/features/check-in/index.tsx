@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { canCheckIn } from './helpers'
+import { canCheckIn, isPendingApproval } from './helpers'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -288,6 +288,7 @@ export function CheckInPage() {
   /* kind === 'detail' */
   const apt = state.appointment
   const eligible = canCheckIn(apt)
+  const awaiting = isPendingApproval(apt)
 
   return (
     <div className='flex min-h-screen items-center justify-center bg-background p-4'>
@@ -331,6 +332,16 @@ export function CheckInPage() {
             >
               {isCheckingIn ? 'Checking in…' : 'Check In'}
             </Button>
+          ) : awaiting ? (
+            <div className='text-center space-y-1'>
+              <p className='text-sm font-medium text-amber-600'>
+                Awaiting Approval
+              </p>
+              <p className='text-xs text-muted-foreground'>
+                Your appointment is pending staff approval. You will be able to
+                check in once it is confirmed.
+              </p>
+            </div>
           ) : (
             <p className='text-center text-sm text-muted-foreground'>
               This appointment cannot be checked in (status: {apt.status}).

@@ -11,24 +11,34 @@ export function useSupabaseAuthSync() {
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session?.user) {
         if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'PASSWORD_RECOVERY') {
-          const { data: profile } = await supabase
+          const { data: profile, error: profileErr } = await supabase
             .from('profiles')
             .select('role')
             .eq('id', session.user.id)
             .single()
 
-          // Preserve existing clinic fields so auth-sync doesn't wipe the
-          // current clinic context (clinicId, clinicRole, clinicName).
+          // Only preserve clinic fields when the session belongs to the SAME
+          // user — prevents Alice's clinic leaking to Bob on the same browser.
           const prev = useAuthStore.getState().auth.user
+          const shouldPreserve = prev?.accountNo === session.user.id
+
+          // If the profile fetch failed, keep the previous role rather than
+          // silently falling back to 'patient'.
+          const resolvedRole = (() => {
+            if (profileErr || !profile) {
+              return shouldPreserve && prev?.role?.length ? prev.role : ['patient']
+            }
+            return profile.role ? [String(profile.role)] : ['patient']
+          })()
 
           setUser({
             accountNo: session.user.id,
             email: session.user.email ?? '',
-            role: profile?.role ? [profile.role] : ['patient'],
+            role: resolvedRole,
             exp: session.expires_at != null ? session.expires_at * 1000 : Infinity,
-            ...(prev?.clinicId ? { clinicId: prev.clinicId } : {}),
-            ...(prev?.clinicRole ? { clinicRole: prev.clinicRole } : {}),
-            ...(prev?.clinicName ? { clinicName: prev.clinicName } : {}),
+            ...(shouldPreserve && prev?.clinicId ? { clinicId: prev.clinicId } : {}),
+            ...(shouldPreserve && prev?.clinicRole ? { clinicRole: prev.clinicRole } : {}),
+            ...(shouldPreserve && prev?.clinicName ? { clinicName: prev.clinicName } : {}),
           })
         }
       } else if (event === 'SIGNED_OUT') {

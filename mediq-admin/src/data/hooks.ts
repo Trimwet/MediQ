@@ -307,6 +307,7 @@ export function useQueue() {
 export function useQueueActions() {
   const queryClient = useQueryClient()
   const { isDoctor, doctor } = useDoctorIdentity()
+  const { clinicId } = useCurrentClinic()
   const invalidate = () =>
     queryClient.invalidateQueries({ queryKey: ['queue'] })
 
@@ -314,7 +315,7 @@ export function useQueueActions() {
     // When a doctor clicks "Call next", scope it to their own queue so they
     // don't accidentally call another doctor's patient.
     mutationFn: () =>
-      queueRepository.callNext(isDoctor ? doctor?.name : undefined),
+      queueRepository.callNext(isDoctor ? doctor?.name : undefined, clinicId ?? undefined),
     onSuccess: invalidate,
   })
   const startVisit = useMutation({
@@ -523,6 +524,17 @@ function useRealtimeTable(
 ) {
   const queryClient = useQueryClient()
 
+  // Supabase Realtime only supports a single `filter` string per channel.
+  // Combine clinic + doctor filters with `and()` when both are present.
+  const combinedFilter = (() => {
+    const parts: string[] = []
+    if (clinicId) parts.push(`clinic_id=eq.${clinicId}`)
+    if (filter) parts.push(`${filter.column}=eq.${filter.value}`)
+    if (parts.length === 0) return undefined
+    if (parts.length === 1) return parts[0]
+    return `and(${parts.join(',')})`
+  })()
+
   useEffect(() => {
     const channel = supabase
       .channel(`rt:${table}:${queryKey.join('/')}`)
@@ -532,8 +544,7 @@ function useRealtimeTable(
           event: '*',
           schema: 'public',
           table,
-          ...(clinicId ? { filter: `clinic_id=eq.${clinicId}` } : {}),
-          ...(filter ? { filter: `${filter.column}=eq.${filter.value}` } : {}),
+          ...(combinedFilter ? { filter: combinedFilter } : {}),
         },
         () => {
           queryClient.invalidateQueries({ queryKey })
@@ -544,7 +555,7 @@ function useRealtimeTable(
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [table, queryKey.join('/'), queryClient, filter, clinicId])
+  }, [table, queryKey.join('/'), queryClient, combinedFilter])
 }
 
 /** Subscribe to queue changes for live updates on the front desk and doctor views. */

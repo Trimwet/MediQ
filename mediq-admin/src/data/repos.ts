@@ -44,7 +44,7 @@ export interface AppointmentsRepository {
 export interface QueueRepository {
   list: (clinicId?: string) => Promise<QueueEntry[]>
   /** Call the next waiting patient. Pass doctorName to scope to a doctor's queue. */
-  callNext: (doctorName?: string) => Promise<void>
+  callNext: (doctorName?: string, clinicId?: string) => Promise<void>
   startVisit: (id: string) => Promise<void>
   complete: (id: string) => Promise<void>
   markLeft: (id: string) => Promise<void>
@@ -177,7 +177,7 @@ export const queueRepository: QueueRepository = {
     await delay()
     return useDataStore.getState().queue
   },
-  async callNext(doctorName?: string) {
+  async callNext(doctorName?: string, _clinicId?: string) {
     await delay(150)
     useDataStore.getState().callNext(doctorName)
   },

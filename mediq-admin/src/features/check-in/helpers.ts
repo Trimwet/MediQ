@@ -1,11 +1,17 @@
 /**
  * Determines whether an appointment is eligible for check-in.
  *
- * Terminal / non-actionable statuses are blocked. All other statuses
- * (booked, pending, arrived, in_progress) allow check-in.
+ * Only `booked` (approved) and `arrived` (already checked-in once) are
+ * allowed. `pending` requires staff approval first.
  */
 export function canCheckIn(apt: { status: string }): boolean {
-  return !['completed', 'cancelled', 'rejected', 'no_show', 'done'].includes(
-    apt.status
-  )
+  return ['booked', 'arrived'].includes(apt.status)
+}
+
+/**
+ * Returns true when the appointment exists but cannot be checked in
+ * because it is awaiting staff approval.
+ */
+export function isPendingApproval(apt: { status: string }): boolean {
+  return apt.status === 'pending'
 }
