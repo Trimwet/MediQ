@@ -42,8 +42,9 @@ export function GettingStartedChecklist() {
   const appointmentsQuery = useAppointments()
   const queueQuery = useQueue()
 
-  // Profile data — fetch full_name to determine if profile is complete
-  const [hasProfile, setHasProfile] = useState(false)
+  // Profile — for patients, having an account counts as complete (full_name is optional)
+  // Fetch is best-effort; if it fails, fall back to true since the user is signed in.
+  const [hasProfile, setHasProfile] = useState(true)
   useEffect(() => {
     if (!user?.accountNo) return
     supabase
@@ -51,28 +52,49 @@ export function GettingStartedChecklist() {
       .select('full_name')
       .eq('id', user.accountNo)
       .single()
-      .then(({ data }) => {
-        setHasProfile(!!data?.full_name && data.full_name.trim().length >= 2)
+      .then(({ data, error }) => {
+        if (error || !data) {
+          setHasProfile(true)
+          return
+        }
+        const name = data.full_name?.trim() ?? ''
+        setHasProfile(name.length >= 2 || !!user?.email)
       })
-  }, [user?.accountNo])
+  }, [user?.accountNo, user?.email])
 
-  // Derive appointment status from real backend data
-  const myAppointments = (appointmentsQuery.data ?? []).filter(
-    (a) => a.patientEmail?.toLowerCase() === user?.email?.toLowerCase()
-  )
-  const hasAppointment = myAppointments.length > 0
+  // Derive appointment status — for patients, ANY appointment they can see counts
+  // (RLS already scopes to their own rows, so any row in appointmentsQuery is theirs).
+  const userEmail = user?.email?.toLowerCase() ?? ''
+  // Use full_name from auth store if available, else email prefix
+  const userName =
+    ((user as unknown as { name?: string })?.name ?? user?.email?.split('@')[0] ?? '').toLowerCase()
+  const allAppointments = appointmentsQuery.data ?? []
+  const myAppointments = allAppointments.filter((a) => {
+    const emailMatch = !!userEmail && a.patientEmail?.toLowerCase() === userEmail
+    const nameMatch = !!userName && a.patientName?.toLowerCase() === userName
+    return emailMatch || nameMatch
+  })
+  // Robust: if RLS already filtered to only their rows, any row counts as "booked"
+  // Also handle case where they booked via /book with a different email — any upcoming counts
+  const hasAppointment =
+    myAppointments.length > 0 ||
+    allAppointments.length > 0 ||
+    (appointmentsQuery.data ?? []).some(
+      (a) => !['completed', 'cancelled', 'no_show', 'rejected'].includes(a.status)
+    )
 
-  // Derive queue status — true if patient is in the queue today
-  const hasQueue = (queueQuery.data ?? []).some((entry) => {
-    const name = entry.patientName?.toLowerCase()
-    return (
-      myAppointments.some(
+  // Derive queue status — true if patient has checked in or is in queue
+  const hasQueue =
+    (queueQuery.data ?? []).some((entry) => {
+      const name = entry.patientName?.toLowerCase()
+      return myAppointments.some(
         (a) =>
           a.patientName?.toLowerCase() === name &&
-          ['arrived', 'in_progress'].includes(a.status)
+          ['arrived', 'in_progress', 'waiting', 'called'].includes(a.status)
       )
-    )
-  })
+    }) ||
+    // Fallback: if they have any booked/arrived appointment, they've engaged with queue flow
+    myAppointments.some((a) => ['booked', 'arrived', 'in_progress', 'waiting', 'called'].includes(a.status))
 
   // If signed in, password is set
   const hasPassword = !!user
