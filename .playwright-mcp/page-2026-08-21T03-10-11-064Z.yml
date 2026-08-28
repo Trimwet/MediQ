@@ -1,0 +1,162 @@
+- generic [active] [ref=f1e1]:
+  - generic [ref=f1e2]:
+    - generic [ref=f1e241]:
+      - link "Skip to Main" [ref=f1e242] [cursor=pointer]:
+        - /url: "#content"
+      - generic [ref=f1e245]:
+        - list [ref=f1e247]:
+          - listitem [ref=f1e248]:
+            - button "Default Clinic professional plan" [ref=f1e249] [cursor=pointer]:
+              - generic [ref=f1e255]:
+                - generic [ref=f1e256]: Default Clinic
+                - generic [ref=f1e257]: professional plan
+        - generic [ref=f1e258]:
+          - generic [ref=f1e259]:
+            - generic [ref=f1e260]: General
+            - list [ref=f1e261]:
+              - listitem [ref=f1e262]:
+                - link "Dashboard" [ref=f1e263] [cursor=pointer]:
+                  - /url: /admin/dashboard
+              - listitem [ref=f1e270]:
+                - link "Appointments" [ref=f1e271] [cursor=pointer]:
+                  - /url: /admin/appointments
+              - listitem [ref=f1e275]:
+                - link "Queue" [ref=f1e276] [cursor=pointer]:
+                  - /url: /admin/queue
+              - listitem [ref=f1e283]:
+                - link "Patients" [ref=f1e284] [cursor=pointer]:
+                  - /url: /admin/patients
+          - generic [ref=f1e289]:
+            - generic [ref=f1e290]: Management
+            - list [ref=f1e291]:
+              - listitem [ref=f1e292]:
+                - link "Doctors" [ref=f1e293] [cursor=pointer]:
+                  - /url: /admin/doctors
+              - listitem [ref=f1e299]:
+                - link "Staff" [ref=f1e300] [cursor=pointer]:
+                  - /url: /admin/staff
+              - listitem [ref=f1e314]:
+                - link "Rooms" [ref=f1e315] [cursor=pointer]:
+                  - /url: /admin/rooms
+          - generic [ref=f1e320]:
+            - generic [ref=f1e321]: Other
+            - list [ref=f1e322]:
+              - listitem [ref=f1e323]:
+                - link "Notifications" [ref=f1e324] [cursor=pointer]:
+                  - /url: /admin/notifications
+              - listitem [ref=f1e329]:
+                - button "Settings" [ref=f1e330] [cursor=pointer]
+        - list [ref=f1e338]:
+          - listitem [ref=f1e339]:
+            - button "J jonahmafuyai jonahmafuyai@gmail.com" [ref=f1e340] [cursor=pointer]:
+              - generic [ref=f1e341]: J
+              - generic [ref=f1e343]:
+                - generic [ref=f1e344]: jonahmafuyai
+                - generic [ref=f1e345]: jonahmafuyai@gmail.com
+        - button "Toggle Sidebar" [ref=f1e349]
+      - generic [ref=f1e350]:
+        - banner [ref=f1e351]:
+          - generic [ref=f1e352]:
+            - button "Toggle Sidebar" [ref=f1e353] [cursor=pointer]
+            - navigation [ref=f1e355]:
+              - link "Overview" [ref=f1e356] [cursor=pointer]:
+                - /url: /admin/dashboard
+              - link "Appointments" [ref=f1e357] [cursor=pointer]:
+                - /url: /admin/appointments
+              - link "Queue" [ref=f1e358] [cursor=pointer]:
+                - /url: /admin/queue
+            - button "Search ⌘ K" [ref=f1e359] [cursor=pointer]:
+              - generic [ref=f1e360]: Search
+              - generic:
+                - generic: ⌘
+                - text: K
+            - button "Notifications" [ref=f1e361] [cursor=pointer]
+            - button "Toggle theme" [ref=f1e362] [cursor=pointer]
+            - button "Open theme settings" [ref=f1e364] [cursor=pointer]
+            - button [ref=f1e365] [cursor=pointer]
+        - main [ref=f1e368]:
+          - generic [ref=f1e369]:
+            - generic [ref=f1e370]:
+              - heading "Dashboard" [level=1] [ref=f1e371]
+              - paragraph [ref=f1e372]: Today's overview
+            - group "Dashboard date range" [ref=f1e374]:
+              - button "Today" [pressed] [ref=f1e375] [cursor=pointer]
+              - button "7 days" [ref=f1e376] [cursor=pointer]
+              - button "30 days" [ref=f1e377] [cursor=pointer]
+              - button "Custom" [ref=f1e378] [cursor=pointer]
+          - generic [ref=f1e379]:
+            - generic [ref=f1e380]:
+              - generic [ref=f1e382]:
+                - paragraph [ref=f1e387]: Today Booked
+                - paragraph [ref=f1e388]: "0"
+              - generic [ref=f1e390]:
+                - paragraph [ref=f1e395]: Completed
+                - paragraph [ref=f1e396]: "0"
+              - generic [ref=f1e398]:
+                - paragraph [ref=f1e403]: Pending
+                - paragraph [ref=f1e404]: "1"
+              - generic [ref=f1e406]:
+                - paragraph [ref=f1e411]: Avg Wait
+                - paragraph [ref=f1e412]: "--"
+            - generic [ref=f1e413]:
+              - generic [ref=f1e415]:
+                - generic [ref=f1e416]: 7-Day Trend
+                - paragraph [ref=f1e419]: No appointments in this period.
+              - generic [ref=f1e420]:
+                - generic [ref=f1e421]: By Status
+                - paragraph [ref=f1e424]: No data available.
+              - generic [ref=f1e425]:
+                - generic [ref=f1e426]: Doctor Utilization
+                - paragraph [ref=f1e429]: No data available.
+            - generic [ref=f1e430]:
+              - generic [ref=f1e432]:
+                - paragraph [ref=f1e436]: Appointments
+                - paragraph [ref=f1e437]: "0"
+                - paragraph [ref=f1e438]: today
+              - generic [ref=f1e440]:
+                - paragraph [ref=f1e447]: In queue
+                - paragraph [ref=f1e448]: "0"
+                - paragraph [ref=f1e449]: 0 waiting > 15 min
+              - generic [ref=f1e451]:
+                - paragraph [ref=f1e456]: Served
+                - paragraph [ref=f1e457]: "0"
+                - paragraph [ref=f1e458]: check-ins completed
+              - generic [ref=f1e460]:
+                - paragraph [ref=f1e466]: Active doctors
+                - paragraph [ref=f1e467]: 1 / 1
+                - paragraph [ref=f1e468]: on duty now
+            - generic [ref=f1e469]:
+              - generic [ref=f1e470]:
+                - generic [ref=f1e471]: Appointmentstoday
+                - application [ref=f1e477]:
+                  - generic [ref=f1e481]:
+                    - generic [ref=f1e482]:
+                      - generic [ref=f1e483]: 9AM
+                      - generic [ref=f1e485]: 10AM
+                      - generic [ref=f1e487]: 11AM
+                      - generic [ref=f1e489]: 12PM
+                      - generic [ref=f1e491]: 1PM
+                      - generic [ref=f1e493]: 2PM
+                      - generic [ref=f1e495]: 3PM
+                      - generic [ref=f1e497]: 4PM
+                      - generic [ref=f1e499]: 5PM
+                    - generic [ref=f1e501]:
+                      - generic [ref=f1e502]: "0"
+                      - generic [ref=f1e504]: "1"
+                      - generic [ref=f1e506]: "2"
+                      - generic [ref=f1e508]: "3"
+                      - generic [ref=f1e510]: "4"
+              - generic [ref=f1e512]:
+                - generic [ref=f1e513]: Recent Check-ins
+                - paragraph [ref=f1e516]: No check-ins in this period.
+    - generic [ref=f1e517]:
+      - heading "Command Palette" [level=2] [ref=f1e518]
+      - paragraph [ref=f1e519]: Search for a command to run...
+    - region "Notifications alt+T"
+    - button "Open Tanstack query devtools" [ref=f1e118] [cursor=pointer]
+    - generic:
+      - contentinfo:
+        - button "Open TanStack Router Devtools" [ref=f1e167] [cursor=pointer]:
+          - generic [ref=f1e239]: "-"
+          - generic [ref=f1e240]: TanStack Router
+  - generic [ref=f1e520]: "0"

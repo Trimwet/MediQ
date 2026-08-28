@@ -1,0 +1,71 @@
+- generic [ref=f3e1]:
+  - generic [ref=f3e2]:
+    - generic [ref=f3e3]:
+      - banner [ref=f3e4]:
+        - generic [ref=f3e5]:
+          - link "Back to home" [ref=f3e6] [cursor=pointer]:
+            - /url: /
+          - link "MediQ home" [ref=f3e7] [cursor=pointer]:
+            - /url: /
+            - img "MediQ" [ref=f3e8]
+        - generic [ref=f3e9]:
+          - button "Toggle theme" [ref=f3e10] [cursor=pointer]
+          - link "Sign in" [ref=f3e12] [cursor=pointer]:
+            - /url: /sign-in
+      - main [ref=f3e13]:
+        - generic [ref=f3e14]:
+          - heading "Book an appointment" [level=1] [ref=f3e15]
+          - paragraph [ref=f3e16]: No account needed — book in under a minute. Your request goes to the clinic for approval, and you can set a password to track it.
+        - generic [ref=f3e17]:
+          - generic [ref=f3e18]: Choose your preferred doctor and time
+          - generic [ref=f3e25]:
+            - generic [ref=f3e26]:
+              - generic [ref=f3e27]: Full name
+              - textbox "Full name" [ref=f3e28]:
+                - /placeholder: Aisha Bello
+            - generic [ref=f3e29]:
+              - generic [ref=f3e30]: Email
+              - textbox "Email" [ref=f3e31]:
+                - /placeholder: you@example.com
+            - generic [ref=f3e32]:
+              - generic [ref=f3e33]: Phone
+              - textbox "Phone" [ref=f3e34]:
+                - /placeholder: +234 800 000 0000
+            - generic [ref=f3e35]:
+              - generic [ref=f3e36]:
+                - text: Doctor
+                - generic [ref=f3e37]: (optional)
+              - combobox [expanded] [ref=f3e38] [cursor=pointer]: No preference — match me with a doctor
+              - paragraph [ref=f3e39]: Pick the doctor you'd like to see, or leave it on “No preference” and we'll assign the doctor best suited to your visit.
+            - generic [ref=f3e40]:
+              - generic [ref=f3e41]: Date
+              - button "Pick a date" [ref=f3e42] [cursor=pointer]
+            - generic [ref=f3e44]:
+              - generic [ref=f3e45]: Time
+              - combobox "Time" [ref=f3e46] [cursor=pointer]:
+                - generic: Choose a time
+              - combobox [ref=f3e47]
+            - paragraph [ref=f3e48]: We'll confirm within hours — if your slot isn't available we'll propose the closest alternative.
+            - generic [ref=f3e49]:
+              - generic [ref=f3e50]:
+                - text: Reason for visit
+                - generic [ref=f3e51]: (optional)
+              - textbox "Reason for visit (optional)" [ref=f3e52]:
+                - /placeholder: Briefly describe your symptoms
+            - button "Confirm appointment" [ref=f3e53] [cursor=pointer]
+    - region "Notifications alt+T"
+    - button "Open Tanstack query devtools" [ref=f3e104] [cursor=pointer]
+    - generic:
+      - contentinfo:
+        - button "Open TanStack Router Devtools" [ref=f3e153] [cursor=pointer]:
+          - generic [ref=f3e225]: "-"
+          - generic [ref=f3e226]: TanStack Router
+  - dialog [ref=f3e228]:
+    - generic [ref=f3e229]:
+      - combobox [expanded] [active] [ref=f3e235]
+      - listbox "Suggestions" [ref=f3e236]:
+        - generic [ref=f3e237]:
+          - option "No preference — match me with a doctor" [selected] [ref=f3e239]
+          - button "Orthopedics 1" [ref=f3e241] [cursor=pointer]:
+            - generic [ref=f3e242]: Orthopedics
+            - generic [ref=f3e243]: "1"

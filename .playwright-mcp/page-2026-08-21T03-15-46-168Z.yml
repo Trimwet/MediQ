@@ -1,0 +1,14 @@
+- generic [ref=f4e2]:
+  - generic [ref=f4e4]:
+    - generic [ref=f4e5]: Checked In!
+    - generic [ref=f4e8]:
+      - paragraph [ref=f4e193]: You have been successfully checked in.
+      - paragraph [ref=f4e194]: "Queue position: #1"
+      - paragraph [ref=f4e195]: Please wait to be called by the reception desk.
+  - region "Notifications alt+T"
+  - button "Open Tanstack query devtools" [ref=f4e70] [cursor=pointer]
+  - generic:
+    - contentinfo:
+      - button "Open TanStack Router Devtools" [ref=f4e119] [cursor=pointer]:
+        - generic [ref=f4e191]: "-"
+        - generic [ref=f4e192]: TanStack Router

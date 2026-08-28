@@ -1,0 +1,123 @@
+- generic [ref=f6e2]:
+  - generic [ref=f6e3]:
+    - link "Skip to Main" [ref=f6e4] [cursor=pointer]:
+      - /url: "#content"
+    - generic [ref=f6e379]:
+      - list [ref=f6e381]:
+        - listitem [ref=f6e382]:
+          - button "Default Clinic professional plan" [ref=f6e383] [cursor=pointer]:
+            - generic [ref=f6e389]:
+              - generic [ref=f6e390]: Default Clinic
+              - generic [ref=f6e391]: professional plan
+      - generic [ref=f6e392]:
+        - generic [ref=f6e393]:
+          - generic [ref=f6e394]: General
+          - list [ref=f6e395]:
+            - listitem [ref=f6e396]:
+              - link "Dashboard" [ref=f6e397] [cursor=pointer]:
+                - /url: /admin/dashboard
+            - listitem [ref=f6e404]:
+              - link "Appointments" [ref=f6e405] [cursor=pointer]:
+                - /url: /admin/appointments
+            - listitem [ref=f6e409]:
+              - link "Queue" [ref=f6e410] [cursor=pointer]:
+                - /url: /admin/queue
+            - listitem [ref=f6e417]:
+              - link "Patients" [ref=f6e418] [cursor=pointer]:
+                - /url: /admin/patients
+        - generic [ref=f6e423]:
+          - generic [ref=f6e424]: Management
+          - list [ref=f6e425]:
+            - listitem [ref=f6e426]:
+              - link "Doctors" [ref=f6e427] [cursor=pointer]:
+                - /url: /admin/doctors
+            - listitem [ref=f6e433]:
+              - link "Staff" [ref=f6e434] [cursor=pointer]:
+                - /url: /admin/staff
+            - listitem [ref=f6e448]:
+              - link "Rooms" [ref=f6e449] [cursor=pointer]:
+                - /url: /admin/rooms
+        - generic [ref=f6e454]:
+          - generic [ref=f6e455]: Other
+          - list [ref=f6e456]:
+            - listitem [ref=f6e457]:
+              - link "Notifications" [ref=f6e458] [cursor=pointer]:
+                - /url: /admin/notifications
+            - listitem [ref=f6e463]:
+              - button "Settings" [ref=f6e464] [cursor=pointer]
+      - list [ref=f6e472]:
+        - listitem [ref=f6e473]:
+          - button "J jonahmafuyai jonahmafuyai@gmail.com" [ref=f6e474] [cursor=pointer]:
+            - generic [ref=f6e475]: J
+            - generic [ref=f6e477]:
+              - generic [ref=f6e478]: jonahmafuyai
+              - generic [ref=f6e479]: jonahmafuyai@gmail.com
+      - button "Toggle Sidebar" [ref=f6e483]
+    - generic [ref=f6e112]:
+      - banner [ref=f6e113]:
+        - generic [ref=f6e114]:
+          - button "Toggle Sidebar" [ref=f6e115] [cursor=pointer]
+          - navigation [ref=f6e117]:
+            - link "Overview" [ref=f6e118] [cursor=pointer]:
+              - /url: /admin/dashboard
+            - link "Appointments" [ref=f6e119] [cursor=pointer]:
+              - /url: /admin/appointments
+            - link "Queue" [ref=f6e120] [cursor=pointer]:
+              - /url: /admin/queue
+          - button "Search ⌘ K" [ref=f6e121] [cursor=pointer]:
+            - generic [ref=f6e122]: Search
+            - generic:
+              - generic: ⌘
+              - text: K
+          - button "Notifications" [ref=f6e123] [cursor=pointer]
+          - button "Toggle theme" [ref=f6e124] [cursor=pointer]
+          - button "Open theme settings" [ref=f6e126] [cursor=pointer]
+          - button [ref=f6e127] [cursor=pointer]
+      - main [ref=f6e130]:
+        - generic [ref=f6e131]:
+          - generic [ref=f6e132]:
+            - heading "Queue" [level=1] [ref=f6e133]
+            - paragraph [ref=f6e134]: Live waiting list and serving board
+          - button "Call next" [disabled]
+        - generic [ref=f6e136]:
+          - generic [ref=f6e137]:
+            - generic [ref=f6e139]:
+              - paragraph [ref=f6e146]: Waiting
+              - paragraph [ref=f6e147]: "0"
+            - generic [ref=f6e149]:
+              - paragraph [ref=f6e154]: Now serving
+              - paragraph [ref=f6e155]: "1"
+            - generic [ref=f6e157]:
+              - paragraph [ref=f6e162]: Served today
+              - paragraph [ref=f6e163]: "0"
+            - generic [ref=f6e165]:
+              - paragraph [ref=f6e170]: Avg wait
+              - paragraph [ref=f6e171]: —
+          - generic [ref=f6e172]:
+            - heading "Now serving" [level=2] [ref=f6e173]
+            - generic [ref=f6e485]:
+              - paragraph [ref=f6e486]: Pitch Test Patient
+              - paragraph
+              - 'img "Status: In room" [ref=f6e515]':
+                - generic [ref=f6e488]: Called
+                - generic [ref=f6e491]: In room
+                - generic [ref=f6e494]: Done
+              - generic [ref=f6e496]:
+                - generic [ref=f6e497]: Called 0 min ago
+                - generic [ref=f6e501]: Room not set
+              - generic [ref=f6e505]:
+                - button "Complete" [ref=f6e507] [cursor=pointer]
+                - button "Mark left" [ref=f6e508] [cursor=pointer]
+        - generic [ref=f6e176]:
+          - heading "Waiting list" [level=2] [ref=f6e177]
+          - generic [ref=f6e178]: No one is waiting. Check in the next appointment.
+  - generic [ref=f6e201]:
+    - heading "Command Palette" [level=2] [ref=f6e202]
+    - paragraph [ref=f6e203]: Search for a command to run...
+  - region "Notifications alt+T"
+  - button "Open Tanstack query devtools" [ref=f6e254] [cursor=pointer]
+  - generic:
+    - contentinfo:
+      - button "Open TanStack Router Devtools" [ref=f6e303] [cursor=pointer]:
+        - generic [ref=f6e375]: "-"
+        - generic [ref=f6e376]: TanStack Router

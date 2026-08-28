@@ -1,0 +1,293 @@
+- generic [ref=f3e1]:
+  - generic [ref=f3e2]:
+    - generic [ref=f3e3]:
+      - banner [ref=f3e4]:
+        - generic [ref=f3e5]:
+          - link "Back to home" [ref=f3e6] [cursor=pointer]:
+            - /url: /
+          - link "MediQ home" [ref=f3e7] [cursor=pointer]:
+            - /url: /
+            - img "MediQ" [ref=f3e8]
+        - generic [ref=f3e9]:
+          - button "Toggle theme" [ref=f3e10] [cursor=pointer]
+          - link "Sign in" [ref=f3e12] [cursor=pointer]:
+            - /url: /sign-in
+      - main [ref=f3e13]:
+        - generic [ref=f3e14]:
+          - heading "Book an appointment" [level=1] [ref=f3e15]
+          - paragraph [ref=f3e16]: No account needed — book in under a minute. Your request goes to the clinic for approval, and you can set a password to track it.
+        - generic [ref=f3e17]:
+          - generic [ref=f3e18]: Choose your preferred doctor and time
+          - generic [ref=f3e25]:
+            - generic [ref=f3e26]:
+              - generic [ref=f3e27]: Full name
+              - textbox "Full name" [ref=f3e28]:
+                - /placeholder: Aisha Bello
+                - text: Pitch Test Patient
+            - generic [ref=f3e29]:
+              - generic [ref=f3e30]: Email
+              - textbox "Email" [ref=f3e31]:
+                - /placeholder: you@example.com
+                - text: e2e-pitch-1@test.local
+            - generic [ref=f3e32]:
+              - generic [ref=f3e33]: Phone
+              - textbox "Phone" [ref=f3e34]:
+                - /placeholder: +234 800 000 0000
+                - text: +234 800 123 4567
+            - generic [ref=f3e35]:
+              - generic [ref=f3e36]:
+                - text: Doctor
+                - generic [ref=f3e37]: (optional)
+              - combobox [ref=f3e38] [cursor=pointer]: No preference — match me with a doctor
+              - paragraph [ref=f3e39]: Pick the doctor you'd like to see, or leave it on “No preference” and we'll assign the doctor best suited to your visit.
+            - generic [ref=f3e40]:
+              - generic [ref=f3e41]: Date
+              - button "Aug 22, 2026" [expanded] [ref=f3e343] [cursor=pointer]
+            - generic [ref=f3e44]:
+              - generic [ref=f3e45]: Time
+              - combobox "Time" [ref=f3e46] [cursor=pointer]:
+                - generic: Choose a time
+              - combobox [ref=f3e344]
+            - paragraph [ref=f3e48]: We'll confirm within hours — if your slot isn't available we'll propose the closest alternative.
+            - generic [ref=f3e49]:
+              - generic [ref=f3e50]:
+                - text: Reason for visit
+                - generic [ref=f3e51]: (optional)
+              - textbox "Reason for visit (optional)" [ref=f3e52]:
+                - /placeholder: Briefly describe your symptoms
+            - button "Confirm appointment" [ref=f3e53] [cursor=pointer]
+    - region "Notifications alt+T"
+    - button "Open Tanstack query devtools" [ref=f3e104] [cursor=pointer]
+    - generic:
+      - contentinfo:
+        - button "Open TanStack Router Devtools" [ref=f3e153] [cursor=pointer]:
+          - generic [ref=f3e225]: "-"
+          - generic [ref=f3e226]: TanStack Router
+  - dialog [ref=f3e248]:
+    - generic [ref=f3e346]:
+      - navigation "Navigation bar" [ref=f3e347]:
+        - button "Go to the Previous Month" [ref=f3e348] [cursor=pointer]
+        - button "Go to the Next Month" [ref=f3e349] [cursor=pointer]
+      - generic [ref=f3e350]:
+        - generic [ref=f3e352]:
+          - generic [ref=f3e353]:
+            - combobox "Choose the Month" [ref=f3e354]:
+              - option "Jan"
+              - option "Feb"
+              - option "Mar"
+              - option "Apr"
+              - option "May"
+              - option "Jun"
+              - option "Jul"
+              - option "Aug" [selected]
+              - option "Sep"
+              - option "Oct"
+              - option "Nov"
+              - option "Dec"
+            - generic [ref=f3e355]: Aug
+          - generic [ref=f3e358]:
+            - combobox "Choose the Year" [ref=f3e359]:
+              - option "1926"
+              - option "1927"
+              - option "1928"
+              - option "1929"
+              - option "1930"
+              - option "1931"
+              - option "1932"
+              - option "1933"
+              - option "1934"
+              - option "1935"
+              - option "1936"
+              - option "1937"
+              - option "1938"
+              - option "1939"
+              - option "1940"
+              - option "1941"
+              - option "1942"
+              - option "1943"
+              - option "1944"
+              - option "1945"
+              - option "1946"
+              - option "1947"
+              - option "1948"
+              - option "1949"
+              - option "1950"
+              - option "1951"
+              - option "1952"
+              - option "1953"
+              - option "1954"
+              - option "1955"
+              - option "1956"
+              - option "1957"
+              - option "1958"
+              - option "1959"
+              - option "1960"
+              - option "1961"
+              - option "1962"
+              - option "1963"
+              - option "1964"
+              - option "1965"
+              - option "1966"
+              - option "1967"
+              - option "1968"
+              - option "1969"
+              - option "1970"
+              - option "1971"
+              - option "1972"
+              - option "1973"
+              - option "1974"
+              - option "1975"
+              - option "1976"
+              - option "1977"
+              - option "1978"
+              - option "1979"
+              - option "1980"
+              - option "1981"
+              - option "1982"
+              - option "1983"
+              - option "1984"
+              - option "1985"
+              - option "1986"
+              - option "1987"
+              - option "1988"
+              - option "1989"
+              - option "1990"
+              - option "1991"
+              - option "1992"
+              - option "1993"
+              - option "1994"
+              - option "1995"
+              - option "1996"
+              - option "1997"
+              - option "1998"
+              - option "1999"
+              - option "2000"
+              - option "2001"
+              - option "2002"
+              - option "2003"
+              - option "2004"
+              - option "2005"
+              - option "2006"
+              - option "2007"
+              - option "2008"
+              - option "2009"
+              - option "2010"
+              - option "2011"
+              - option "2012"
+              - option "2013"
+              - option "2014"
+              - option "2015"
+              - option "2016"
+              - option "2017"
+              - option "2018"
+              - option "2019"
+              - option "2020"
+              - option "2021"
+              - option "2022"
+              - option "2023"
+              - option "2024"
+              - option "2025"
+              - option "2026" [selected]
+            - generic [ref=f3e360]: "2026"
+          - status [ref=f3e363]: August 2026
+        - grid "August 2026" [ref=f3e364]:
+          - rowgroup [ref=f3e365]:
+            - row [ref=f3e366]:
+              - columnheader [ref=f3e367]: Su
+              - columnheader [ref=f3e368]: Mo
+              - columnheader [ref=f3e369]: Tu
+              - columnheader [ref=f3e370]: We
+              - columnheader [ref=f3e371]: Th
+              - columnheader [ref=f3e372]: Fr
+              - columnheader [ref=f3e373]: Sa
+          - rowgroup [ref=f3e374]:
+            - row [ref=f3e375]:
+              - gridcell "Sunday, July 26th, 2026" [ref=f3e376]:
+                - button "Sunday, July 26th, 2026" [disabled]: "26"
+              - gridcell "Monday, July 27th, 2026" [ref=f3e377]:
+                - button "Monday, July 27th, 2026" [disabled]: "27"
+              - gridcell "Tuesday, July 28th, 2026" [ref=f3e378]:
+                - button "Tuesday, July 28th, 2026" [disabled]: "28"
+              - gridcell "Wednesday, July 29th, 2026" [ref=f3e379]:
+                - button "Wednesday, July 29th, 2026" [disabled]: "29"
+              - gridcell "Thursday, July 30th, 2026" [ref=f3e380]:
+                - button "Thursday, July 30th, 2026" [disabled]: "30"
+              - gridcell "Friday, July 31st, 2026" [ref=f3e381]:
+                - button "Friday, July 31st, 2026" [disabled]: "31"
+              - gridcell "Saturday, August 1st, 2026" [ref=f3e382]:
+                - button "Saturday, August 1st, 2026" [disabled]: "1"
+            - row [ref=f3e383]:
+              - gridcell "Sunday, August 2nd, 2026" [ref=f3e384]:
+                - button "Sunday, August 2nd, 2026" [disabled]: "2"
+              - gridcell "Monday, August 3rd, 2026" [ref=f3e385]:
+                - button "Monday, August 3rd, 2026" [disabled]: "3"
+              - gridcell "Tuesday, August 4th, 2026" [ref=f3e386]:
+                - button "Tuesday, August 4th, 2026" [disabled]: "4"
+              - gridcell "Wednesday, August 5th, 2026" [ref=f3e387]:
+                - button "Wednesday, August 5th, 2026" [disabled]: "5"
+              - gridcell "Thursday, August 6th, 2026" [ref=f3e388]:
+                - button "Thursday, August 6th, 2026" [disabled]: "6"
+              - gridcell "Friday, August 7th, 2026" [ref=f3e389]:
+                - button "Friday, August 7th, 2026" [disabled]: "7"
+              - gridcell "Saturday, August 8th, 2026" [ref=f3e390]:
+                - button "Saturday, August 8th, 2026" [disabled]: "8"
+            - row [ref=f3e391]:
+              - gridcell "Sunday, August 9th, 2026" [ref=f3e392]:
+                - button "Sunday, August 9th, 2026" [disabled]: "9"
+              - gridcell "Monday, August 10th, 2026" [ref=f3e393]:
+                - button "Monday, August 10th, 2026" [disabled]: "10"
+              - gridcell "Tuesday, August 11th, 2026" [ref=f3e394]:
+                - button "Tuesday, August 11th, 2026" [disabled]: "11"
+              - gridcell "Wednesday, August 12th, 2026" [ref=f3e395]:
+                - button "Wednesday, August 12th, 2026" [disabled]: "12"
+              - gridcell "Thursday, August 13th, 2026" [ref=f3e396]:
+                - button "Thursday, August 13th, 2026" [disabled]: "13"
+              - gridcell "Friday, August 14th, 2026" [ref=f3e397]:
+                - button "Friday, August 14th, 2026" [disabled]: "14"
+              - gridcell "Saturday, August 15th, 2026" [ref=f3e398]:
+                - button "Saturday, August 15th, 2026" [disabled]: "15"
+            - row [ref=f3e399]:
+              - gridcell "Sunday, August 16th, 2026" [ref=f3e400]:
+                - button "Sunday, August 16th, 2026" [disabled]: "16"
+              - gridcell "Monday, August 17th, 2026" [ref=f3e401]:
+                - button "Monday, August 17th, 2026" [disabled]: "17"
+              - gridcell "Tuesday, August 18th, 2026" [ref=f3e402]:
+                - button "Tuesday, August 18th, 2026" [disabled]: "18"
+              - gridcell "Wednesday, August 19th, 2026" [ref=f3e403]:
+                - button "Wednesday, August 19th, 2026" [disabled]: "19"
+              - gridcell "Thursday, August 20th, 2026" [ref=f3e404]:
+                - button "Thursday, August 20th, 2026" [disabled]: "20"
+              - gridcell [ref=f3e405]:
+                - button "Today, Friday, August 21st, 2026" [ref=f3e406] [cursor=pointer]: "21"
+              - gridcell [selected] [ref=f3e407]:
+                - button "Saturday, August 22nd, 2026, selected" [active] [ref=f3e408] [cursor=pointer]: "22"
+            - row [ref=f3e409]:
+              - gridcell [ref=f3e410]:
+                - button "Sunday, August 23rd, 2026" [ref=f3e411] [cursor=pointer]: "23"
+              - gridcell [ref=f3e412]:
+                - button "Monday, August 24th, 2026" [ref=f3e413] [cursor=pointer]: "24"
+              - gridcell [ref=f3e414]:
+                - button "Tuesday, August 25th, 2026" [ref=f3e415] [cursor=pointer]: "25"
+              - gridcell [ref=f3e416]:
+                - button "Wednesday, August 26th, 2026" [ref=f3e417] [cursor=pointer]: "26"
+              - gridcell [ref=f3e418]:
+                - button "Thursday, August 27th, 2026" [ref=f3e419] [cursor=pointer]: "27"
+              - gridcell [ref=f3e420]:
+                - button "Friday, August 28th, 2026" [ref=f3e421] [cursor=pointer]: "28"
+              - gridcell [ref=f3e422]:
+                - button "Saturday, August 29th, 2026" [ref=f3e423] [cursor=pointer]: "29"
+            - row [ref=f3e424]:
+              - gridcell [ref=f3e425]:
+                - button "Sunday, August 30th, 2026" [ref=f3e426] [cursor=pointer]: "30"
+              - gridcell [ref=f3e427]:
+                - button "Monday, August 31st, 2026" [ref=f3e428] [cursor=pointer]: "31"
+              - gridcell [ref=f3e429]:
+                - button "Tuesday, September 1st, 2026" [ref=f3e430] [cursor=pointer]: "1"
+              - gridcell [ref=f3e431]:
+                - button "Wednesday, September 2nd, 2026" [ref=f3e432] [cursor=pointer]: "2"
+              - gridcell [ref=f3e433]:
+                - button "Thursday, September 3rd, 2026" [ref=f3e434] [cursor=pointer]: "3"
+              - gridcell [ref=f3e435]:
+                - button "Friday, September 4th, 2026" [ref=f3e436] [cursor=pointer]: "4"
+              - gridcell [ref=f3e437]:
+                - button "Saturday, September 5th, 2026" [ref=f3e438] [cursor=pointer]: "5"

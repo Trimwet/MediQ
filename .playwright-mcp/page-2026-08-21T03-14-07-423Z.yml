@@ -1,0 +1,75 @@
+- generic:
+  - generic:
+    - generic:
+      - banner:
+        - generic:
+          - link:
+            - /url: /
+          - link:
+            - /url: /
+        - generic:
+          - button:
+            - generic: Toggle theme
+          - link:
+            - /url: /sign-in
+            - text: Sign in
+      - main:
+        - generic:
+          - heading [level=1]: Book an appointment
+          - paragraph: No account needed — book in under a minute. Your request goes to the clinic for approval, and you can set a password to track it.
+        - generic:
+          - generic: Choose your preferred doctor and time
+          - generic:
+            - generic:
+              - generic:
+                - generic: Full name
+                - textbox:
+                  - /placeholder: Aisha Bello
+                  - text: Pitch Test Patient
+              - generic:
+                - generic: Email
+                - textbox:
+                  - /placeholder: you@example.com
+                  - text: e2e-pitch-1@test.local
+              - generic:
+                - generic: Phone
+                - textbox:
+                  - /placeholder: +234 800 000 0000
+                  - text: +234 800 123 4567
+              - generic:
+                - generic:
+                  - text: Doctor
+                  - generic: (optional)
+                - combobox: No preference — match me with a doctor
+                - paragraph: Pick the doctor you'd like to see, or leave it on “No preference” and we'll assign the doctor best suited to your visit.
+              - generic:
+                - generic: Date
+                - button: Aug 22, 2026
+              - generic:
+                - generic: Time
+                - combobox [expanded]:
+                  - generic: Choose a time
+                - combobox
+              - paragraph: We'll confirm within hours — if your slot isn't available we'll propose the closest alternative.
+              - generic:
+                - generic:
+                  - text: Reason for visit
+                  - generic: (optional)
+                - textbox:
+                  - /placeholder: Briefly describe your symptoms
+              - button: Confirm appointment
+    - region "Notifications alt+T"
+    - generic:
+      - button
+    - button [ref=f3e439] [cursor=pointer]:
+      - generic [ref=f3e225]: "-"
+      - generic [ref=f3e226]: TanStack Router
+  - listbox [ref=f3e440]:
+    - option "9:00 AM" [active] [ref=f3e441]
+    - option "10:00 AM" [ref=f3e444]
+    - option "11:00 AM" [ref=f3e447]
+    - option "12:00 PM" [ref=f3e450]
+    - option "1:00 PM" [ref=f3e453]
+    - option "2:00 PM" [ref=f3e456]
+    - option "3:00 PM — Fully booked" [disabled]
+    - option "4:00 PM" [ref=f3e459]

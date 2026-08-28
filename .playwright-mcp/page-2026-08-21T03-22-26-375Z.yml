@@ -1,0 +1,92 @@
+- generic [ref=f9e2]:
+  - generic [ref=f9e3]:
+    - link "Skip to Main" [ref=f9e4] [cursor=pointer]:
+      - /url: "#content"
+    - generic [ref=f9e7]:
+      - list [ref=f9e9]:
+        - listitem [ref=f9e10]:
+          - button "Default Clinic professional plan" [ref=f9e11] [cursor=pointer]:
+            - generic [ref=f9e17]:
+              - generic [ref=f9e18]: Default Clinic
+              - generic [ref=f9e19]: professional plan
+      - generic [ref=f9e20]:
+        - generic [ref=f9e21]:
+          - generic [ref=f9e22]: General
+          - list [ref=f9e23]:
+            - listitem [ref=f9e24]:
+              - link "Dashboard" [ref=f9e25] [cursor=pointer]:
+                - /url: /admin/dashboard
+            - listitem [ref=f9e32]:
+              - link "Appointments" [ref=f9e33] [cursor=pointer]:
+                - /url: /admin/appointments
+            - listitem [ref=f9e37]:
+              - link "Queue" [ref=f9e38] [cursor=pointer]:
+                - /url: /admin/queue
+            - listitem [ref=f9e45]:
+              - link "Patients" [ref=f9e46] [cursor=pointer]:
+                - /url: /admin/patients
+        - generic [ref=f9e51]:
+          - generic [ref=f9e52]: Management
+          - list [ref=f9e53]:
+            - listitem [ref=f9e54]:
+              - link "Doctors" [ref=f9e55] [cursor=pointer]:
+                - /url: /admin/doctors
+            - listitem [ref=f9e61]:
+              - link "Staff" [ref=f9e62] [cursor=pointer]:
+                - /url: /admin/staff
+            - listitem [ref=f9e76]:
+              - link "Rooms" [ref=f9e77] [cursor=pointer]:
+                - /url: /admin/rooms
+        - generic [ref=f9e82]:
+          - generic [ref=f9e83]: Other
+          - list [ref=f9e84]:
+            - listitem [ref=f9e85]:
+              - link "Notifications" [ref=f9e86] [cursor=pointer]:
+                - /url: /admin/notifications
+            - listitem [ref=f9e91]:
+              - button "Settings" [ref=f9e92] [cursor=pointer]
+      - list [ref=f9e100]:
+        - listitem [ref=f9e101]:
+          - button "J jonahmafuyai jonahmafuyai@gmail.com" [ref=f9e102] [cursor=pointer]:
+            - generic [ref=f9e103]: J
+            - generic [ref=f9e105]:
+              - generic [ref=f9e106]: jonahmafuyai
+              - generic [ref=f9e107]: jonahmafuyai@gmail.com
+      - button "Toggle Sidebar" [ref=f9e111]
+    - generic [ref=f9e112]:
+      - banner [ref=f9e113]:
+        - generic [ref=f9e114]:
+          - button "Toggle Sidebar" [ref=f9e115] [cursor=pointer]
+          - navigation [ref=f9e117]:
+            - link "Overview" [ref=f9e118] [cursor=pointer]:
+              - /url: /admin/dashboard
+            - link "Appointments" [ref=f9e119] [cursor=pointer]:
+              - /url: /admin/appointments
+            - link "Queue" [ref=f9e120] [cursor=pointer]:
+              - /url: /admin/queue
+          - button "Search ⌘ K" [ref=f9e121] [cursor=pointer]:
+            - generic [ref=f9e122]: Search
+            - generic:
+              - generic: ⌘
+              - text: K
+          - button "Notifications" [ref=f9e123] [cursor=pointer]
+          - button "Toggle theme" [ref=f9e124] [cursor=pointer]
+          - button "Open theme settings" [ref=f9e126] [cursor=pointer]
+          - button [ref=f9e127] [cursor=pointer]
+      - main [ref=f9e130]:
+        - generic [ref=f9e131]:
+          - generic [ref=f9e132]:
+            - heading "Rooms" [level=1] [ref=f9e133]
+            - paragraph [ref=f9e134]: Clinic rooms and availability
+          - button "Add room" [ref=f9e135] [cursor=pointer]
+        - generic [ref=f9e136]: No rooms yet. Add the first room.
+  - generic [ref=f9e137]:
+    - heading "Command Palette" [level=2] [ref=f9e138]
+    - paragraph [ref=f9e139]: Search for a command to run...
+  - region "Notifications alt+T"
+  - button "Open Tanstack query devtools" [ref=f9e190] [cursor=pointer]
+  - generic:
+    - contentinfo:
+      - button "Open TanStack Router Devtools" [ref=f9e345] [cursor=pointer]:
+        - generic [ref=f9e311]: "-"
+        - generic [ref=f9e312]: TanStack Router

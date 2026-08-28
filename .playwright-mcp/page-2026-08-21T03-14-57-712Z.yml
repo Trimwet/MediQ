@@ -1,0 +1,56 @@
+- generic [ref=f3e2]:
+  - generic [ref=f3e464]:
+    - link "MediQ home" [ref=f3e465] [cursor=pointer]:
+      - /url: /
+      - img "MediQ" [ref=f3e466]
+    - generic [ref=f3e468]:
+      - generic [ref=f3e472]:
+        - heading "Booking request sent" [level=1] [ref=f3e473]
+        - paragraph [ref=f3e474]:
+          - text: Ref
+          - generic [ref=f3e475]: c08a004c…
+          - text: •Pitch Test Patient•Saturday, Aug 22 • 10:00 AM
+      - generic [ref=f3e476]:
+        - generic [ref=f3e477]:
+          - heading "Next steps" [level=3] [ref=f3e478]
+          - generic [ref=f3e479]: 2 of 3 done
+        - list [ref=f3e482]:
+          - listitem [ref=f3e483]:
+            - generic [ref=f3e484]:
+              - generic [ref=f3e488]: Booking request sent
+              - generic [ref=f3e489]: Ref c08a004c
+          - listitem [ref=f3e490]:
+            - button "Save your ticket Hide" [active] [ref=f3e507] [cursor=pointer]:
+              - generic [ref=f3e495]: Save your ticket
+              - generic [ref=f3e496]: Hide
+          - listitem [ref=f3e497]:
+            - button "Create account to track Set password" [ref=f3e498] [cursor=pointer]:
+              - generic [ref=f3e502]: Create account to track
+              - generic [ref=f3e503]: Set password
+      - generic [ref=f3e518]:
+        - generic [ref=f3e522]:
+          - paragraph [ref=f3e523]: Scan to check in
+          - paragraph [ref=f3e524]: Present this QR code at the clinic reception
+        - generic [ref=f3e525]:
+          - generic [ref=f3e526]:
+            - term [ref=f3e527]: Patient
+            - definition [ref=f3e528]: Pitch Test Patient
+          - generic [ref=f3e529]:
+            - term [ref=f3e530]: Doctor
+            - definition
+          - generic [ref=f3e531]:
+            - term [ref=f3e532]: When
+            - definition [ref=f3e533]: Saturday, Aug 22 • 10:00 AM
+          - generic [ref=f3e534]:
+            - term [ref=f3e535]: Reference
+            - definition [ref=f3e536]: c08a004c-189d-4082-92d6-b2b618c08615
+        - button "Print ticket" [ref=f3e537] [cursor=pointer]
+      - paragraph [ref=f3e504]: The clinic reviews your request before it appears on the schedule.
+      - button "Book another" [ref=f3e506] [cursor=pointer]
+  - region "Notifications alt+T"
+  - button "Open Tanstack query devtools" [ref=f3e104] [cursor=pointer]
+  - generic:
+    - contentinfo:
+      - button "Open TanStack Router Devtools" [ref=f3e463] [cursor=pointer]:
+        - generic [ref=f3e225]: "-"
+        - generic [ref=f3e226]: TanStack Router

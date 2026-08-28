@@ -1,0 +1,129 @@
+- generic:
+  - generic:
+    - generic:
+      - link:
+        - /url: "#content"
+        - text: Skip to Main
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - list:
+                - listitem:
+                  - button:
+                    - generic:
+                      - generic: Default Clinic
+                      - generic: professional plan
+            - generic:
+              - generic:
+                - generic: General
+                - list:
+                  - listitem:
+                    - link:
+                      - /url: /admin/dashboard
+                      - generic: Dashboard
+                  - listitem:
+                    - link:
+                      - /url: /admin/appointments
+                      - generic: Appointments
+                  - listitem:
+                    - link:
+                      - /url: /admin/queue
+                      - generic: Queue
+                  - listitem:
+                    - link:
+                      - /url: /admin/patients
+                      - generic: Patients
+              - generic:
+                - generic: Management
+                - list:
+                  - listitem:
+                    - link:
+                      - /url: /admin/doctors
+                      - generic: Doctors
+                  - listitem:
+                    - link:
+                      - /url: /admin/staff
+                      - generic: Staff
+                  - listitem:
+                    - link:
+                      - /url: /admin/rooms
+                      - generic: Rooms
+              - generic:
+                - generic: Other
+                - list:
+                  - listitem:
+                    - link:
+                      - /url: /admin/notifications
+                      - generic: Notifications
+                  - listitem:
+                    - button:
+                      - generic: Settings
+            - generic:
+              - list:
+                - listitem:
+                  - button:
+                    - generic: J
+                    - generic:
+                      - generic: jonahmafuyai
+                      - generic: jonahmafuyai@gmail.com
+            - button
+      - generic:
+        - banner:
+          - generic:
+            - button:
+              - generic: Toggle Sidebar
+            - navigation:
+              - link:
+                - /url: /admin/dashboard
+                - text: Overview
+              - link:
+                - /url: /admin/appointments
+                - text: Appointments
+              - link:
+                - /url: /admin/queue
+                - text: Queue
+            - button:
+              - generic: Search
+              - generic:
+                - generic: ⌘
+                - text: K
+            - button
+            - button:
+              - generic: Toggle theme
+            - button
+            - button
+        - main:
+          - generic:
+            - generic:
+              - heading [level=1]: Rooms
+              - paragraph: Clinic rooms and availability
+            - button: Add room
+          - generic: No rooms yet. Add the first room.
+    - generic:
+      - heading [level=2]: Command Palette
+      - paragraph: Search for a command to run...
+    - region "Notifications alt+T"
+    - generic:
+      - button
+    - button [ref=f9e313] [cursor=pointer]:
+      - generic [ref=f9e311]: "-"
+      - generic [ref=f9e312]: TanStack Router
+  - dialog [ref=f9e315]:
+    - generic [ref=f9e316]:
+      - heading "Add room" [level=2] [ref=f9e317]
+      - paragraph [ref=f9e321]: Add a room to the clinic and set its type.
+    - generic [ref=f9e322]:
+      - generic [ref=f9e323]:
+        - generic [ref=f9e324]: Room number
+        - textbox "Room number" [active] [ref=f9e325]:
+          - /placeholder: "eg: 9"
+      - generic [ref=f9e326]:
+        - generic [ref=f9e327]: Room type
+        - combobox "Room type" [ref=f9e328] [cursor=pointer]:
+          - generic: Select a room type
+        - combobox [ref=f9e329]
+    - generic [ref=f9e330]:
+      - button "Cancel" [ref=f9e331] [cursor=pointer]
+      - button "Add room" [ref=f9e332] [cursor=pointer]
+    - button "Close" [ref=f9e333] [cursor=pointer]

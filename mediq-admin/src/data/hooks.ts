@@ -69,8 +69,42 @@ export function useCreateAppointment() {
 export function useUpdateAppointmentStatus() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, status }: { id: string; status: AppointmentStatus }) =>
-      appointmentsRepository.updateStatus(id, status),
+    mutationFn: async ({ id, status }: { id: string; status: AppointmentStatus }) => {
+      // When checking in (booked → arrived), also create the queue entry so
+      // the patient appears on the Queue page.  This mirrors the logic in
+      // src/features/check-in/index.tsx.
+      if (status === 'arrived') {
+        // 1. Fetch the raw appointment row to get clinic_id and patient details.
+        const { data: apt, error: fetchErr } = await supabase
+          .from('appointments')
+          .select('*')
+          .eq('id', id)
+          .single()
+
+        if (fetchErr || !apt) throw fetchErr ?? new Error('Appointment not found')
+
+        // 2. Idempotent: skip if a queue entry already exists for this appointment.
+        const { data: existing } = await supabase
+          .from('queue_entries')
+          .select('id')
+          .eq('appointment_id', apt.id)
+          .limit(1)
+
+        if (!existing?.length) {
+          const { error: insertErr } = await supabase.from('queue_entries').insert({
+            appointment_id: apt.id,
+            patient_name: apt.patient_name,
+            appointment_time: apt.scheduled_for,
+            doctor_name: apt.doctor_name ?? '',
+            clinic_id: apt.clinic_id,
+            status: 'waiting',
+          })
+          if (insertErr) throw insertErr
+        }
+      }
+
+      await appointmentsRepository.updateStatus(id, status)
+    },
     // Optimistic update: patch the cache immediately so the UI responds
     // without waiting for the Supabase round-trip.
     onMutate: async ({ id, status }) => {

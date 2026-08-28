@@ -1,0 +1,33 @@
+- generic [ref=f2e2]:
+  - generic [ref=f2e4]:
+    - generic [ref=f2e5]:
+      - link "MediQ home" [ref=f2e6] [cursor=pointer]:
+        - /url: /
+        - img "MediQ" [ref=f2e7]
+      - generic [ref=f2e8]: Create your clinic
+      - generic [ref=f2e9]: Set up your workspace in 30 seconds
+    - generic [ref=f2e11]:
+      - generic [ref=f2e12]:
+        - generic [ref=f2e13]: Clinic name
+        - textbox "Clinic name" [active] [ref=f2e14]:
+          - /placeholder: e.g. City General Hospital
+          - text: Pitch Test Clinic
+      - generic [ref=f2e15]:
+        - generic [ref=f2e16]: URL slug
+        - generic [ref=f2e17]:
+          - generic [ref=f2e18]: mediq.app/
+          - textbox "clinic-name" [ref=f2e19]: pitch-test-clinic
+        - paragraph [ref=f2e197]: Checking availability...
+      - generic [ref=f2e20]:
+        - generic [ref=f2e21]: Plan
+        - combobox "Plan" [ref=f2e22] [cursor=pointer]:
+          - generic: Free — ₦0/mo
+        - combobox [ref=f2e23]
+      - button "Create clinic & continue" [disabled]
+  - region "Notifications alt+T"
+  - button "Open Tanstack query devtools" [ref=f2e74] [cursor=pointer]
+  - generic:
+    - contentinfo:
+      - button "Open TanStack Router Devtools" [ref=f2e123] [cursor=pointer]:
+        - generic [ref=f2e195]: "-"
+        - generic [ref=f2e196]: TanStack Router

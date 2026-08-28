@@ -1,0 +1,198 @@
+- generic:
+  - generic:
+    - generic:
+      - link:
+        - /url: "#content"
+        - text: Skip to Main
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - list:
+                - listitem:
+                  - button:
+                    - generic:
+                      - generic: Default Clinic
+                      - generic: professional plan
+            - generic:
+              - generic:
+                - generic: General
+                - list:
+                  - listitem:
+                    - link:
+                      - /url: /admin/dashboard
+                      - generic: Dashboard
+                  - listitem:
+                    - link:
+                      - /url: /admin/appointments
+                      - generic: Appointments
+                  - listitem:
+                    - link:
+                      - /url: /admin/queue
+                      - generic: Queue
+                  - listitem:
+                    - link:
+                      - /url: /admin/patients
+                      - generic: Patients
+              - generic:
+                - generic: Management
+                - list:
+                  - listitem:
+                    - link:
+                      - /url: /admin/doctors
+                      - generic: Doctors
+                  - listitem:
+                    - link:
+                      - /url: /admin/staff
+                      - generic: Staff
+                  - listitem:
+                    - link:
+                      - /url: /admin/rooms
+                      - generic: Rooms
+              - generic:
+                - generic: Other
+                - list:
+                  - listitem:
+                    - link:
+                      - /url: /admin/notifications
+                      - generic: Notifications
+                  - listitem:
+                    - button:
+                      - generic: Settings
+            - generic:
+              - list:
+                - listitem:
+                  - button:
+                    - generic: J
+                    - generic:
+                      - generic: jonahmafuyai
+                      - generic: jonahmafuyai@gmail.com
+            - button
+      - generic:
+        - banner:
+          - generic:
+            - button:
+              - generic: Toggle Sidebar
+            - navigation:
+              - link:
+                - /url: /admin/dashboard
+                - text: Overview
+              - link:
+                - /url: /admin/appointments
+                - text: Appointments
+              - link:
+                - /url: /admin/queue
+                - text: Queue
+            - button:
+              - generic: Search
+              - generic:
+                - generic: ⌘
+                - text: K
+            - button
+            - button:
+              - generic: Toggle theme
+            - button
+            - button
+        - main:
+          - generic:
+            - generic:
+              - heading [level=1]: Doctors
+              - paragraph: Clinic doctors and availability
+            - button: Add doctor
+          - generic:
+            - generic:
+              - generic:
+                - textbox:
+                  - /placeholder: Search doctors...
+                - generic:
+                  - button: Status
+              - button: View
+            - generic:
+              - generic:
+                - table:
+                  - rowgroup:
+                    - row:
+                      - columnheader:
+                        - generic:
+                          - button:
+                            - generic: Doctor
+                      - columnheader:
+                        - generic:
+                          - button:
+                            - generic: Specialization
+                      - columnheader:
+                        - generic:
+                          - button:
+                            - generic: Today
+                      - columnheader:
+                        - generic:
+                          - button:
+                            - generic: Status
+                      - columnheader:
+                        - generic: Actions
+                  - rowgroup:
+                    - row:
+                      - cell:
+                        - generic:
+                          - paragraph: jonah mafuyai
+                          - paragraph: jonahmafuyai81@gmail.com
+                      - cell: Orthopedics
+                      - cell:
+                        - generic: 1 appointments
+                      - cell:
+                        - generic: active
+                      - cell:
+                        - button:
+                          - generic: Open menu
+            - generic:
+              - generic:
+                - generic:
+                  - combobox:
+                    - generic: "10"
+                  - paragraph: Rows per page
+              - generic:
+                - generic: Page 1 of 1
+                - generic:
+                  - button [disabled]:
+                    - generic: Go to first page
+                  - button [disabled]:
+                    - generic: Go to previous page
+                  - generic:
+                    - button:
+                      - generic: Go to page 1
+                      - text: "1"
+                  - button [disabled]:
+                    - generic: Go to next page
+                  - button [disabled]:
+                    - generic: Go to last page
+    - generic:
+      - heading [level=2]: Command Palette
+      - paragraph: Search for a command to run...
+    - region "Notifications alt+T"
+    - generic:
+      - button
+    - button [ref=f7e367] [cursor=pointer]:
+      - generic [ref=f7e365]: "-"
+      - generic [ref=f7e366]: TanStack Router
+  - dialog [ref=f7e369]:
+    - generic [ref=f7e370]:
+      - heading "Add doctor" [level=2] [ref=f7e371]
+      - paragraph [ref=f7e376]: Register a doctor in the clinic directory.
+    - generic [ref=f7e377]:
+      - generic [ref=f7e378]:
+        - generic [ref=f7e379]: Full name
+        - textbox "Full name" [active] [ref=f7e380]:
+          - /placeholder: "eg: Dr. Chukwuemeka"
+      - generic [ref=f7e381]:
+        - generic [ref=f7e382]: Specialization
+        - combobox "Specialization" [ref=f7e383] [cursor=pointer]:
+          - generic: Select a specialization
+        - combobox [ref=f7e384]
+      - generic [ref=f7e385]:
+        - generic [ref=f7e386]: Email
+        - textbox "Email" [ref=f7e387]:
+          - /placeholder: "eg: dr.name@mediq.ng"
+    - generic [ref=f7e388]:
+      - button "Cancel" [ref=f7e389] [cursor=pointer]
+      - button "Add doctor" [ref=f7e390] [cursor=pointer]
+    - button "Close" [ref=f7e391] [cursor=pointer]

@@ -1,0 +1,220 @@
+- generic:
+  - generic:
+    - generic:
+      - link:
+        - /url: "#content"
+        - text: Skip to Main
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - list:
+                - listitem:
+                  - button:
+                    - generic:
+                      - generic: Default Clinic
+                      - generic: professional plan
+            - generic:
+              - generic:
+                - generic: General
+                - list:
+                  - listitem:
+                    - link:
+                      - /url: /admin/dashboard
+                      - generic: Dashboard
+                  - listitem:
+                    - link:
+                      - /url: /admin/appointments
+                      - generic: Appointments
+                  - listitem:
+                    - link:
+                      - /url: /admin/queue
+                      - generic: Queue
+                  - listitem:
+                    - link:
+                      - /url: /admin/patients
+                      - generic: Patients
+              - generic:
+                - generic: Management
+                - list:
+                  - listitem:
+                    - link:
+                      - /url: /admin/doctors
+                      - generic: Doctors
+                  - listitem:
+                    - link:
+                      - /url: /admin/staff
+                      - generic: Staff
+                  - listitem:
+                    - link:
+                      - /url: /admin/rooms
+                      - generic: Rooms
+              - generic:
+                - generic: Other
+                - list:
+                  - listitem:
+                    - link:
+                      - /url: /admin/notifications
+                      - generic: Notifications
+                  - listitem:
+                    - button:
+                      - generic: Settings
+            - generic:
+              - list:
+                - listitem:
+                  - button [expanded]:
+                    - generic: J
+                    - generic:
+                      - generic: jonahmafuyai
+                      - generic: jonahmafuyai@gmail.com
+            - button
+      - generic:
+        - banner:
+          - generic:
+            - button:
+              - generic: Toggle Sidebar
+            - navigation:
+              - link:
+                - /url: /admin/dashboard
+                - text: Overview
+              - link:
+                - /url: /admin/appointments
+                - text: Appointments
+              - link:
+                - /url: /admin/queue
+                - text: Queue
+            - button:
+              - generic: Search
+              - generic:
+                - generic: ⌘
+                - text: K
+            - button
+            - button:
+              - generic: Toggle theme
+            - button
+            - button
+        - main:
+          - generic:
+            - generic:
+              - heading [level=1]: Dashboard
+              - paragraph: Today's overview
+            - generic:
+              - group:
+                - button [pressed]: Today
+                - button: 7 days
+                - button: 30 days
+                - button: Custom
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - paragraph: Today Booked
+                  - paragraph: "0"
+              - generic:
+                - generic:
+                  - generic:
+                    - paragraph: Completed
+                  - paragraph: "0"
+              - generic:
+                - generic:
+                  - generic:
+                    - paragraph: Pending
+                  - paragraph: "1"
+              - generic:
+                - generic:
+                  - generic:
+                    - paragraph: Avg Wait
+                  - paragraph: "--"
+            - generic:
+              - generic:
+                - generic:
+                  - generic: 7-Day Trend
+                  - generic:
+                    - paragraph: No appointments in this period.
+              - generic:
+                - generic: By Status
+                - generic:
+                  - paragraph: No data available.
+              - generic:
+                - generic: Doctor Utilization
+                - generic:
+                  - paragraph: No data available.
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - paragraph: Appointments
+                  - paragraph: "0"
+                  - paragraph: today
+              - generic:
+                - generic:
+                  - generic:
+                    - paragraph: In queue
+                  - paragraph: "0"
+                  - paragraph: 0 waiting > 15 min
+              - generic:
+                - generic:
+                  - generic:
+                    - paragraph: Served
+                  - paragraph: "0"
+                  - paragraph: check-ins completed
+              - generic:
+                - generic:
+                  - generic:
+                    - paragraph: Active doctors
+                  - paragraph: 1 / 1
+                  - paragraph: on duty now
+            - generic:
+              - generic:
+                - generic: Appointmentstoday
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - application:
+                            - generic:
+                              - generic:
+                                - generic: 9AM
+                                - generic: 10AM
+                                - generic: 11AM
+                                - generic: 12PM
+                                - generic: 1PM
+                                - generic: 2PM
+                                - generic: 3PM
+                                - generic: 4PM
+                                - generic: 5PM
+                              - generic:
+                                - generic: "0"
+                                - generic: "1"
+                                - generic: "2"
+                                - generic: "3"
+                                - generic: "4"
+              - generic:
+                - generic: Recent Check-ins
+                - generic:
+                  - paragraph: No check-ins in this period.
+    - generic:
+      - heading [level=2]: Command Palette
+      - paragraph: Search for a command to run...
+    - region "Notifications alt+T"
+    - generic:
+      - button
+    - button [ref=f1e664] [cursor=pointer]:
+      - generic [ref=f1e239]: "-"
+      - generic [ref=f1e240]: TanStack Router
+  - generic: "0"
+  - menu "J jonahmafuyai jonahmafuyai@gmail.com" [active] [ref=f1e665]:
+    - generic [ref=f1e667]:
+      - generic [ref=f1e668]: J
+      - generic [ref=f1e670]:
+        - generic [ref=f1e671]: jonahmafuyai
+        - generic [ref=f1e672]: jonahmafuyai@gmail.com
+    - separator [ref=f1e673]
+    - group [ref=f1e674]:
+      - menuitem "Account" [ref=f1e675]
+      - menuitem "Settings" [ref=f1e676]
+      - menuitem "Notifications" [ref=f1e677]
+    - separator [ref=f1e678]
+    - menuitem "Sign out" [ref=f1e679]

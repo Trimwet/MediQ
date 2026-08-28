@@ -28,6 +28,11 @@ export function AppointmentsTable({
   onApprove,
   onReject,
 }: AppointmentsTableProps) {
+  const doctorFilterOptions = useMemo(() => {
+    const unique = Array.from(new Set(data.map((d) => d.doctorName))).sort()
+    return unique.map((name) => ({ label: name, value: name }))
+  }, [data])
+
   const columns = useMemo<ColumnDef<Appointment>[]>(
     () => [
       {
@@ -49,6 +54,8 @@ export function AppointmentsTable({
             {row.getValue('doctorName')}
           </span>
         ),
+        filterFn: (row, id, value) =>
+          (value as string[]).includes(row.getValue(id) as string),
       },
       {
         accessorKey: 'scheduledFor',
@@ -72,11 +79,44 @@ export function AppointmentsTable({
           )
         },
         sortingFn: 'datetime',
+        filterFn: (row, id, value) => {
+          const iso = row.getValue<string>(id)
+          const d = new Date(iso)
+          const now = new Date()
+          const startToday = new Date(now)
+          startToday.setHours(0, 0, 0, 0)
+          const endToday = new Date(now)
+          endToday.setHours(23, 59, 59, 999)
+          return (value as string[]).some((v) => {
+            if (v === 'today')
+              return d >= startToday && d <= endToday
+            if (v === 'past') return d < startToday
+            if (v === 'upcoming') return d > endToday
+            if (v === 'recent') {
+              const diff = (d.getTime() - now.getTime()) / 86_400_000
+              return diff >= -7 && diff <= 7
+            }
+            if (v === 'week') {
+              const weekFromNow = new Date(now.getTime() + 7 * 86_400_000)
+              return d > endToday && d <= weekFromNow
+            }
+            return false
+          })
+        },
       },
       {
         accessorKey: 'reason',
-        header: 'Reason',
-        cell: ({ row }) => row.getValue('reason') ?? '—',
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title='Reason' />
+        ),
+        cell: ({ row }) => {
+          const v = row.getValue<string | undefined>('reason')
+          return v ? (
+            <span className='text-muted-foreground'>{v}</span>
+          ) : (
+            <span className='text-muted-foreground'>—</span>
+          )
+        },
       },
       {
         accessorKey: 'status',
@@ -95,6 +135,21 @@ export function AppointmentsTable({
           )
         },
         filterFn: (row, id, value) => value.includes(row.getValue(id)),
+        sortingFn: (rowA, rowB, columnId) => {
+          const order: Record<AppointmentStatus, number> = {
+            pending: 0,
+            booked: 1,
+            arrived: 2,
+            in_progress: 3,
+            completed: 4,
+            no_show: 5,
+            cancelled: 6,
+            rejected: 7,
+          }
+          const a = rowA.getValue<AppointmentStatus>(columnId)
+          const b = rowB.getValue<AppointmentStatus>(columnId)
+          return (order[a] ?? 99) - (order[b] ?? 99)
+        },
       },
       ...(canManage
         ? [
@@ -126,9 +181,33 @@ export function AppointmentsTable({
       searchPlaceholder='Search patients, doctors...'
       emptyMessage='No appointments scheduled.'
       emptyDescription='Book an appointment to get started.'
-      // Newest / soonest appointments first on load.
-      initialSorting={[{ id: 'scheduledFor', desc: true }]}
+      // Pending booking requests first, then most recent scheduled time.
+      // This puts new bookings (pending) at the very top so staff see recent requests immediately.
+      initialSorting={[
+        { id: 'status', desc: false },
+        { id: 'scheduledFor', desc: true },
+      ]}
       filters={[
+        {
+          columnId: 'scheduledFor',
+          title: 'Date',
+          options: [
+            { label: 'Recent (7d)', value: 'recent' },
+            { label: 'Today', value: 'today' },
+            { label: 'Next 7 days', value: 'week' },
+            { label: 'Upcoming', value: 'upcoming' },
+            { label: 'Past', value: 'past' },
+          ],
+        },
+        ...(doctorFilterOptions.length
+          ? [
+              {
+                columnId: 'doctorName',
+                title: 'Doctor',
+                options: doctorFilterOptions,
+              },
+            ]
+          : []),
         {
           columnId: 'status',
           title: 'Status',

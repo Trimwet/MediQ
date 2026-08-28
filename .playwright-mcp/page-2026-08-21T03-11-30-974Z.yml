@@ -1,0 +1,67 @@
+- generic [active] [ref=f1e1]:
+  - generic [ref=f1e2]:
+    - generic [ref=f1e688]:
+      - button "Toggle theme" [ref=f1e690] [cursor=pointer]
+      - generic [ref=f1e692]:
+        - img "MediQ" [ref=f1e693]
+        - generic [ref=f1e695]:
+          - link "Back to home" [ref=f1e696] [cursor=pointer]:
+            - /url: /
+          - heading "Sign in" [level=1] [ref=f1e699]
+          - paragraph [ref=f1e700]:
+            - text: Enter your email and password to access your account. Don't have an account?
+            - link "Create one" [ref=f1e701] [cursor=pointer]:
+              - /url: /sign-up
+          - generic [ref=f1e702]:
+            - generic [ref=f1e704]:
+              - generic [ref=f1e705]:
+                - generic [ref=f1e706]: Email
+                - textbox "Email" [ref=f1e707]:
+                  - /placeholder: name@example.com
+                  - text: jonahmafuyai@gmail.com
+              - generic [ref=f1e708]:
+                - generic [ref=f1e709]: Password
+                - generic [ref=f1e710]:
+                  - textbox "Password" [ref=f1e711]:
+                    - /placeholder: ••••••••
+                    - text: permitted
+                  - button "Show password" [ref=f1e712] [cursor=pointer]
+                - link "Forgot password?" [ref=f1e714] [cursor=pointer]:
+                  - /url: /forgot-password
+              - button "Sign in" [ref=f1e715] [cursor=pointer]
+              - paragraph [ref=f1e716]:
+                - text: Visiting as a patient?
+                - link "Book an appointment — no account needed" [ref=f1e717] [cursor=pointer]:
+                  - /url: /book
+            - paragraph [ref=f1e719]:
+              - text: By clicking sign in, you agree to our
+              - link "Terms of Service" [ref=f1e720] [cursor=pointer]:
+                - /url: /terms
+              - text: and
+              - link "Privacy Policy" [ref=f1e721] [cursor=pointer]:
+                - /url: /privacy
+              - text: .
+      - complementary [ref=f1e722]:
+        - generic [ref=f1e723]:
+          - img "MediQ dashboard showing appointments and queue overview" [ref=f1e725]
+          - list [ref=f1e726]:
+            - listitem [ref=f1e727]:
+              - generic [ref=f1e731]:
+                - paragraph [ref=f1e732]: Appointments
+                - paragraph [ref=f1e733]: Your daily schedule at a glance
+            - listitem [ref=f1e734]:
+              - generic [ref=f1e741]:
+                - paragraph [ref=f1e742]: Live queue
+                - paragraph [ref=f1e743]: Check-ins and wait time in real time
+            - listitem [ref=f1e744]:
+              - generic [ref=f1e750]:
+                - paragraph [ref=f1e751]: Doctor coverage
+                - paragraph [ref=f1e752]: See which doctors are active
+    - region "Notifications alt+T"
+    - button "Open Tanstack query devtools" [ref=f1e118] [cursor=pointer]
+    - generic:
+      - contentinfo:
+        - button "Open TanStack Router Devtools" [ref=f1e753] [cursor=pointer]:
+          - generic [ref=f1e239]: "-"
+          - generic [ref=f1e240]: TanStack Router
+  - generic [ref=f1e520]: "0"
