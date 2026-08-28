@@ -550,18 +550,24 @@ export const roomsRepository: RoomsRepository = {
 // ---------------------------------------------------------------------------
 
 export const notificationsRepository: NotificationsRepository = {
-  async list(_clinicId?: string) {
+  async list(clinicId?: string) {
     const {
       data: { user },
     } = await supabase.auth.getUser()
     if (!user) return []
 
-    // Get all notifications visible to this user (staff see clinic-wide;
-    // patients see their own via recipients). Then join read status.
-    const { data: notifs, error: notifErr } = await supabase
+    // Get notifications — scoped to clinic when clinicId is provided.
+    // Then join read status for the current user.
+    let query = supabase
       .from('notifications')
       .select('*')
       .order('created_at', { ascending: false })
+
+    if (clinicId) {
+      query = query.eq('clinic_id', clinicId)
+    }
+
+    const { data: notifs, error: notifErr } = await query
 
     if (notifErr) throw notifErr
 

@@ -1,6 +1,6 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout'
-import { can, requiredPermissionFor } from '@/config/rbac'
+import { can, hasRole, requiredPermissionFor } from '@/config/rbac'
 import { useAuthStore } from '@/stores/auth-store'
 
 export const Route = createFileRoute('/_authenticated')({
@@ -16,6 +16,11 @@ export const Route = createFileRoute('/_authenticated')({
         to: '/sign-in',
         search: { redirect: location.href },
       })
+    }
+
+    // Patients must stay in the patient portal — block /admin/* access
+    if (hasRole(user.role, 'patient') && location.pathname.startsWith('/admin')) {
+      throw redirect({ to: '/patient' })
     }
 
     // Signed in but not allowed on this route (longest-prefix match so
