@@ -52,6 +52,7 @@ export function useAppointments() {
   return useQuery({
     queryKey: ['appointments', clinicId ?? 'none'],
     queryFn: () => appointmentsRepository.list(clinicId ?? undefined),
+    enabled: !!clinicId,
   })
 }
 
@@ -68,6 +69,7 @@ export function useCreateAppointment() {
 
 export function useUpdateAppointmentStatus() {
   const queryClient = useQueryClient()
+  const { clinicId } = useCurrentClinic()
   return useMutation({
     mutationFn: async ({ id, status }: { id: string; status: AppointmentStatus }) => {
       // When checking in (booked → arrived), also create the queue entry so
@@ -108,16 +110,17 @@ export function useUpdateAppointmentStatus() {
     // Optimistic update: patch the cache immediately so the UI responds
     // without waiting for the Supabase round-trip.
     onMutate: async ({ id, status }) => {
-      await queryClient.cancelQueries({ queryKey: ['appointments'] })
-      const previous = queryClient.getQueryData<Appointment[]>(['appointments'])
-      queryClient.setQueryData<Appointment[]>(['appointments'], (old) =>
+      const key = ['appointments', clinicId ?? 'none'] as const
+      await queryClient.cancelQueries({ queryKey: key })
+      const previous = queryClient.getQueryData<Appointment[]>(key)
+      queryClient.setQueryData<Appointment[]>(key, (old) =>
         (old ?? []).map((a) => (a.id === id ? { ...a, status } : a))
       )
       return { previous }
     },
     onError: (_err, _vars, context) => {
       if (context?.previous) {
-        queryClient.setQueryData(['appointments'], context.previous)
+        queryClient.setQueryData(['appointments', clinicId ?? 'none'], context.previous)
       }
     },
     // Check-in also affects the queue; always refetch both on settle.
@@ -130,6 +133,7 @@ export function useUpdateAppointmentStatus() {
 
 export function useApproveAppointment() {
   const queryClient = useQueryClient()
+  const { clinicId } = useCurrentClinic()
   return useMutation({
     mutationFn: ({
       id,
@@ -139,9 +143,10 @@ export function useApproveAppointment() {
       doctor?: { id: string; name: string }
     }) => appointmentsRepository.approve(id, doctor),
     onMutate: async ({ id, doctor }) => {
-      await queryClient.cancelQueries({ queryKey: ['appointments'] })
-      const previous = queryClient.getQueryData<Appointment[]>(['appointments'])
-      queryClient.setQueryData<Appointment[]>(['appointments'], (old) =>
+      const key = ['appointments', clinicId ?? 'none'] as const
+      await queryClient.cancelQueries({ queryKey: key })
+      const previous = queryClient.getQueryData<Appointment[]>(key)
+      queryClient.setQueryData<Appointment[]>(key, (old) =>
         (old ?? []).map((a) =>
           a.id === id
             ? {
@@ -158,7 +163,7 @@ export function useApproveAppointment() {
     },
     onError: (_err, _vars, context) => {
       if (context?.previous) {
-        queryClient.setQueryData(['appointments'], context.previous)
+        queryClient.setQueryData(['appointments', clinicId ?? 'none'], context.previous)
       }
     },
     onSettled: () => {
@@ -170,13 +175,15 @@ export function useApproveAppointment() {
 
 export function useRejectAppointment() {
   const queryClient = useQueryClient()
+  const { clinicId } = useCurrentClinic()
   return useMutation({
     mutationFn: ({ id, reason }: { id: string; reason?: string }) =>
       appointmentsRepository.reject(id, reason),
     onMutate: async ({ id, reason }) => {
-      await queryClient.cancelQueries({ queryKey: ['appointments'] })
-      const previous = queryClient.getQueryData<Appointment[]>(['appointments'])
-      queryClient.setQueryData<Appointment[]>(['appointments'], (old) =>
+      const key = ['appointments', clinicId ?? 'none'] as const
+      await queryClient.cancelQueries({ queryKey: key })
+      const previous = queryClient.getQueryData<Appointment[]>(key)
+      queryClient.setQueryData<Appointment[]>(key, (old) =>
         (old ?? []).map((a) =>
           a.id === id
             ? {
@@ -191,7 +198,7 @@ export function useRejectAppointment() {
     },
     onError: (_err, _vars, context) => {
       if (context?.previous) {
-        queryClient.setQueryData(['appointments'], context.previous)
+        queryClient.setQueryData(['appointments', clinicId ?? 'none'], context.previous)
       }
     },
     onSettled: () => {
@@ -265,7 +272,7 @@ export function useBookedSlots(date: Date | undefined, doctorId?: string) {
         clinicId ?? undefined,
         doctorId
       ),
-    enabled: !!date,
+    enabled: !!date && !!clinicId,
   })
 }
 
@@ -289,6 +296,7 @@ export function useQueue() {
   const { isDoctor, doctor } = useDoctorIdentity()
   return useQuery({
     queryKey: ['queue', clinicId ?? 'none', doctor?.id ?? (isDoctor ? 'unresolved' : 'all')],
+    enabled: !!clinicId,
     queryFn: async () => {
       const all = await queueRepository.list(clinicId ?? undefined)
       if (!isDoctor) return all
@@ -341,6 +349,7 @@ export function usePatients() {
   const { isDoctor, doctor } = useDoctorIdentity()
   return useQuery({
     queryKey: ['patients', clinicId ?? 'none', doctor?.id ?? (isDoctor ? 'unresolved' : 'all')],
+    enabled: !!clinicId,
     queryFn: async () => {
       const [allPatients, allAppointments] = await Promise.all([
         patientsRepository.list(clinicId ?? undefined),
@@ -384,6 +393,7 @@ export function useDoctors() {
   return useQuery({
     queryKey: ['doctors', clinicId ?? 'none'],
     queryFn: () => doctorsRepository.list(clinicId ?? undefined),
+    enabled: !!clinicId,
   })
 }
 
@@ -421,6 +431,7 @@ export function useStaff() {
   return useQuery({
     queryKey: ['staff', clinicId ?? 'none'],
     queryFn: () => staffRepository.list(clinicId ?? undefined),
+    enabled: !!clinicId,
   })
 }
 
@@ -449,6 +460,7 @@ export function useRooms() {
   return useQuery({
     queryKey: ['rooms', clinicId ?? 'none'],
     queryFn: () => roomsRepository.list(clinicId ?? undefined),
+    enabled: !!clinicId,
   })
 }
 
@@ -478,6 +490,7 @@ export function useNotifications() {
   return useQuery({
     queryKey: ['notifications', clinicId ?? 'none'],
     queryFn: () => notificationsRepository.list(clinicId ?? undefined),
+    enabled: !!clinicId,
   })
 }
 
@@ -506,6 +519,7 @@ export function useAnalytics(range: 'today' | '7d' | '30d' = 'today') {
   return useQuery({
     queryKey: ['analytics', clinicId ?? 'none', range],
     queryFn: () => analyticsRepository.getSummary(clinicId ?? undefined, range),
+    enabled: !!clinicId,
   })
 }
 

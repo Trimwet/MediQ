@@ -223,6 +223,7 @@ export function Appointments() {
           data={visibleAppointments}
           loading={appointmentsQuery.isPending}
           canManage={canManage}
+          isActionsDisabled={updateStatus.isPending || approve.isPending || reject.isPending}
           onStatusChange={handleStatusChange}
           onApprove={handleApprove}
           onReject={handleReject}

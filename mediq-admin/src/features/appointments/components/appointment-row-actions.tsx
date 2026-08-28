@@ -21,6 +21,8 @@ type AppointmentRowActionsProps = {
   onStatusChange: (id: string, status: AppointmentStatus) => void
   onApprove: (appointment: Appointment) => void
   onReject: (appointment: Appointment) => void
+  /** Disable all action items while a mutation is in-flight. */
+  disabled?: boolean
 }
 
 export function AppointmentRowActions({
@@ -28,6 +30,7 @@ export function AppointmentRowActions({
   onStatusChange,
   onApprove,
   onReject,
+  disabled = false,
 }: AppointmentRowActionsProps) {
   const next = nextStatus[appointment.status]
 
@@ -45,11 +48,11 @@ export function AppointmentRowActions({
             <DropdownMenuLabel className='text-xs text-muted-foreground'>
               Review request
             </DropdownMenuLabel>
-            <DropdownMenuItem onClick={() => onApprove(appointment)}>
+            <DropdownMenuItem disabled={disabled} onClick={() => onApprove(appointment)}>
               <CheckCircle2 />
               Approve
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onReject(appointment)}>
+            <DropdownMenuItem disabled={disabled} onClick={() => onReject(appointment)}>
               <XCircle />
               Reject
             </DropdownMenuItem>
@@ -62,6 +65,7 @@ export function AppointmentRowActions({
             {next && (
               <>
                 <DropdownMenuItem
+                  disabled={disabled}
                   onClick={() => onStatusChange(appointment.id, next)}
                 >
                   {next === 'arrived'
@@ -75,6 +79,7 @@ export function AppointmentRowActions({
             )}
             {canCancel.includes(appointment.status) && (
               <DropdownMenuItem
+                disabled={disabled}
                 onClick={() => onStatusChange(appointment.id, 'cancelled')}
               >
                 Cancel
@@ -82,6 +87,7 @@ export function AppointmentRowActions({
             )}
             {canNoShow.includes(appointment.status) && (
               <DropdownMenuItem
+                disabled={disabled}
                 onClick={() => onStatusChange(appointment.id, 'no_show')}
               >
                 Mark no-show

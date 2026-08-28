@@ -133,6 +133,11 @@ export function Queue() {
               doneCount={doneCount}
               averageWaitMinutes={averageWaitMinutes}
               canManage={canManage}
+              isActionsDisabled={
+                actions.startVisit.isPending ||
+                actions.complete.isPending ||
+                actions.markLeft.isPending
+              }
               onInRoom={handleStartVisit}
               onDone={handleComplete}
               onLeft={handleMarkLeft}

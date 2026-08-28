@@ -15,6 +15,8 @@ type AppointmentsTableProps = {
   data: Appointment[]
   loading?: boolean
   canManage: boolean
+  /** Disable all row actions while a mutation is in-flight. */
+  isActionsDisabled?: boolean
   onStatusChange: (id: string, status: AppointmentStatus) => void
   onApprove: (appointment: Appointment) => void
   onReject: (appointment: Appointment) => void
@@ -24,6 +26,7 @@ export function AppointmentsTable({
   data,
   loading = false,
   canManage,
+  isActionsDisabled = false,
   onStatusChange,
   onApprove,
   onReject,
@@ -163,6 +166,7 @@ export function AppointmentsTable({
                     onStatusChange={onStatusChange}
                     onApprove={onApprove}
                     onReject={onReject}
+                    disabled={isActionsDisabled}
                   />
                 </div>
               ),
@@ -170,7 +174,7 @@ export function AppointmentsTable({
           ]
         : []),
     ],
-    [canManage, onStatusChange, onApprove, onReject]
+    [canManage, isActionsDisabled, onStatusChange, onApprove, onReject]
   )
 
   return (

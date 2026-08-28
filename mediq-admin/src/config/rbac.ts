@@ -59,7 +59,13 @@ export const rolePermissions: Record<Role, readonly Permission[]> = {
     'patients:manage',
     'notifications:view',
   ],
-  // Clinician: sees their own work, cannot book or administer
+  // Clinician: sees their own work, cannot book or administer.
+  // NOTE: doctors intentionally lack 'queue:manage' at the RBAC layer so the
+  // UI hides Call next / Start visit / Complete / Mark left buttons. The RLS
+  // policy on queue_entries UPDATE is permissive (user_in_clinic covers all
+  // clinic members including doctors), so a doctor *could* bypass the UI and
+  // update queue entries via the API. If that becomes a concern, tighten the
+  // RLS to require role IN ('admin','front_desk') for UPDATE.
   doctor: [
     'dashboard:view',
     'appointments:view',

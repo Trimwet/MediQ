@@ -16,6 +16,8 @@ type QueueBoardProps = {
   doneCount: number
   averageWaitMinutes: number
   canManage: boolean
+  /** Disable all action buttons while a mutation is in-flight. */
+  isActionsDisabled?: boolean
   onInRoom: (entry: QueueEntry) => void
   onDone: (entry: QueueEntry) => void
   onLeft: (entry: QueueEntry) => void
@@ -27,6 +29,7 @@ export function QueueBoard({
   doneCount,
   averageWaitMinutes,
   canManage,
+  isActionsDisabled = false,
   onInRoom,
   onDone,
   onLeft,
@@ -98,7 +101,7 @@ export function QueueBoard({
                 {canManage && (
                   <div className='serving-card-actions'>
                     {entry.status === 'called' && (
-                      <Button size='sm' onClick={() => onInRoom(entry)}>
+                      <Button size='sm' disabled={isActionsDisabled} onClick={() => onInRoom(entry)}>
                         <DoorOpen />
                         Start visit
                       </Button>
@@ -106,6 +109,7 @@ export function QueueBoard({
                     <Button
                       size='sm'
                       variant='outline'
+                      disabled={isActionsDisabled}
                       onClick={() => onDone(entry)}
                     >
                       <CheckCircle2 />
@@ -114,6 +118,7 @@ export function QueueBoard({
                     <Button
                       size='sm'
                       variant='ghost'
+                      disabled={isActionsDisabled}
                       onClick={() => onLeft(entry)}
                     >
                       Mark left
