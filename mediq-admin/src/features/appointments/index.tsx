@@ -53,6 +53,12 @@ export function Appointments() {
           toast.success(`Appointment marked ${status.replace('_', ' ')}`)
           if (status === 'arrived' && appointment) {
             try {
+              const { data: existing } = await supabase
+                .from('queue_entries')
+                .select('id')
+                .eq('appointment_id', id)
+                .maybeSingle()
+              if (existing) return
               const { data: clinicData } = await supabase
                 .from('appointments')
                 .select('clinic_id')
@@ -91,7 +97,6 @@ export function Appointments() {
       {
         onSuccess: async () => {
           toast.success(`Request approved for ${appointment.patientName}`)
-          // If approved appointment is for today, auto-add to queue so it appears in /admin/queue
           const apptDate = new Date(appointment.scheduledFor)
           const today = new Date()
           const isToday =
@@ -100,6 +105,12 @@ export function Appointments() {
             apptDate.getFullYear() === today.getFullYear()
           if (isToday) {
             try {
+              const { data: existing } = await supabase
+                .from('queue_entries')
+                .select('id')
+                .eq('appointment_id', appointment.id)
+                .maybeSingle()
+              if (existing) return
               const { data: clinicData } = await supabase
                 .from('appointments')
                 .select('clinic_id')
@@ -137,6 +148,12 @@ export function Appointments() {
             apptDate.getFullYear() === today.getFullYear()
           if (isToday) {
             try {
+              const { data: existing } = await supabase
+                .from('queue_entries')
+                .select('id')
+                .eq('appointment_id', target.id)
+                .maybeSingle()
+              if (existing) return
               const { data: clinicData } = await supabase
                 .from('appointments')
                 .select('clinic_id')
