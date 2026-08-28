@@ -15,7 +15,7 @@ const TASKS: Task[] = [
   {
     id: 'profile',
     label: 'Complete your profile',
-    href: '/settings',
+    href: '/admin/settings',
   },
   {
     id: 'book',
