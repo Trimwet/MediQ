@@ -6,7 +6,7 @@ import { ThemeSwitch } from '@/components/theme-switch'
 import dashboardDark from './assets/dashboard-dark.png'
 import dashboardLight from './assets/dashboard-light.png'
 
-type AuthBackTo = '/' | '/sign-in' | '/sign-up' | '/forgot-password' | '/otp'
+type AuthBackTo = '/' | '/sign-in' | '/sign-up' | '/forgot-password'
 
 type AuthLayoutProps = {
   title: string

@@ -44,7 +44,6 @@ type PasswordFormValues = z.infer<typeof passwordFormSchema>
 export function AccountForm() {
   const [marketingEmails, setMarketingEmails] = useState(true)
   const [securityEmails, setSecurityEmails] = useState(true)
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false)
   const [confirmText, setConfirmText] = useState('')
 
   const passwordForm = useForm<PasswordFormValues>({
@@ -171,29 +170,6 @@ export function AccountForm() {
             <Switch
               checked={securityEmails}
               onCheckedChange={setSecurityEmails}
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Two-Factor Authentication</CardTitle>
-          <CardDescription>
-            Add an extra layer of security to your account.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className='flex flex-row items-center justify-between rounded-lg border p-4'>
-            <div className='space-y-0.5'>
-              <Label className='text-base'>Require a one-time code</Label>
-              <p className='text-sm text-muted-foreground'>
-                Get a verification code via authenticator app when signing in.
-              </p>
-            </div>
-            <Switch
-              checked={twoFactorEnabled}
-              onCheckedChange={setTwoFactorEnabled}
             />
           </div>
         </CardContent>
