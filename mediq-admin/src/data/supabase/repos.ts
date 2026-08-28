@@ -355,13 +355,15 @@ export const doctorsRepository: DoctorsRepository = {
     if (!doctors?.length) return []
 
     const doctorIds = doctors.map((d: Record<string, unknown>) => d.id)
-    const { data: counts } = await supabase
+    let countQuery = supabase
       .from('appointments')
       .select('doctor_id')
       .in('doctor_id', doctorIds)
       .gte('scheduled_for', todayStart.toISOString())
       .lte('scheduled_for', todayEnd.toISOString())
       .not('status', 'in', '("cancelled","rejected")')
+    if (clinicId) countQuery = countQuery.eq('clinic_id', clinicId)
+    const { data: counts } = await countQuery
 
     const countMap = new Map<string, number>()
     for (const c of (counts ?? []) as { doctor_id: string }[]) {
@@ -474,11 +476,13 @@ export const roomsRepository: RoomsRepository = {
     if (!rooms?.length) return []
 
     const roomIds = rooms.map((r: Record<string, unknown>) => r.id)
-    const { data: entries } = await supabase
+    let occupancyQuery = supabase
       .from('queue_entries')
       .select('room_id, doctor_name, patient_name')
       .in('room_id', roomIds)
       .eq('status', 'in_room')
+    if (clinicId) occupancyQuery = occupancyQuery.eq('clinic_id', clinicId)
+    const { data: entries } = await occupancyQuery
 
     const occupancyMap = new Map<
       string,

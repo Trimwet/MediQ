@@ -28,6 +28,17 @@ function safeJsonParse(value: string | undefined): unknown {
   }
 }
 
+function isValidAuthUser(value: unknown): value is AuthUser {
+  if (!value || typeof value !== 'object') return false
+  const v = value as Record<string, unknown>
+  return (
+    typeof v.accountNo === 'string' &&
+    typeof v.email === 'string' &&
+    Array.isArray(v.role) &&
+    typeof v.exp === 'number'
+  )
+}
+
 interface AuthState {
   auth: {
     user: AuthUser | null
@@ -49,7 +60,11 @@ export const useAuthStore = create<AuthState>()((set) => {
   const cookieState = getCookie(ACCESS_TOKEN)
   const initToken = (safeJsonParse(cookieState) as string) || ''
   const userState = getCookie(USER_COOKIE)
-  const initUser = (safeJsonParse(userState) as AuthUser | null) ?? null
+  const parsedUser = safeJsonParse(userState)
+  const initUser = isValidAuthUser(parsedUser) ? (parsedUser as AuthUser) : null
+  if (userState && parsedUser && !isValidAuthUser(parsedUser)) {
+    removeCookie(USER_COOKIE)
+  }
   return {
     auth: {
       user: initUser,

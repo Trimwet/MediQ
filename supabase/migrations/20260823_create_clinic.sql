@@ -68,15 +68,19 @@ BEGIN
     RAISE EXCEPTION 'Invalid plan';
   END IF;
 
-  -- Check slug not taken
+  -- Check slug not taken (fast path) + handle race via EXCEPTION
   IF EXISTS (SELECT 1 FROM public.clinics WHERE slug = v_slug) THEN
     RAISE EXCEPTION 'Slug already taken';
   END IF;
 
-  -- Insert clinic
-  INSERT INTO public.clinics (name, slug, plan, status)
-  VALUES (trim(p_name), v_slug, v_plan, 'active')
-  RETURNING * INTO v_clinic;
+  -- Insert clinic — handle concurrent same-slug race
+  BEGIN
+    INSERT INTO public.clinics (name, slug, plan, status)
+    VALUES (trim(p_name), v_slug, v_plan, 'active')
+    RETURNING * INTO v_clinic;
+  EXCEPTION WHEN unique_violation THEN
+    RAISE EXCEPTION 'Slug already taken';
+  END;
 
   -- Insert membership as admin
   INSERT INTO public.clinic_members (clinic_id, user_id, role)

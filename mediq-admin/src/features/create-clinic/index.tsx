@@ -339,9 +339,19 @@ function CombinedForm() {
       // Step 2: Wait for session to persist
       const { data: sessionData } = await supabase.auth.getSession()
       if (!sessionData.session) {
-        // Some projects require email confirmation — user must verify first
+        try {
+          localStorage.setItem(
+            'mediq_pending_clinic',
+            JSON.stringify({
+              clinicName: data.clinicName,
+              slug: data.slug,
+              plan: data.plan,
+              email: data.email,
+            })
+          )
+        } catch {}
         toast.success(
-          'Account created! Please check your email to verify, then sign in.'
+          'Account created! Please check your email to verify, then sign in — your clinic details are saved and will be created when you return.'
         )
         navigate({ to: '/sign-in' })
         setIsLoading(false)
@@ -607,6 +617,7 @@ function CombinedForm() {
 function ClinicOnlyForm() {
   const navigate = useNavigate()
   const setClinic = useAuthStore((s) => s.auth.setClinic)
+  const user = useAuthStore((s) => s.auth.user)
   const [isLoading, setIsLoading] = useState(false)
 
   const methods = useForm<ClinicOnlyValues>({
@@ -618,6 +629,21 @@ function ClinicOnlyForm() {
     },
     mode: 'onChange',
   })
+
+  // Restore pending clinic if user just verified email after CombinedForm
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('mediq_pending_clinic')
+      if (!raw || !user?.email) return
+      const pending = JSON.parse(raw) as { clinicName: string; slug: string; plan: string; email: string }
+      if (pending.email.toLowerCase() !== user.email.toLowerCase()) return
+      if (!methods.getValues('clinicName')) methods.setValue('clinicName', pending.clinicName)
+      if (!methods.getValues('slug')) methods.setValue('slug', pending.slug)
+      if (pending.plan) methods.setValue('plan', pending.plan as ClinicOnlyValues['plan'])
+      localStorage.removeItem('mediq_pending_clinic')
+      toast.info('Your clinic details were restored — review and submit to create it.')
+    } catch {}
+  }, [])
 
   const isSlugTouched = !!methods.formState.touchedFields.slug
   const { slugStatus, slug } = useSlugField(
