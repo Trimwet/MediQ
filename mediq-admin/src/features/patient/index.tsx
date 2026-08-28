@@ -149,31 +149,32 @@ export function PatientPortal() {
   return (
     <div className='min-h-svh bg-muted/40'>
       {/* Header */}
-      <header className='flex h-16 items-center justify-between border-b bg-background px-4 sm:px-6'>
-        <div className='flex items-center gap-2'>
-          <Button variant='ghost' size='sm' asChild>
+      <header className='flex h-16 items-center justify-between gap-2 border-b bg-background px-4 sm:px-6'>
+        <div className='flex min-w-0 items-center gap-3'>
+          <Button variant='ghost' size='sm' asChild className='shrink-0'>
             <Link to='/' aria-label='Back to home'>
-              <ArrowLeft className='size-4' />
+              <ArrowLeft aria-hidden="true" className='size-4' />
             </Link>
           </Button>
-          <Link to='/' aria-label='MediQ home'>
-            <Logo className='h-9' />
+          <Link to='/' aria-label='MediQ home' className='shrink-0'>
+            <Logo className='h-7 sm:h-9' />
           </Link>
         </div>
-        <div className='flex items-center gap-1.5'>
+        <div className='flex shrink-0 items-center gap-1 sm:gap-1.5'>
           <span className='me-1 hidden text-sm text-muted-foreground sm:block'>
             {user.email}
           </span>
           <ThemeSwitch />
-          <Button variant='ghost' size='sm' asChild>
+          <Button variant='ghost' size='sm' asChild className='gap-1.5'>
             <Link to='/change-password'>
-              <KeyRound />
-              Change password
+              <KeyRound aria-hidden="true" className='size-4' />
+              <span className='hidden sm:inline'>Change password</span>
+              <span className='sm:hidden sr-only'>Change password</span>
             </Link>
           </Button>
-          <Button variant='outline' size='sm' onClick={handleSignOut}>
-            <LogOut />
-            Sign out
+          <Button variant='ghost' size='sm' onClick={handleSignOut} className='gap-1.5'>
+            <LogOut aria-hidden="true" className='size-4' />
+            <span className='hidden sm:inline'>Sign out</span>
           </Button>
         </div>
       </header>
@@ -252,9 +253,19 @@ export function PatientPortal() {
               </h2>
 
               {upcoming.length === 0 ? (
-                <Card>
-                  <CardContent className='py-10 text-center text-sm text-muted-foreground'>
-                    No upcoming appointments. Book one below.
+                <Card className='py-4'>
+                  <CardContent className='py-8 text-center'>
+                    <div className='mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-muted'>
+                      <CalendarDays aria-hidden="true" className='size-6 text-muted-foreground' />
+                    </div>
+                    <p className='font-medium'>No upcoming appointments</p>
+                    <p className='mx-auto mt-1 max-w-sm text-sm text-muted-foreground'>Your booked appointments will appear here. Let's get your first visit scheduled.</p>
+                    <Button asChild className='mt-4'>
+                      <Link to='/book'>
+                        <CalendarDays aria-hidden="true" className='size-4' />
+                        Book an appointment
+                      </Link>
+                    </Button>
                   </CardContent>
                 </Card>
               ) : (
@@ -265,8 +276,8 @@ export function PatientPortal() {
                   ).includes(appointment.status)
                   const isCancellingThis = pendingCancelId === appointment.id
                   return (
-                    <Card key={appointment.id}>
-                      <CardContent className='pt-5 pb-4'>
+                    <Card key={appointment.id} className='py-4'>
+                      <CardContent>
                         <div className='flex items-start justify-between gap-3'>
                           <div className='space-y-1'>
                             <p className='leading-tight font-medium'>
@@ -274,7 +285,7 @@ export function PatientPortal() {
                             </p>
                             {spec && (
                               <p className='flex items-center gap-1 text-xs text-muted-foreground'>
-                                <Stethoscope className='size-3' />
+                                <Stethoscope aria-hidden="true" className='size-3' />
                                 {spec}
                               </p>
                             )}
@@ -315,7 +326,7 @@ export function PatientPortal() {
                               disabled={isCancellingThis}
                               aria-busy={isCancellingThis}
                             >
-                              <X className='size-3.5' />
+                              <X aria-hidden="true" className='size-3.5' />
                               {isCancellingThis ? 'Cancelling…' : 'Cancel'}
                             </Button>
                           )}
@@ -336,8 +347,8 @@ export function PatientPortal() {
                 {past.map((appointment) => {
                   const spec = getSpecialization(appointment)
                   return (
-                    <Card key={appointment.id}>
-                      <CardContent className='pt-5 pb-4'>
+                    <Card key={appointment.id} className='py-4'>
+                      <CardContent>
                         <div className='flex items-start justify-between gap-3'>
                           <div className='space-y-1'>
                             <p className='leading-tight font-medium'>
@@ -345,7 +356,7 @@ export function PatientPortal() {
                             </p>
                             {spec && (
                               <p className='flex items-center gap-1 text-xs text-muted-foreground'>
-                                <Stethoscope className='size-3' />
+                                <Stethoscope aria-hidden="true" className='size-3' />
                                 {spec}
                               </p>
                             )}
@@ -392,7 +403,7 @@ export function PatientPortal() {
 
         <Button className='self-start' asChild>
           <Link to='/book'>
-            <CalendarDays />
+            <CalendarDays aria-hidden="true" className='size-4' />
             Book an appointment
           </Link>
         </Button>

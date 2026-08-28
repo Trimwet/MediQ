@@ -198,7 +198,7 @@ export function GettingStartedChecklist() {
           <h3 className='text-sm font-semibold'>Getting started</h3>
           {allDone ? (
             <span className='flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400'>
-              <PartyPopper className='size-3.5' />
+              <PartyPopper aria-hidden="true" className='size-3.5' />
               All done!
             </span>
           ) : (
@@ -209,7 +209,14 @@ export function GettingStartedChecklist() {
         </div>
 
         {/* Progress bar */}
-        <div className='mb-4 h-1.5 w-full overflow-hidden rounded-full bg-muted'>
+        <div
+          role="progressbar"
+          aria-valuenow={pct}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label={`Getting started ${doneCount} of ${total} complete`}
+          className='mb-4 h-1.5 w-full overflow-hidden rounded-full bg-muted'
+        >
           <div
             className={cn(
               'h-full rounded-full transition-all duration-500 ease-out',
@@ -250,10 +257,10 @@ export function GettingStartedChecklist() {
                   <span className='flex size-5 shrink-0 items-center justify-center'>
                     {done ? (
                       <span className='flex size-5 items-center justify-center rounded-full bg-primary text-primary-foreground'>
-                        <Check className='size-3' strokeWidth={3} />
+                        <Check aria-hidden="true" className='size-3' strokeWidth={3} />
                       </span>
                     ) : (
-                      <Circle className='size-5 text-muted-foreground/40' />
+                      <Circle aria-hidden="true" className='size-5 text-muted-foreground/40' />
                     )}
                   </span>
 
