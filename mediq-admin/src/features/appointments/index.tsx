@@ -6,6 +6,7 @@ import {
   useRejectAppointment,
   useUpdateAppointmentStatus,
 } from '@/data/hooks'
+import { supabase } from '@/lib/supabase'
 import { CalendarPlus } from 'lucide-react'
 import { toast } from 'sonner'
 import { useRbac } from '@/hooks/use-rbac'
@@ -44,11 +45,31 @@ export function Appointments() {
   const visibleAppointments = appointmentsQuery.data ?? []
 
   function handleStatusChange(id: string, status: AppointmentStatus) {
+    const appointment = visibleAppointments.find((a) => a.id === id)
     updateStatus.mutate(
       { id, status },
       {
-        onSuccess: () =>
-          toast.success(`Appointment marked ${status.replace('_', ' ')}`),
+        onSuccess: async () => {
+          toast.success(`Appointment marked ${status.replace('_', ' ')}`)
+          if (status === 'arrived' && appointment) {
+            try {
+              const { data: clinicData } = await supabase
+                .from('appointments')
+                .select('clinic_id')
+                .eq('id', id)
+                .single()
+              const queueClinicId = (clinicData as Record<string, unknown>)?.clinic_id as string | undefined
+              await supabase.from('queue_entries').insert({
+                appointment_id: id,
+                patient_name: appointment.patientName,
+                appointment_time: appointment.scheduledFor,
+                doctor_name: appointment.doctorName,
+                clinic_id: queueClinicId,
+                status: 'waiting',
+              })
+            } catch {}
+          }
+        },
       }
     )
   }
@@ -61,7 +82,6 @@ export function Appointments() {
   }
 
   function handleApprove(appointment: Appointment) {
-    // Requests without a doctor need one assigned as part of the approval.
     if (!appointment.doctorId) {
       setApproveTarget(appointment)
       return
@@ -69,21 +89,71 @@ export function Appointments() {
     approve.mutate(
       { id: appointment.id },
       {
-        onSuccess: () =>
-          toast.success(`Request approved for ${appointment.patientName}`),
+        onSuccess: async () => {
+          toast.success(`Request approved for ${appointment.patientName}`)
+          // If approved appointment is for today, auto-add to queue so it appears in /admin/queue
+          const apptDate = new Date(appointment.scheduledFor)
+          const today = new Date()
+          const isToday =
+            apptDate.getDate() === today.getDate() &&
+            apptDate.getMonth() === today.getMonth() &&
+            apptDate.getFullYear() === today.getFullYear()
+          if (isToday) {
+            try {
+              const { data: clinicData } = await supabase
+                .from('appointments')
+                .select('clinic_id')
+                .eq('id', appointment.id)
+                .single()
+              const clinicId = (clinicData as Record<string, unknown>)?.clinic_id as string | undefined
+              await supabase.from('queue_entries').insert({
+                appointment_id: appointment.id,
+                patient_name: appointment.patientName,
+                appointment_time: appointment.scheduledFor,
+                doctor_name: appointment.doctorName,
+                clinic_id: clinicId,
+                status: 'waiting',
+              })
+            } catch {}
+          }
+        },
       }
     )
   }
 
   function handleApproveWithDoctor(doctorId: string, doctorName: string) {
     if (!approveTarget) return
+    const target = approveTarget
     approve.mutate(
-      { id: approveTarget.id, doctor: { id: doctorId, name: doctorName } },
+      { id: target.id, doctor: { id: doctorId, name: doctorName } },
       {
-        onSuccess: () =>
-          toast.success(
-            `Request approved for ${approveTarget.patientName} — assigned to ${doctorName}`
-          ),
+        onSuccess: async () => {
+          toast.success(`Request approved for ${target.patientName} — assigned to ${doctorName}`)
+          const apptDate = new Date(target.scheduledFor)
+          const today = new Date()
+          const isToday =
+            apptDate.getDate() === today.getDate() &&
+            apptDate.getMonth() === today.getMonth() &&
+            apptDate.getFullYear() === today.getFullYear()
+          if (isToday) {
+            try {
+              const { data: clinicData } = await supabase
+                .from('appointments')
+                .select('clinic_id')
+                .eq('id', target.id)
+                .single()
+              const clinicId = (clinicData as Record<string, unknown>)?.clinic_id as string | undefined
+              await supabase.from('queue_entries').insert({
+                appointment_id: target.id,
+                patient_name: target.patientName,
+                appointment_time: target.scheduledFor,
+                doctor_name: doctorName,
+                clinic_id: clinicId,
+                status: 'waiting',
+              })
+            } catch {}
+          }
+        },
       }
     )
     setApproveTarget(null)
