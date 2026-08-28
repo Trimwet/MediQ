@@ -94,8 +94,9 @@ export function PatientPortal() {
   const queuePosition = todayAppointment
     ? waitingQueue.findIndex(
         (e) =>
+          (e.appointmentId && e.appointmentId === todayAppointment.id) ||
           e.patientName.toLowerCase() ===
-          (todayAppointment.patientName ?? '').toLowerCase()
+            (todayAppointment.patientName ?? '').toLowerCase()
       )
     : -1
 

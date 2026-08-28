@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
+import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -57,8 +58,7 @@ export function AccountForm() {
 
   const handleDeleteAccount = () => {
     if (confirmText !== 'delete') return
-    setConfirmText('')
-    toast.success('Your account has been deleted.')
+    toast.info('Account deletion requires admin approval. Please contact your clinic admin.')
   }
 
   return (
@@ -73,9 +73,16 @@ export function AccountForm() {
         <CardContent>
           <Form {...passwordForm}>
             <form
-              onSubmit={passwordForm.handleSubmit(() => {
-                passwordForm.reset()
-                toast.success('Password updated')
+              onSubmit={passwordForm.handleSubmit(async (values) => {
+                const { error } = await supabase.auth.updateUser({
+                  password: values.newPassword,
+                })
+                if (error) {
+                  toast.error(error.message)
+                } else {
+                  toast.success('Password updated')
+                  passwordForm.reset()
+                }
               })}
               className='space-y-6'
             >
