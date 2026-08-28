@@ -1,0 +1,171 @@
+{
+  "directed": false,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "label": "getting-started-checklist.tsx",
+      "file_type": "code",
+      "source_file": "components/getting-started-checklist.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 0,
+      "norm_label": "getting-started-checklist.tsx",
+      "id": "components_getting_started_checklist",
+      "community_name": "Getting Started Checklist"
+    },
+    {
+      "label": "Task",
+      "file_type": "code",
+      "source_file": "components/getting-started-checklist.tsx",
+      "source_location": "L11",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 0,
+      "norm_label": "task",
+      "id": "components_getting_started_checklist_task",
+      "community_name": "Getting Started Checklist"
+    },
+    {
+      "label": "TASKS",
+      "file_type": "code",
+      "source_file": "components/getting-started-checklist.tsx",
+      "source_location": "L18",
+      "_origin": "ast",
+      "community": 0,
+      "norm_label": "tasks",
+      "id": "components_getting_started_checklist_tasks",
+      "community_name": "Getting Started Checklist"
+    },
+    {
+      "label": "GettingStartedChecklist()",
+      "file_type": "code",
+      "source_file": "components/getting-started-checklist.tsx",
+      "source_location": "L42",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "norm_label": "gettingstartedchecklist()",
+      "id": "components_getting_started_checklist_gettingstartedchecklist",
+      "community_name": "Getting Started Checklist"
+    },
+    {
+      "label": "index.tsx",
+      "file_type": "code",
+      "source_file": "index.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "index.tsx",
+      "id": "index",
+      "community_name": "index.tsx"
+    },
+    {
+      "label": "CANCELLABLE_STATUSES",
+      "file_type": "code",
+      "source_file": "index.tsx",
+      "source_location": "L35",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "cancellable_statuses",
+      "id": "index_cancellable_statuses",
+      "community_name": "index.tsx"
+    },
+    {
+      "label": "PatientPortal()",
+      "file_type": "code",
+      "source_file": "index.tsx",
+      "source_location": "L37",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "patientportal()",
+      "id": "index_patientportal",
+      "community_name": "index.tsx"
+    }
+  ],
+  "links": [
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "components/getting-started-checklist.tsx",
+      "source_location": "L42",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "components_getting_started_checklist",
+      "target": "components_getting_started_checklist_gettingstartedchecklist"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "components/getting-started-checklist.tsx",
+      "source_location": "L11",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "components_getting_started_checklist",
+      "target": "components_getting_started_checklist_task"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "components/getting-started-checklist.tsx",
+      "source_location": "L18",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "components_getting_started_checklist",
+      "target": "components_getting_started_checklist_tasks"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "index.tsx",
+      "source_location": "L33",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "components_getting_started_checklist"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "index.tsx",
+      "source_location": "L33",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "components_getting_started_checklist_gettingstartedchecklist"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "index.tsx",
+      "source_location": "L35",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "index_cancellable_statuses"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "index.tsx",
+      "source_location": "L37",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "index",
+      "target": "index_patientportal"
+    }
+  ],
+  "hyperedges": [],
+  "built_at_commit": "b71af318fb78257644c7d277c36d278cc5962715"
+}

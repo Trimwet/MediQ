@@ -6,6 +6,7 @@
  * from `useCurrentClinic()` — never from props or URL params.
  */
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
+import { hasRole } from '@/config/rbac'
 import { useAuthStore } from '@/stores/auth-store'
 import { supabase } from '@/lib/supabase'
 
@@ -95,6 +96,15 @@ export function ClinicProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (!memberships?.length) {
+        const currentRole = useAuthStore.getState().auth.user?.role ?? []
+        if (hasRole(currentRole, 'patient')) {
+          // Patients have no clinic_members row — not an error.
+          setClinic(null)
+          setAllClinics([])
+          setError(null)
+          setIsLoading(false)
+          return
+        }
         setError('No clinic assigned — contact your admin.')
         setIsLoading(false)
         return
@@ -153,6 +163,15 @@ export function ClinicProvider({ children }: { children: React.ReactNode }) {
       return
     }
 
+    // Patients have no clinic membership — skip clinic resolution entirely.
+    if (hasRole(user.role, 'patient')) {
+      setClinic(null)
+      setAllClinics([])
+      setError(null)
+      setIsLoading(false)
+      return
+    }
+
     // If the user already has a clinic in the auth store, use it immediately
     if (user.clinicId && user.clinicRole && user.clinicName) {
       // Set the clinic with real values if available from the allClinics list,
@@ -189,7 +208,7 @@ export function ClinicProvider({ children }: { children: React.ReactNode }) {
     } else {
       setIsLoading(false)
     }
-  }, [user, fetchMemberships])
+  }, [user, fetchMemberships, allClinics])
 
   function switchClinic(newClinicId: string) {
     const target = allClinics.find((c) => c.clinicId === newClinicId)

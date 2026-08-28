@@ -1,7 +1,6 @@
-import { useEffect } from 'react'
+import { useState } from 'react'
 import { format, isToday } from 'date-fns'
 import { Link, useNavigate } from '@tanstack/react-router'
-import { hasRole } from '@/config/rbac'
 import {
   useAppointments,
   useCancelAppointment,
@@ -20,6 +19,16 @@ import { toast } from 'sonner'
 import { Logo } from '@/assets/logo'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/auth-store'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -32,7 +41,7 @@ import {
 } from '@/features/appointments/schema'
 import { GettingStartedChecklist } from './components/getting-started-checklist'
 
-const CANCELLABLE_STATUSES = ['pending', 'booked'] as const
+const CANCELLABLE_STATUSES = ['pending', 'booked', 'arrived'] as const
 
 export function PatientPortal() {
   const navigate = useNavigate()
@@ -44,17 +53,10 @@ export function PatientPortal() {
   const doctorsQuery = useDoctors()
   const cancelAppointment = useCancelAppointment()
 
-  // Route guard: signed in as a patient only.
-  useEffect(() => {
-    if (!user) {
-      navigate({ to: '/sign-in', replace: true })
-      return
-    }
-    if (!hasRole(user.role, 'patient')) {
-      navigate({ to: '/', replace: true })
-    }
-  }, [user, navigate])
+  const [pendingCancelId, setPendingCancelId] = useState<string | null>(null)
+  const [confirmId, setConfirmId] = useState<string | null>(null)
 
+  // Auth is enforced in src/routes/patient.tsx beforeLoad — keep a null fallback for the brief store hydration window.
   if (!user) return null
 
   const myAppointments = (appointmentsQuery.data ?? []).filter(
@@ -91,7 +93,7 @@ export function PatientPortal() {
     (e) => e.status === 'waiting'
   )
 
-  const queuePosition = todayAppointment
+  const rawQueuePosition = todayAppointment
     ? waitingQueue.findIndex(
         (e) =>
           (e.appointmentId && e.appointmentId === todayAppointment.id) ||
@@ -99,6 +101,15 @@ export function PatientPortal() {
             (todayAppointment.patientName ?? '').toLowerCase()
       )
     : -1
+
+  // C3 fallback: queue RLS has no patient branch — if appointment status itself indicates queued, show #1.
+  const queuePosition =
+    rawQueuePosition >= 0
+      ? rawQueuePosition
+      : todayAppointment &&
+          ['arrived', 'waiting', 'in_progress'].includes(todayAppointment.status)
+        ? 0
+        : -1
 
   function getSpecialization(appointment: Appointment) {
     return doctorsQuery.data?.find((d) => d.id === appointment.doctorId)
@@ -110,12 +121,19 @@ export function PatientPortal() {
       toast.error('You can only cancel your own appointments.')
       return
     }
-    if (confirm('Are you sure you want to cancel this appointment?')) {
-      cancelAppointment.mutate(id, {
-        onSuccess: () => toast.success('Appointment cancelled.'),
-        onError: () => toast.error('Failed to cancel appointment.'),
-      })
-    }
+    setConfirmId(id)
+  }
+
+  function handleConfirmCancel() {
+    if (!confirmId) return
+    const id = confirmId
+    setPendingCancelId(id)
+    setConfirmId(null)
+    cancelAppointment.mutate(id, {
+      onSuccess: () => toast.success('Appointment cancelled.'),
+      onError: () => toast.error('Failed to cancel appointment.'),
+      onSettled: () => setPendingCancelId(null),
+    })
   }
 
   function handleSignOut() {
@@ -124,6 +142,9 @@ export function PatientPortal() {
       navigate({ to: '/', replace: true })
     })
   }
+
+  const isLoadingAppointments = appointmentsQuery.isPending
+  const isErrorAppointments = appointmentsQuery.isError
 
   return (
     <div className='min-h-svh bg-muted/40'>
@@ -160,7 +181,7 @@ export function PatientPortal() {
       <main className='mx-auto flex max-w-2xl flex-col gap-8 px-4 py-10 sm:px-6'>
         {/* Queue position banner — only when they're in today's queue */}
         {todayAppointment && queuePosition >= 0 && (
-          <div id='patient-queue-banner' className='rounded-lg border bg-background p-4'>
+          <div id='patient-queue-waiting' data-testid='patient-queue-banner' className='rounded-lg border bg-background p-4'>
             <div className='flex items-start justify-between gap-4'>
               <div className='space-y-0.5'>
                 <p className='text-xs font-medium tracking-wide text-muted-foreground uppercase'>
@@ -186,7 +207,7 @@ export function PatientPortal() {
 
         {/* In-progress banner */}
         {todayAppointment?.status === 'in_progress' && (
-          <div id='patient-queue-banner' className='rounded-lg border bg-background p-4'>
+          <div id='patient-queue-inprogress' data-testid='patient-queue-banner-inprogress' className='rounded-lg border bg-background p-4'>
             <p className='text-xs font-medium tracking-wide text-muted-foreground uppercase'>
               Currently with doctor
             </p>
@@ -207,7 +228,16 @@ export function PatientPortal() {
         {/* Getting started checklist */}
         <GettingStartedChecklist />
 
-        {appointmentsQuery.isPending ? (
+        {isErrorAppointments ? (
+          <Card>
+            <CardContent className='py-8 text-center'>
+              <p className='text-sm text-destructive'>Failed to load appointments. {String((appointmentsQuery.error as Error)?.message ?? '')}</p>
+              <Button variant='outline' size='sm' className='mt-3' onClick={() => appointmentsQuery.refetch()}>
+                Retry
+              </Button>
+            </CardContent>
+          </Card>
+        ) : isLoadingAppointments ? (
           <div className='space-y-3'>
             {Array.from({ length: 3 }).map((_, i) => (
               <Skeleton key={i} className='h-24 w-full' />
@@ -233,6 +263,7 @@ export function PatientPortal() {
                   const canCancel = (
                     CANCELLABLE_STATUSES as readonly string[]
                   ).includes(appointment.status)
+                  const isCancellingThis = pendingCancelId === appointment.id
                   return (
                     <Card key={appointment.id}>
                       <CardContent className='pt-5 pb-4'>
@@ -281,10 +312,11 @@ export function PatientPortal() {
                               size='sm'
                               className='shrink-0 text-muted-foreground hover:text-destructive'
                               onClick={() => handleCancel(appointment.id)}
-                              disabled={cancelAppointment.isPending}
+                              disabled={isCancellingThis}
+                              aria-busy={isCancellingThis}
                             >
                               <X className='size-3.5' />
-                              Cancel
+                              {isCancellingThis ? 'Cancelling…' : 'Cancel'}
                             </Button>
                           )}
                         </div>
@@ -365,6 +397,23 @@ export function PatientPortal() {
           </Link>
         </Button>
       </main>
+
+      <AlertDialog open={!!confirmId} onOpenChange={(open) => !open && setConfirmId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel appointment?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will cancel your appointment. You can book a new one afterwards. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setConfirmId(null)}>Keep appointment</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmCancel} className='bg-destructive text-destructive-foreground hover:bg-destructive/90'>
+              Cancel appointment
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

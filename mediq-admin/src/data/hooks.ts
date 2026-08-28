@@ -49,11 +49,41 @@ function useDoctorIdentity() {
 
 export function useAppointments() {
   const { clinicId } = useCurrentClinic()
+  const user = useAuthStore((s) => s.auth.user)
+  const isPatient = hasRole(user?.role ?? [], 'patient')
   return useQuery({
-    queryKey: ['appointments', clinicId ?? 'none'],
-    queryFn: () => appointmentsRepository.list(clinicId ?? undefined),
-    enabled: !!clinicId,
+    queryKey: isPatient
+      ? ['appointments', 'patient', user?.email?.toLowerCase() ?? 'none']
+      : ['appointments', clinicId ?? 'none'],
+    queryFn: async () => {
+      if (isPatient) {
+        if (!user?.email) return []
+        const { data, error } = await supabase
+          .from('appointments')
+          .select('*')
+          .ilike('patient_email', user.email)
+          .order('scheduled_for', { ascending: false })
+        if (error) throw error
+        return (data ?? []).map((row: Record<string, unknown>) => ({
+          id: String(row.id),
+          patientName: String(row.patient_name),
+          patientEmail: row.patient_email ? String(row.patient_email) : undefined,
+          doctorId: row.doctor_id ? String(row.doctor_id) : '',
+          doctorName: row.doctor_name ? String(row.doctor_name) : '',
+          scheduledFor: String(row.scheduled_for),
+          status: String(row.status) as AppointmentStatus,
+          reason: row.reason ? String(row.reason) : undefined,
+          rejectionReason: row.rejection_reason ? String(row.rejection_reason) : undefined,
+        })) as Appointment[]
+      }
+      return appointmentsRepository.list(clinicId ?? undefined)
+    },
+    enabled: isPatient ? !!user?.email : !!clinicId,
   })
+}
+
+export function usePatientAppointments() {
+  return useAppointments()
 }
 
 export function useCreateAppointment() {
@@ -212,12 +242,36 @@ export function useRejectAppointment() {
 export function useCancelAppointment() {
   const queryClient = useQueryClient()
   const { clinicId } = useCurrentClinic()
+  const user = useAuthStore((s) => s.auth.user)
+  const isPatient = hasRole(user?.role ?? [], 'patient')
   return useMutation({
-    mutationFn: (id: string) => {
+    mutationFn: async (id: string) => {
+      if (isPatient) {
+        // Patient cancel bypasses clinic_id filter — RLS allows patient_email match with status='cancelled'.
+        const { error } = await supabase.from('appointments').update({ status: 'cancelled' }).eq('id', id)
+        if (error) throw error
+        return
+      }
       if (!clinicId) throw new Error('Missing clinic context')
       return appointmentsRepository.updateStatus(id, 'cancelled', clinicId)
     },
-    onSuccess: () => {
+    onMutate: async (id: string) => {
+      const key: readonly unknown[] = isPatient
+        ? (['appointments', 'patient', user?.email?.toLowerCase() ?? 'none'] as const)
+        : (['appointments', clinicId ?? 'none'] as const)
+      await queryClient.cancelQueries({ queryKey: key as string[] })
+      const previous = queryClient.getQueryData<Appointment[]>(key as string[])
+      queryClient.setQueryData<Appointment[]>(key as string[], (old) =>
+        (old ?? []).map((a) => (a.id === id ? { ...a, status: 'cancelled' as AppointmentStatus } : a))
+      )
+      return { previous, key }
+    },
+    onError: (_err, _id, ctx) => {
+      if (ctx?.previous && ctx?.key) {
+        queryClient.setQueryData(ctx.key as string[], ctx.previous)
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['appointments'] })
       queryClient.invalidateQueries({ queryKey: ['queue'] })
     },
@@ -298,16 +352,48 @@ export function useBookAppointment() {
 export function useQueue() {
   const { clinicId } = useCurrentClinic()
   const { isDoctor, doctor } = useDoctorIdentity()
+  const user = useAuthStore((s) => s.auth.user)
+  const isPatient = hasRole(user?.role ?? [], 'patient')
   return useQuery({
-    queryKey: ['queue', clinicId ?? 'none', doctor?.id ?? (isDoctor ? 'unresolved' : 'all')],
-    enabled: !!clinicId,
+    queryKey: isPatient
+      ? ['queue', 'patient', user?.email?.toLowerCase() ?? 'none']
+      : ['queue', clinicId ?? 'none', doctor?.id ?? (isDoctor ? 'unresolved' : 'all')],
+    enabled: isPatient ? !!user?.email : !!clinicId,
     queryFn: async () => {
+      if (isPatient) {
+        // Queue RLS has no patient branch yet — primary fallback is appointment status (see checklist).
+        // Try a clinic-less fetch so that when RLS gains a patient branch data appears without code change.
+        try {
+          const { data, error } = await supabase
+            .from('queue_entries')
+            .select('*, rooms!queue_entries_room_id_fkey(number)')
+            .order('checked_in_at', { ascending: true })
+            .limit(50)
+          if (!error && data?.length) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            return (data as any[]).map((row: Record<string, unknown>) => {
+              const rooms = row.rooms as { number: string } | null
+              return {
+                id: String(row.id),
+                appointmentId: row.appointment_id ? String(row.appointment_id) : undefined,
+                patientName: String(row.patient_name),
+                appointmentTime: String(row.appointment_time),
+                checkedInAt: String(row.checked_in_at),
+                calledAt: row.called_at ? String(row.called_at) : undefined,
+                doctorName: String(row.doctor_name),
+                room: rooms?.number ? String(rooms.number) : undefined,
+                status: String(row.status) as import('@/features/queue/schema').QueueEntry['status'],
+              }
+            })
+          }
+        } catch {
+          // fall through to empty
+        }
+        return []
+      }
       const all = await queueRepository.list(clinicId ?? undefined)
       if (!isDoctor) return all
       if (!doctor) return []
-      // Prefer matching by appointmentId → doctor.id for accuracy.
-      // Fall back to doctorName string match for queue entries without an
-      // appointmentId (e.g. walk-ins added directly to the queue).
       return all.filter((e) => {
         if (e.doctorName === doctor.name) return true
         return false
@@ -394,10 +480,27 @@ export function useCreatePatient() {
 
 export function useDoctors() {
   const { clinicId } = useCurrentClinic()
+  const user = useAuthStore((s) => s.auth.user)
+  const isPatient = hasRole(user?.role ?? [], 'patient')
   return useQuery({
-    queryKey: ['doctors', clinicId ?? 'none'],
-    queryFn: () => doctorsRepository.list(clinicId ?? undefined),
-    enabled: !!clinicId,
+    queryKey: isPatient ? ['doctors', 'patient'] : ['doctors', clinicId ?? 'none'],
+    queryFn: async () => {
+      if (isPatient) {
+        // Patients need doctor specialization for display; use the public RPC which works without clinic scope.
+        const { data, error } = await supabase.rpc('list_public_doctors', {})
+        if (error) throw error
+        return (data ?? []).map((d: Record<string, unknown>) => ({
+          id: String(d.id),
+          name: String(d.name),
+          specialization: String(d.specialization),
+          email: '',
+          status: 'active' as DoctorStatus,
+          todayAppointments: 0,
+        })) as Doctor[]
+      }
+      return doctorsRepository.list(clinicId ?? undefined)
+    },
+    enabled: isPatient || !!clinicId,
   })
 }
 

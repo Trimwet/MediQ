@@ -1,0 +1,49 @@
+{
+  "communities": {
+    "0": [
+      "components_getting_started_checklist",
+      "components_getting_started_checklist_gettingstartedchecklist",
+      "components_getting_started_checklist_task",
+      "components_getting_started_checklist_tasks"
+    ],
+    "1": [
+      "index",
+      "index_cancellable_statuses",
+      "index_patientportal"
+    ]
+  },
+  "cohesion": {
+    "0": 0.5,
+    "1": 0.6666666666666666
+  },
+  "gods": [
+    {
+      "id": "components_getting_started_checklist_gettingstartedchecklist",
+      "label": "GettingStartedChecklist()",
+      "degree": 2
+    },
+    {
+      "id": "components_getting_started_checklist_task",
+      "label": "Task",
+      "degree": 1
+    },
+    {
+      "id": "components_getting_started_checklist_tasks",
+      "label": "TASKS",
+      "degree": 1
+    },
+    {
+      "id": "index_cancellable_statuses",
+      "label": "CANCELLABLE_STATUSES",
+      "degree": 1
+    }
+  ],
+  "surprises": [],
+  "questions": [
+    {
+      "type": "isolated_nodes",
+      "question": "What connects `Task`, `TASKS`, `CANCELLABLE_STATUSES` to the rest of the system?",
+      "why": "3 weakly-connected nodes found - possible documentation gaps or missing edges."
+    }
+  ]
+}

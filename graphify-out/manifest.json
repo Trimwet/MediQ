@@ -1,0 +1,12 @@
+{
+  "components/getting-started-checklist.tsx": {
+    "mtime": 1787953845.871899,
+    "ast_hash": "2ddf6d895d907ab1f70a0a20d1de2bec",
+    "semantic_hash": "2ddf6d895d907ab1f70a0a20d1de2bec"
+  },
+  "index.tsx": {
+    "mtime": 1787946477.8715987,
+    "ast_hash": "50a1edf09695947333af01f90fb199e5",
+    "semantic_hash": "50a1edf09695947333af01f90fb199e5"
+  }
+}
