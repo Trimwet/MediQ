@@ -64,8 +64,9 @@ export function GettingStartedChecklist() {
 
   // Derive appointment status — for patients, ANY appointment they can see counts
   // (RLS already scopes to their own rows, so any row in appointmentsQuery is theirs).
+  // Also handles booking-method: patient books via /book then creates account with same email —
+  // localStorage flag ensures it marks done even before the query round-trips.
   const userEmail = user?.email?.toLowerCase() ?? ''
-  // Use full_name from auth store if available, else email prefix
   const userName =
     ((user as unknown as { name?: string })?.name ?? user?.email?.split('@')[0] ?? '').toLowerCase()
   const allAppointments = appointmentsQuery.data ?? []
@@ -74,9 +75,20 @@ export function GettingStartedChecklist() {
     const nameMatch = !!userName && a.patientName?.toLowerCase() === userName
     return emailMatch || nameMatch
   })
+  const hasLocalBookingFlag = (() => {
+    try {
+      if (localStorage.getItem('mediq_has_booked') === 'true') {
+        const bookedEmail = localStorage.getItem('mediq_has_booked_email')
+        if (!bookedEmail) return true
+        return bookedEmail.toLowerCase() === userEmail
+      }
+    } catch {}
+    return false
+  })()
   // Robust: if RLS already filtered to only their rows, any row counts as "booked"
   // Also handle case where they booked via /book with a different email — any upcoming counts
   const hasAppointment =
+    hasLocalBookingFlag ||
     myAppointments.length > 0 ||
     allAppointments.length > 0 ||
     (appointmentsQuery.data ?? []).some(

@@ -146,6 +146,12 @@ export function Booking() {
       },
       {
         onSuccess: (bookingResult) => {
+          try {
+            localStorage.setItem('mediq_has_booked', 'true')
+            if (bookingResult?.appointment?.patientEmail) {
+              localStorage.setItem('mediq_has_booked_email', String(bookingResult.appointment.patientEmail).toLowerCase())
+            }
+          } catch {}
           setResult(bookingResult)
           form.reset()
         },
