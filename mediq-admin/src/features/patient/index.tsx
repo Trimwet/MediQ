@@ -155,7 +155,7 @@ export function PatientPortal() {
       <main className='mx-auto flex max-w-2xl flex-col gap-8 px-4 py-10 sm:px-6'>
         {/* Queue position banner — only when they're in today's queue */}
         {todayAppointment && queuePosition >= 0 && (
-          <div className='rounded-lg border bg-background p-4'>
+          <div id='patient-queue-banner' className='rounded-lg border bg-background p-4'>
             <div className='flex items-start justify-between gap-4'>
               <div className='space-y-0.5'>
                 <p className='text-xs font-medium tracking-wide text-muted-foreground uppercase'>
@@ -181,7 +181,7 @@ export function PatientPortal() {
 
         {/* In-progress banner */}
         {todayAppointment?.status === 'in_progress' && (
-          <div className='rounded-lg border bg-background p-4'>
+          <div id='patient-queue-banner' className='rounded-lg border bg-background p-4'>
             <p className='text-xs font-medium tracking-wide text-muted-foreground uppercase'>
               Currently with doctor
             </p>

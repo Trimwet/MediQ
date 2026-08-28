@@ -172,15 +172,35 @@ export function GettingStartedChecklist() {
         <ul className='space-y-1'>
           {TASKS.map((task) => {
             const done = isDone(task.id)
+            const isClickable = !!task.href || task.id === 'queue'
             return (
               <li key={task.id}>
                 <div
+                  role={isClickable ? 'button' : undefined}
+                  tabIndex={isClickable ? 0 : undefined}
+                  onClick={() => {
+                    if (task.id === 'queue') {
+                      const el = document.getElementById('patient-queue-banner')
+                      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                      else window.scrollTo({ top: 0, behavior: 'smooth' })
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      if (task.id === 'queue') {
+                        const el = document.getElementById('patient-queue-banner')
+                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                      }
+                    }
+                  }}
                   className={cn(
                     'flex w-full items-center gap-3 rounded-md px-2 py-2 text-sm',
-                    // Show pointer + hover only for tasks with a navigable link
-                    task.href && !done
+                    isClickable && !done
                       ? 'cursor-pointer transition-colors hover:bg-muted/60'
-                      : ''
+                      : isClickable && done
+                        ? 'cursor-pointer transition-colors hover:bg-muted/40'
+                        : ''
                   )}
                 >
                   {/* Marker */}
@@ -205,14 +225,34 @@ export function GettingStartedChecklist() {
                     {task.label}
                   </span>
 
-                  {/* Action link — hidden when done or when no href */}
-                  {!done && task.href && (
-                    <Link
-                      to={task.href}
-                      className='shrink-0 text-xs font-medium text-primary underline-offset-2 hover:underline'
+                  {/* Action — queue row shows "View" that scrolls; others show Go */}
+                  {task.id === 'queue' ? (
+                    <button
+                      type='button'
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        const el = document.getElementById('patient-queue-banner')
+                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                        else window.scrollTo({ top: 0, behavior: 'smooth' })
+                      }}
+                      className={cn(
+                        'shrink-0 text-xs font-medium underline-offset-2 hover:underline',
+                        done ? 'text-muted-foreground' : 'text-primary'
+                      )}
                     >
-                      Go
-                    </Link>
+                      {done ? 'View' : 'View'}
+                    </button>
+                  ) : (
+                    !done &&
+                    task.href && (
+                      <Link
+                        to={task.href}
+                        onClick={(e) => e.stopPropagation()}
+                        className='shrink-0 text-xs font-medium text-primary underline-offset-2 hover:underline'
+                      >
+                        Go
+                      </Link>
+                    )
                   )}
                 </div>
               </li>
