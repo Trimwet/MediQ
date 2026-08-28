@@ -92,7 +92,7 @@ export function Dashboard() {
    */
   const isDoctor = user?.role.includes('doctor')
   const doctor = isDoctor
-    ? doctors.find((d) => d.email === user?.email)
+    ? doctors.find((d) => d.email?.toLowerCase() === user?.email?.toLowerCase())
     : undefined
   const ownAppointments = useMemo(
     () =>
@@ -268,10 +268,12 @@ export function Dashboard() {
       <Header>
         <HeaderNav active='overview' />
         <Search />
-        <NotificationBell />
-        <ThemeSwitch />
-        <ConfigDrawer />
-        <ProfileDropdown />
+        <div className='ms-auto flex items-center gap-3 sm:gap-4'>
+          <NotificationBell />
+          <ThemeSwitch />
+          <ConfigDrawer />
+          <ProfileDropdown />
+        </div>
       </Header>
 
       <Main className='flex flex-1 flex-col gap-4 sm:gap-6'>

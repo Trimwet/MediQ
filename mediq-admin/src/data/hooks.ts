@@ -517,7 +517,9 @@ function useRealtimeTable(
   table: string,
   queryKey: string[],
   /** Only invalidate when the row matches this filter. Omit for all changes. */
-  filter?: { column: string; value: string }
+  filter?: { column: string; value: string },
+  /** Scope realtime to a specific clinic. Omit for all clinics. */
+  clinicId?: string | null
 ) {
   const queryClient = useQueryClient()
 
@@ -530,6 +532,7 @@ function useRealtimeTable(
           event: '*',
           schema: 'public',
           table,
+          ...(clinicId ? { filter: `clinic_id=eq.${clinicId}` } : {}),
           ...(filter ? { filter: `${filter.column}=eq.${filter.value}` } : {}),
         },
         () => {
@@ -541,24 +544,28 @@ function useRealtimeTable(
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [table, queryKey.join('/'), queryClient, filter])
+  }, [table, queryKey.join('/'), queryClient, filter, clinicId])
 }
 
 /** Subscribe to queue changes for live updates on the front desk and doctor views. */
 export function useRealtimeQueue(doctorName?: string) {
+  const { clinicId } = useCurrentClinic()
   useRealtimeTable(
     'queue_entries',
     ['queue'],
-    doctorName ? { column: 'doctor_name', value: doctorName } : undefined
+    doctorName ? { column: 'doctor_name', value: doctorName } : undefined,
+    clinicId
   )
 }
 
 /** Subscribe to appointment changes for live updates. */
 export function useRealtimeAppointments() {
-  useRealtimeTable('appointments', ['appointments'])
+  const { clinicId } = useCurrentClinic()
+  useRealtimeTable('appointments', ['appointments'], undefined, clinicId)
 }
 
 /** Subscribe to notification changes for the live bell. */
 export function useRealtimeNotifications() {
-  useRealtimeTable('notifications', ['notifications'])
+  const { clinicId } = useCurrentClinic()
+  useRealtimeTable('notifications', ['notifications'], undefined, clinicId)
 }
