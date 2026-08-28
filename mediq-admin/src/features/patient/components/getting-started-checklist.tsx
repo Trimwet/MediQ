@@ -202,24 +202,6 @@ export function GettingStartedChecklist() {
             return (
               <li key={task.id}>
                 <div
-                  role={isClickable ? 'button' : undefined}
-                  tabIndex={isClickable ? 0 : undefined}
-                  onClick={() => {
-                    if (task.id === 'queue') {
-                      const el = document.getElementById('patient-queue-banner')
-                      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                      else window.scrollTo({ top: 0, behavior: 'smooth' })
-                    }
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault()
-                      if (task.id === 'queue') {
-                        const el = document.getElementById('patient-queue-banner')
-                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                      }
-                    }
-                  }}
                   className={cn(
                     'flex w-full items-center gap-3 rounded-md px-2 py-2 text-sm',
                     isClickable && !done
@@ -228,6 +210,13 @@ export function GettingStartedChecklist() {
                         ? 'cursor-pointer transition-colors hover:bg-muted/40'
                         : ''
                   )}
+                  onClick={() => {
+                    if (task.id === 'queue') {
+                      const el = document.getElementById('patient-queue-banner')
+                      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                      else window.scrollTo({ top: 0, behavior: 'smooth' })
+                    }
+                  }}
                 >
                   {/* Marker */}
                   <span className='flex size-5 shrink-0 items-center justify-center'>

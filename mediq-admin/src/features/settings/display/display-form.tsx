@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
@@ -48,6 +48,8 @@ const dateFormats = ['DD/MM/YYYY', 'MM/DD/YYYY', 'YYYY-MM-DD']
 
 const itemsPerPageOptions = ['10', '25', '50', '100']
 
+const STORAGE_KEY = 'mediq_display_prefs'
+
 export function DisplayForm() {
   const [language, setLanguage] = useState('en')
   const [timezone, setTimezone] = useState('Africa/Lagos')
@@ -55,8 +57,27 @@ export function DisplayForm() {
   const [use24Hour, setUse24Hour] = useState(false)
   const [itemsPerPage, setItemsPerPage] = useState('25')
 
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY)
+      if (!raw) return
+      const prefs = JSON.parse(raw) as Record<string, unknown>
+      if (typeof prefs.language === 'string') setLanguage(prefs.language)
+      if (typeof prefs.timezone === 'string') setTimezone(prefs.timezone)
+      if (typeof prefs.dateFormat === 'string') setDateFormat(prefs.dateFormat)
+      if (typeof prefs.use24Hour === 'boolean') setUse24Hour(prefs.use24Hour)
+      if (typeof prefs.itemsPerPage === 'string') setItemsPerPage(prefs.itemsPerPage)
+    } catch {}
+  }, [])
+
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    try {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({ language, timezone, dateFormat, use24Hour, itemsPerPage })
+      )
+    } catch {}
     toast.success('Display preferences updated')
   }
 

@@ -118,6 +118,7 @@ export function PricingSection() {
             </span>
             <Switch
               id={id}
+              aria-label='Toggle billing period'
               checked={billing === 'yearly'}
               className='bg-muted data-[state=checked]:bg-primary'
               onCheckedChange={(checked: boolean) =>
@@ -227,7 +228,7 @@ export function PricingSection() {
                       : 'text-muted-foreground'
                   )}
                 >
-                  /{billing === 'monthly' ? 'mo' : 'yr'}
+                  /mo{billing === 'yearly' && <span className='ms-1 text-xs'>billed yearly</span>}
                 </span>
               </div>
 
