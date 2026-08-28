@@ -172,9 +172,30 @@ export function Booking() {
       {
         onSuccess: (bookingResult) => {
           try {
+            const emailLower = bookingResult?.appointment?.patientEmail
+              ? String(bookingResult.appointment.patientEmail).toLowerCase()
+              : String(values.email).toLowerCase()
+            const now = Date.now()
+            // Legacy global keys (kept for backward compat)
             localStorage.setItem('mediq_has_booked', 'true')
-            if (bookingResult?.appointment?.patientEmail) {
-              localStorage.setItem('mediq_has_booked_email', String(bookingResult.appointment.patientEmail).toLowerCase())
+            if (emailLower) {
+              localStorage.setItem('mediq_has_booked_email', emailLower)
+            }
+            localStorage.setItem('mediq_has_booked_at', String(now))
+            // Clinic-scoped keys with email and expiry
+            if (clinicId && emailLower) {
+              localStorage.setItem(
+                `mediq_has_booked:${clinicId}`,
+                JSON.stringify({ email: emailLower, at: now })
+              )
+              localStorage.setItem(`mediq_has_booked:${clinicId}:${emailLower}`, 'true')
+              localStorage.setItem(`mediq_has_booked_at:${clinicId}`, String(now))
+              localStorage.setItem(`mediq_has_booked_at:${clinicId}:${emailLower}`, String(now))
+              localStorage.setItem(`mediq_has_booked_email:${clinicId}`, emailLower)
+            } else if (emailLower) {
+              // No clinicId (default clinic) — still scope by email with timestamp
+              localStorage.setItem(`mediq_has_booked:${emailLower}`, 'true')
+              localStorage.setItem(`mediq_has_booked_at:${emailLower}`, String(now))
             }
           } catch {}
           setResult(bookingResult)

@@ -4,6 +4,7 @@ import { Check, Circle, PartyPopper } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/auth-store'
+import { useCurrentClinic } from '@/lib/clinic-context'
 import { useAppointments, useQueue } from '@/data/hooks'
 import { Card, CardContent } from '@/components/ui/card'
 
@@ -63,13 +64,11 @@ export function GettingStartedChecklist() {
       })
   }, [user?.accountNo, user?.email])
 
-  // Derive appointment status — for patients, ANY appointment they can see counts
-  // (RLS already scopes to their own rows, so any row in appointmentsQuery is theirs).
-  // Also handles booking-method: patient books via /book then creates account with same email —
-  // localStorage flag ensures it marks done even before the query round-trips.
+  // Derive appointment status — strict email/name match only, clinic-scoped.
   const userEmail = user?.email?.toLowerCase() ?? ''
   const userName =
     ((user as unknown as { name?: string })?.name ?? user?.email?.split('@')[0] ?? '').toLowerCase()
+  const { clinicId } = useCurrentClinic()
   const allAppointments = appointmentsQuery.data ?? []
   const myAppointments = allAppointments.filter((a) => {
     const emailMatch = !!userEmail && a.patientEmail?.toLowerCase() === userEmail
@@ -78,36 +77,63 @@ export function GettingStartedChecklist() {
   })
   const hasLocalBookingFlag = (() => {
     try {
-      if (localStorage.getItem('mediq_has_booked') === 'true') {
-        const bookedEmail = localStorage.getItem('mediq_has_booked_email')
-        if (!bookedEmail) return true
-        return bookedEmail.toLowerCase() === userEmail
+      if (!clinicId || !userEmail) return false
+      const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000
+      const scopedKey = `mediq_has_booked:${clinicId}`
+      const raw = localStorage.getItem(scopedKey)
+      if (raw) {
+        try {
+          const obj = JSON.parse(raw)
+          if (obj && typeof obj.email === 'string' && typeof obj.at === 'number') {
+            if (obj.email.toLowerCase() !== userEmail) return false
+            if (Date.now() - obj.at > SEVEN_DAYS_MS) return false
+            return true
+          }
+        } catch {}
+        if (raw === 'true') {
+          const bookedEmail = localStorage.getItem(`mediq_has_booked_email:${clinicId}`)
+          if (bookedEmail && bookedEmail.toLowerCase() !== userEmail) return false
+          const atRaw = localStorage.getItem(`mediq_has_booked_at:${clinicId}`)
+          if (atRaw) {
+            const at = Number(atRaw)
+            if (!Number.isNaN(at) && Date.now() - at > SEVEN_DAYS_MS) return false
+          }
+          return true
+        }
       }
-    } catch {}
-    return false
+      const emailScopedKey = `mediq_has_booked:${clinicId}:${userEmail}`
+      if (localStorage.getItem(emailScopedKey) === 'true') {
+        const atRaw = localStorage.getItem(`mediq_has_booked_at:${clinicId}:${userEmail}`)
+        if (atRaw) {
+          const at = Number(atRaw)
+          if (!Number.isNaN(at) && Date.now() - at > SEVEN_DAYS_MS) return false
+        }
+        return true
+      }
+      return false
+    } catch {
+      return false
+    }
   })()
-  // Robust: if RLS already filtered to only their rows, any row counts as "booked"
-  // Also handle case where they booked via /book with a different email — any upcoming counts
-  const hasAppointment =
-    hasLocalBookingFlag ||
-    myAppointments.length > 0 ||
-    allAppointments.length > 0 ||
-    (appointmentsQuery.data ?? []).some(
-      (a) => !['completed', 'cancelled', 'no_show', 'rejected'].includes(a.status)
-    )
+  // Strict: only myAppointments counts — no allAppointments fallback
+  const hasAppointment = hasLocalBookingFlag || myAppointments.length > 0
 
-  // Derive queue status — true if patient has checked in or is in queue
-  const hasQueue =
-    (queueQuery.data ?? []).some((entry) => {
-      const name = entry.patientName?.toLowerCase()
-      return myAppointments.some(
+  // Derive queue status — only via actual queue entry, only arrived/in_progress/waiting
+  const hasQueue = (queueQuery.data ?? []).some((entry) => {
+    const entryName = entry.patientName?.toLowerCase()
+    const isUserEntry =
+      myAppointments.some(
         (a) =>
-          a.patientName?.toLowerCase() === name &&
-          ['arrived', 'in_progress', 'waiting', 'called'].includes(a.status)
-      )
-    }) ||
-    // Fallback: if they have any booked/arrived appointment, they've engaged with queue flow
-    myAppointments.some((a) => ['booked', 'arrived', 'in_progress', 'waiting', 'called'].includes(a.status))
+          (entry.appointmentId && entry.appointmentId === a.id) ||
+          a.patientName?.toLowerCase() === entryName
+      ) || entryName === userName
+    if (!isUserEntry) return false
+    if (entry.status === 'waiting') return true
+    const linked = myAppointments.find((a) => a.id === entry.appointmentId)
+    if (linked && ['arrived', 'in_progress', 'waiting'].includes(linked.status)) return true
+    if (['arrived', 'in_progress', 'waiting'].includes(entry.status as string)) return true
+    return false
+  })
 
   // If signed in, password is set
   const hasPassword = !!user

@@ -192,11 +192,13 @@ export const appointmentsRepository: AppointmentsRepository = {
     )
   },
 
-  async updateStatus(id, status) {
+  async updateStatus(id: string, status: AppointmentStatus, clinicId?: string) {
+    if (!clinicId) throw new Error('Missing clinic context')
     const { error } = await supabase
       .from('appointments')
       .update({ status })
       .eq('id', id)
+      .eq('clinic_id', clinicId)
 
     if (error) throw error
   },

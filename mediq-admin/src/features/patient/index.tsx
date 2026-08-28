@@ -106,6 +106,10 @@ export function PatientPortal() {
   }
 
   function handleCancel(id: string) {
+    if (!myAppointments.some((a) => a.id === id)) {
+      toast.error('You can only cancel your own appointments.')
+      return
+    }
     if (confirm('Are you sure you want to cancel this appointment?')) {
       cancelAppointment.mutate(id, {
         onSuccess: () => toast.success('Appointment cancelled.'),

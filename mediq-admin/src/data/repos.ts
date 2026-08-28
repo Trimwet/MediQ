@@ -28,7 +28,7 @@ export interface AppointmentsRepository {
     input: Omit<Appointment, 'id' | 'status'>,
     clinicId?: string
   ) => Promise<Appointment>
-  updateStatus: (id: string, status: AppointmentStatus) => Promise<void>
+  updateStatus: (id: string, status: AppointmentStatus, clinicId?: string) => Promise<void>
   /** Approve a pending request; optionally assign a doctor at the same time. */
   approve: (id: string, doctor?: { id: string; name: string }) => Promise<void>
   /** Reject a pending request, with an optional reason for the patient. */
@@ -138,7 +138,7 @@ export const appointmentsRepository: AppointmentsRepository = {
     await delay(150)
     return useDataStore.getState().addAppointment(input)
   },
-  async updateStatus(id, status) {
+  async updateStatus(id, status, _clinicId?: string) {
     await delay(150)
     useDataStore.getState().updateAppointmentStatus(id, status)
   },

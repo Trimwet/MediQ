@@ -105,7 +105,8 @@ export function useUpdateAppointmentStatus() {
         }
       }
 
-      await appointmentsRepository.updateStatus(id, status)
+      if (!clinicId) throw new Error('Missing clinic context')
+      await appointmentsRepository.updateStatus(id, status, clinicId)
     },
     // Optimistic update: patch the cache immediately so the UI responds
     // without waiting for the Supabase round-trip.
@@ -210,9 +211,12 @@ export function useRejectAppointment() {
 
 export function useCancelAppointment() {
   const queryClient = useQueryClient()
+  const { clinicId } = useCurrentClinic()
   return useMutation({
-    mutationFn: (id: string) =>
-      appointmentsRepository.updateStatus(id, 'cancelled'),
+    mutationFn: (id: string) => {
+      if (!clinicId) throw new Error('Missing clinic context')
+      return appointmentsRepository.updateStatus(id, 'cancelled', clinicId)
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['appointments'] })
       queryClient.invalidateQueries({ queryKey: ['queue'] })
