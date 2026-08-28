@@ -9,7 +9,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { SelectDropdown } from '@/components/select-dropdown'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { type Appointment } from '../schema'
 
 type ApproveDialogProps = {
@@ -51,17 +57,24 @@ export function ApproveDialog({
         </DialogHeader>
         <div className='space-y-2'>
           <p className='text-sm font-medium'>Doctor</p>
-          <SelectDropdown
-            isControlled
-            defaultValue={doctorId}
-            onValueChange={setDoctorId}
-            isPending={doctorsQuery.isPending}
-            placeholder='Choose a doctor'
-            items={activeDoctors.map((d) => ({
-              label: `${d.name} — ${d.specialization}`,
-              value: d.id,
-            }))}
-          />
+          <Select value={doctorId} onValueChange={setDoctorId}>
+            <SelectTrigger>
+              <SelectValue placeholder='Choose a doctor' />
+            </SelectTrigger>
+            <SelectContent>
+              {doctorsQuery.isPending ? (
+                <SelectItem disabled value='loading'>
+                  Loading...
+                </SelectItem>
+              ) : (
+                activeDoctors.map((d) => (
+                  <SelectItem key={d.id} value={d.id}>
+                    {d.name} — {d.specialization}
+                  </SelectItem>
+                ))
+              )}
+            </SelectContent>
+          </Select>
         </div>
         <DialogFooter>
           <Button variant='outline' onClick={() => onOpenChange(false)}>
