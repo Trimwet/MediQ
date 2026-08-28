@@ -28,7 +28,8 @@ const TASKS: Task[] = [
   {
     id: 'queue',
     label: 'Check your queue status',
-    href: '/patient',
+    // No href — you're already on /patient where the queue banner lives.
+    // Done is derived from hasQueue (arrived/in_progress/waiting).
   },
   {
     id: 'password',
