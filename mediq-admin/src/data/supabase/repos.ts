@@ -131,22 +131,21 @@ function mapNotification(
 
 export const appointmentsRepository: AppointmentsRepository = {
   async list(clinicId?: string) {
-    let query = supabase
+    // Fail-closed: without a clinic scope we would otherwise list all clinics
+    // (RLS bypass for admins). Return empty instead of leaking cross-tenant data.
+    if (!clinicId) return []
+    const { data, error } = await supabase
       .from('appointments')
       .select('*')
+      .eq('clinic_id', clinicId)
       .order('scheduled_for', { ascending: false })
-
-    if (clinicId) {
-      query = query.eq('clinic_id', clinicId)
-    }
-
-    const { data, error } = await query
 
     if (error) throw error
     return (data ?? []).map(mapAppointment)
   },
 
   async create(input, clinicId?: string) {
+    if (!clinicId) throw new Error('Missing clinic context')
     const { data, error } = await supabase
       .from('appointments')
       .insert({
@@ -157,7 +156,7 @@ export const appointmentsRepository: AppointmentsRepository = {
         scheduled_for: input.scheduledFor,
         reason: input.reason ?? null,
         status: 'booked',
-        ...(clinicId ? { clinic_id: clinicId } : {}),
+        clinic_id: clinicId,
       })
       .select()
       .single()
@@ -171,6 +170,8 @@ export const appointmentsRepository: AppointmentsRepository = {
     clinicId?: string,
     doctorId?: string
   ): Promise<number[]> {
+    // Fail-closed: require clinic scope; otherwise would return hours from all clinics.
+    if (!clinicId) return []
     const start = new Date(date)
     start.setHours(0, 0, 0, 0)
     const end = new Date(date)
@@ -181,7 +182,7 @@ export const appointmentsRepository: AppointmentsRepository = {
       .gte('scheduled_for', start.toISOString())
       .lte('scheduled_for', end.toISOString())
       .in('status', ['pending', 'booked', 'arrived', 'in_progress'])
-    if (clinicId) query = query.eq('clinic_id', clinicId)
+      .eq('clinic_id', clinicId)
     if (doctorId && doctorId !== 'no_preference')
       query = query.eq('doctor_id', doctorId)
     const { data, error } = await query
@@ -230,17 +231,14 @@ export const appointmentsRepository: AppointmentsRepository = {
 
 export const queueRepository: QueueRepository = {
   async list(clinicId?: string) {
+    // Fail-closed: do not leak queue entries across clinics.
+    if (!clinicId) return []
     // Join rooms to get the room number for display.
-    let query = supabase
+    const { data, error } = await supabase
       .from('queue_entries')
       .select('*, rooms!queue_entries_room_id_fkey(number)')
+      .eq('clinic_id', clinicId)
       .order('checked_in_at', { ascending: true })
-
-    if (clinicId) {
-      query = query.eq('clinic_id', clinicId)
-    }
-
-    const { data, error } = await query
 
     if (error) throw error
 
@@ -295,22 +293,19 @@ export const queueRepository: QueueRepository = {
 
 export const patientsRepository: PatientsRepository = {
   async list(clinicId?: string) {
-    let query = supabase
+    if (!clinicId) return []
+    const { data, error } = await supabase
       .from('patients')
       .select('*')
+      .eq('clinic_id', clinicId)
       .order('name')
-
-    if (clinicId) {
-      query = query.eq('clinic_id', clinicId)
-    }
-
-    const { data, error } = await query
 
     if (error) throw error
     return (data ?? []).map(mapPatient)
   },
 
   async create(input, clinicId?: string) {
+    if (!clinicId) throw new Error('Missing clinic context')
     const { data, error } = await supabase
       .from('patients')
       .insert({
@@ -319,7 +314,7 @@ export const patientsRepository: PatientsRepository = {
         email: input.email ?? null,
         last_visit: input.lastVisit ?? null,
         visits: input.visits,
-        ...(clinicId ? { clinic_id: clinicId } : {}),
+        clinic_id: clinicId,
       })
       .select()
       .single()
@@ -335,35 +330,30 @@ export const patientsRepository: PatientsRepository = {
 
 export const doctorsRepository: DoctorsRepository = {
   async list(clinicId?: string) {
+    if (!clinicId) return []
     const todayStart = new Date()
     todayStart.setHours(0, 0, 0, 0)
     const todayEnd = new Date()
     todayEnd.setHours(23, 59, 59, 999)
 
-    let query = supabase
+    const { data: doctors, error } = await supabase
       .from('doctors')
       .select('*')
+      .eq('clinic_id', clinicId)
       .order('name')
-
-    if (clinicId) {
-      query = query.eq('clinic_id', clinicId)
-    }
-
-    const { data: doctors, error } = await query
 
     if (error) throw error
     if (!doctors?.length) return []
 
     const doctorIds = doctors.map((d: Record<string, unknown>) => d.id)
-    let countQuery = supabase
+    const { data: counts } = await supabase
       .from('appointments')
       .select('doctor_id')
       .in('doctor_id', doctorIds)
       .gte('scheduled_for', todayStart.toISOString())
       .lte('scheduled_for', todayEnd.toISOString())
       .not('status', 'in', '("cancelled","rejected")')
-    if (clinicId) countQuery = countQuery.eq('clinic_id', clinicId)
-    const { data: counts } = await countQuery
+      .eq('clinic_id', clinicId)
 
     const countMap = new Map<string, number>()
     for (const c of (counts ?? []) as { doctor_id: string }[]) {
@@ -376,6 +366,7 @@ export const doctorsRepository: DoctorsRepository = {
   },
 
   async create(input, clinicId?: string) {
+    if (!clinicId) throw new Error('Missing clinic context')
     const { data, error } = await supabase
       .from('doctors')
       .insert({
@@ -383,7 +374,7 @@ export const doctorsRepository: DoctorsRepository = {
         specialization: input.specialization,
         email: input.email,
         status: input.status,
-        ...(clinicId ? { clinic_id: clinicId } : {}),
+        clinic_id: clinicId,
       })
       .select()
       .single()
@@ -413,22 +404,19 @@ export const doctorsRepository: DoctorsRepository = {
 
 export const staffRepository: StaffRepository = {
   async list(clinicId?: string) {
-    let query = supabase
+    if (!clinicId) return []
+    const { data, error } = await supabase
       .from('staff')
       .select('*')
+      .eq('clinic_id', clinicId)
       .order('name')
-
-    if (clinicId) {
-      query = query.eq('clinic_id', clinicId)
-    }
-
-    const { data, error } = await query
 
     if (error) throw error
     return (data ?? []).map(mapStaff)
   },
 
   async create(input, clinicId?: string) {
+    if (!clinicId) throw new Error('Missing clinic context')
     const { data, error } = await supabase
       .from('staff')
       .upsert(
@@ -438,7 +426,7 @@ export const staffRepository: StaffRepository = {
           phone: input.phone,
           email: input.email,
           status: input.status,
-          ...(clinicId ? { clinic_id: clinicId } : {}),
+          clinic_id: clinicId,
         },
         { onConflict: 'email' }
       )
@@ -461,28 +449,23 @@ export const staffRepository: StaffRepository = {
 
 export const roomsRepository: RoomsRepository = {
   async list(clinicId?: string) {
-    let query = supabase
+    if (!clinicId) return []
+    const { data: rooms, error } = await supabase
       .from('rooms')
       .select('*')
+      .eq('clinic_id', clinicId)
       .order('number')
-
-    if (clinicId) {
-      query = query.eq('clinic_id', clinicId)
-    }
-
-    const { data: rooms, error } = await query
 
     if (error) throw error
     if (!rooms?.length) return []
 
     const roomIds = rooms.map((r: Record<string, unknown>) => r.id)
-    let occupancyQuery = supabase
+    const { data: entries } = await supabase
       .from('queue_entries')
       .select('room_id, doctor_name, patient_name')
       .in('room_id', roomIds)
       .eq('status', 'in_room')
-    if (clinicId) occupancyQuery = occupancyQuery.eq('clinic_id', clinicId)
-    const { data: entries } = await occupancyQuery
+      .eq('clinic_id', clinicId)
 
     const occupancyMap = new Map<
       string,
@@ -510,13 +493,14 @@ export const roomsRepository: RoomsRepository = {
   },
 
   async create(input, clinicId?: string) {
+    if (!clinicId) throw new Error('Missing clinic context')
     const { data, error } = await supabase
       .from('rooms')
       .insert({
         number: input.number,
         type: input.type,
         status: input.status,
-        ...(clinicId ? { clinic_id: clinicId } : {}),
+        clinic_id: clinicId,
       })
       .select()
       .single()
@@ -541,6 +525,8 @@ export const roomsRepository: RoomsRepository = {
 
 export const notificationsRepository: NotificationsRepository = {
   async list(clinicId?: string) {
+    // Fail-closed: without clinicId we would leak notifications across tenants.
+    if (!clinicId) return []
     const {
       data: { user },
     } = await supabase.auth.getUser()
@@ -548,16 +534,11 @@ export const notificationsRepository: NotificationsRepository = {
 
     // Get notifications — scoped to clinic when clinicId is provided.
     // Then join read status for the current user.
-    let query = supabase
+    const { data: notifs, error: notifErr } = await supabase
       .from('notifications')
       .select('*')
+      .eq('clinic_id', clinicId)
       .order('created_at', { ascending: false })
-
-    if (clinicId) {
-      query = query.eq('clinic_id', clinicId)
-    }
-
-    const { data: notifs, error: notifErr } = await query
 
     if (notifErr) throw notifErr
 
@@ -725,18 +706,17 @@ export const analyticsRepository = {
     clinicId?: string,
     range: AnalyticsRange = 'today',
   ): Promise<AnalyticsSummary> {
+    // Fail-closed: analytics without clinic scope would aggregate all tenants.
+    if (!clinicId) throw new Error('Missing clinic context')
     const { start, end } = rangeToInterval(range)
 
     // --- Appointments in range ---
-    let aptQuery = supabase
+    const { data: apts, error: aptErr } = await supabase
       .from('appointments')
       .select('status, doctor_name, scheduled_for')
       .gte('scheduled_for', start.toISOString())
       .lte('scheduled_for', end.toISOString())
-
-    if (clinicId) aptQuery = aptQuery.eq('clinic_id', clinicId)
-
-    const { data: apts, error: aptErr } = await aptQuery
+      .eq('clinic_id', clinicId)
     if (aptErr) throw aptErr
 
     const rows = (apts ?? []) as Array<{
@@ -752,14 +732,13 @@ export const analyticsRepository = {
     const todayEnd = new Date()
     todayEnd.setHours(23, 59, 59, 999)
 
-    let todayQuery = supabase
+    const { data: todayRows } = await supabase
       .from('appointments')
       .select('status')
       .gte('scheduled_for', todayStart.toISOString())
       .lte('scheduled_for', todayEnd.toISOString())
-    if (clinicId) todayQuery = todayQuery.eq('clinic_id', clinicId)
+      .eq('clinic_id', clinicId)
 
-    const { data: todayRows } = await todayQuery
     const todayList = (todayRows ?? []) as Array<{ status: string }>
 
     const today = {
@@ -806,15 +785,13 @@ export const analyticsRepository = {
       .sort((a, b) => b.completed - a.completed)
 
     // Average wait minutes from queue_entries in range
-    let queueQuery = supabase
+    const { data: queueRows, error: queueErr } = await supabase
       .from('queue_entries')
       .select('checked_in_at, called_at, status')
       .gte('checked_in_at', start.toISOString())
       .lte('checked_in_at', end.toISOString())
+      .eq('clinic_id', clinicId)
 
-    if (clinicId) queueQuery = queueQuery.eq('clinic_id', clinicId)
-
-    const { data: queueRows, error: queueErr } = await queueQuery
     if (queueErr) throw queueErr
 
     const avgWaitMinutes = calcAvgWaitMinutes(
