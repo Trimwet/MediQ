@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { z } from 'zod'
 import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -27,6 +28,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
+import { useCurrentClinic } from '@/lib/clinic-context'
 
 const facilityFormSchema = z.object({
   trackRooms: z.boolean(),
@@ -40,6 +42,7 @@ const facilityFormSchema = z.object({
 type FacilityFormValues = z.infer<typeof facilityFormSchema>
 
 export function FacilityForm() {
+  const { clinicId } = useCurrentClinic()
   const trackRooms = useFacilityStore((s) => s.trackRooms)
   const roomLabel = useFacilityStore((s) => s.roomLabel)
   const setTrackRooms = useFacilityStore((s) => s.setTrackRooms)
@@ -56,9 +59,83 @@ export function FacilityForm() {
     name: 'trackRooms',
   })
 
+  // Clinic-scoped hydration: prefer `mediq_facility:${clinicId}` if present,
+  // fallback to legacy `mediq_facility`, and migrate legacy -> scoped.
+  useEffect(() => {
+    if (!clinicId) return
+    try {
+      const scopedKey = `mediq_facility:${clinicId}`
+      const scopedRaw = localStorage.getItem(scopedKey)
+      if (scopedRaw) {
+        const parsed = JSON.parse(scopedRaw) as
+          | { state?: { trackRooms?: unknown; roomLabel?: unknown } }
+          | { trackRooms?: unknown; roomLabel?: unknown }
+        const scopedState = (parsed as { state?: unknown }).state ?? parsed
+        const nextTrackRooms =
+          typeof (scopedState as { trackRooms?: unknown }).trackRooms ===
+          'boolean'
+            ? (scopedState as { trackRooms: boolean }).trackRooms
+            : null
+        const nextRoomLabel =
+          typeof (scopedState as { roomLabel?: unknown }).roomLabel === 'string'
+            ? (scopedState as { roomLabel: string }).roomLabel
+            : null
+        if (nextTrackRooms !== null) setTrackRooms(nextTrackRooms)
+        if (nextRoomLabel !== null) setRoomLabel(nextRoomLabel)
+        form.reset({
+          trackRooms: nextTrackRooms ?? trackRooms,
+          roomLabel: nextRoomLabel ?? roomLabel,
+        })
+      } else {
+        // No scoped entry yet — migrate legacy global value if it exists
+        const legacyRaw = localStorage.getItem('mediq_facility')
+        if (legacyRaw) {
+          try {
+            localStorage.setItem(scopedKey, legacyRaw)
+          } catch {
+            // ignore quota
+          }
+        }
+      }
+    } catch {
+      // ignore parse / storage errors
+    }
+    // Only re-run when clinicId changes; setters and form are stable
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clinicId])
+
+  // Keep form in sync when store rehydrates from storage (e.g., after clinic switch)
+  useEffect(() => {
+    form.reset({ trackRooms, roomLabel })
+  }, [trackRooms, roomLabel, form])
+
   function onSubmit(values: FacilityFormValues) {
     setTrackRooms(values.trackRooms)
     setRoomLabel(values.roomLabel)
+    // Ensure both legacy and clinic-scoped keys are written (store's custom
+    // storage already does this, but we double-write here for explicitness and
+    // to handle the case where clinicId became available after store init).
+    if (clinicId) {
+      try {
+        const serialized = localStorage.getItem('mediq_facility')
+        if (serialized) {
+          localStorage.setItem(`mediq_facility:${clinicId}`, serialized)
+        } else {
+          // Fallback: construct payload if persist hasn't flushed yet
+          const payload = JSON.stringify({
+            state: {
+              trackRooms: values.trackRooms,
+              roomLabel: values.roomLabel.trim() || 'Room',
+            },
+            version: 0,
+          })
+          localStorage.setItem('mediq_facility', payload)
+          localStorage.setItem(`mediq_facility:${clinicId}`, payload)
+        }
+      } catch {
+        // ignore
+      }
+    }
     toast.success('Facility settings saved')
   }
 
