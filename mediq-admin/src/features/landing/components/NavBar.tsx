@@ -123,12 +123,14 @@ export function NavBar() {
               </nav>
 
               <SheetFooter className='border-t border-border p-4'>
-                <Button size='lg' className='w-full' asChild>
-                  <Link to='/book'>
-                    <CalendarCheck />
-                    Book appointment
-                  </Link>
-                </Button>
+                <SheetClose asChild>
+                  <Button size='lg' className='w-full' asChild>
+                    <Link to='/book'>
+                      <CalendarCheck />
+                      Book appointment
+                    </Link>
+                  </Button>
+                </SheetClose>
               </SheetFooter>
             </SheetContent>
           </Sheet>
