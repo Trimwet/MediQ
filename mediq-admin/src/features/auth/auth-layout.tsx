@@ -14,7 +14,7 @@ type AuthLayoutProps = {
   children: React.ReactNode
   footer?: React.ReactNode
   /** Optional back link rendered above the title. */
-  back?: { to: AuthBackTo; label: string }
+  back?: { to: AuthBackTo; label: string; search?: Record<string, unknown> }
 }
 
 const features = [
@@ -54,6 +54,7 @@ export function AuthLayout({
             {back ? (
               <Link
                 to={back.to}
+                search={back.search as never}
                 className='mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground'
               >
                 <ArrowLeft className='size-4' />

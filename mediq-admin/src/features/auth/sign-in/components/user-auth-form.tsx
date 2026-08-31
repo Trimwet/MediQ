@@ -105,10 +105,13 @@ export function UserAuthForm({
       })
       auth.setAccessToken(sessionData.session?.access_token ?? '')
 
-      const defaultPath = role.includes('patient')
-        ? '/patient'
-        : '/admin/dashboard'
-      const targetPath = redirectTo || defaultPath
+      const isSafeRedirect = (to: string | undefined) =>
+        !!to && to.startsWith('/') && !to.startsWith('//') && !to.includes('://') && !to.includes('\\')
+      const targetPath = isSafeRedirect(redirectTo)
+        ? (redirectTo as string)
+        : role.includes('patient')
+          ? '/patient'
+          : '/admin/dashboard'
       navigate({ to: targetPath, replace: true })
 
       toast.success(`Welcome back, ${profile.full_name || data.email}!`)

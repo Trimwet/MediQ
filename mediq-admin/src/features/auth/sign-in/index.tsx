@@ -4,6 +4,7 @@ import { UserAuthForm } from './components/user-auth-form'
 
 export function SignIn() {
   const { redirect } = useSearch({ from: '/(auth)/sign-in' })
+  const signUpSearch = redirect ? { redirect } : undefined
 
   return (
     <AuthLayout
@@ -15,6 +16,7 @@ export function SignIn() {
           account?{' '}
           <Link
             to='/sign-up'
+            search={signUpSearch}
             className='text-nowrap underline underline-offset-4 hover:text-primary'
           >
             Create one

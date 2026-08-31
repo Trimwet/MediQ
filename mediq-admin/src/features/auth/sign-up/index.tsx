@@ -1,15 +1,16 @@
-import { Link } from '@tanstack/react-router'
+import { Link, useSearch } from '@tanstack/react-router'
 import { AuthLayout } from '../auth-layout'
 import { SignUpForm } from './components/sign-up-form'
 
-const search = new URLSearchParams(window.location.search)
-const isBusiness = search.get('business') === 'true'
-
 export function SignUp() {
+  const { redirect, business } = useSearch({ from: '/(auth)/sign-up' })
+  const isBusiness = business === 'true'
+  const signInSearch = redirect ? { redirect } : undefined
+
   return (
     <AuthLayout
       title={isBusiness ? 'Create your clinic account' : 'Create an account'}
-      back={{ to: '/sign-in', label: 'Back to sign in' }}
+      back={{ to: '/sign-in', label: 'Back to sign in', search: signInSearch }}
       description={
         <>
           {isBusiness
@@ -18,6 +19,7 @@ export function SignUp() {
           Already have an account?{' '}
           <Link
             to='/sign-in'
+            search={signInSearch}
             className='text-nowrap underline underline-offset-4 hover:text-primary'
           >
             Sign in
