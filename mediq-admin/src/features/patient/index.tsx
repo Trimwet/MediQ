@@ -180,9 +180,9 @@ export function PatientPortal() {
       </header>
 
       <main className='mx-auto flex max-w-2xl flex-col gap-8 px-4 py-10 sm:px-6'>
-        {/* Queue position banner — only when they're in today's queue */}
+        {/* Queue position banner — sticky, live, with ETA */}
         {todayAppointment && queuePosition >= 0 && (
-          <div id='patient-queue-waiting' data-testid='patient-queue-banner' className='rounded-lg border bg-background p-4'>
+          <div id='patient-queue-waiting' data-testid='patient-queue-banner' className='sticky top-16 z-10 rounded-lg border bg-background/95 p-4 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-background/80' role='status' aria-live='polite'>
             <div className='flex items-start justify-between gap-4'>
               <div className='space-y-0.5'>
                 <p className='text-xs font-medium tracking-wide text-muted-foreground uppercase'>

@@ -6,7 +6,7 @@ const ACCESS_TOKEN = 'thisisjustarandomstring'
 // session (and its role) survives a reload, like a real token restore would.
 const USER_COOKIE = 'mediq_user'
 
-interface AuthUser {
+export interface AuthUser {
   accountNo: string
   email: string
   role: string[]

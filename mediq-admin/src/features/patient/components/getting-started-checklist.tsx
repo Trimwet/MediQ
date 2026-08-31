@@ -190,6 +190,25 @@ export function GettingStartedChecklist() {
   const allDone = doneCount === total
   const pct = total === 0 ? 0 : Math.round((doneCount / total) * 100)
 
+  // Dismiss after all done — persists in localStorage
+  const [dismissed, setDismissed] = useState(() => {
+    try {
+      return localStorage.getItem('mediq_checklist_dismissed') === 'true'
+    } catch {
+      return false
+    }
+  })
+  useEffect(() => {
+    if (allDone) {
+      try {
+        localStorage.setItem('mediq_checklist_dismissed', 'true')
+      } catch {}
+    }
+  }, [allDone])
+  const [collapsed, setCollapsed] = useState(false)
+
+  if (dismissed) return null
+
   return (
     <Card className='overflow-hidden'>
       <CardContent className='p-5'>
@@ -228,13 +247,31 @@ export function GettingStartedChecklist() {
 
         {/* Celebration line — shown only when every task is done */}
         {allDone && (
-          <p className='mb-3 rounded-md bg-emerald-50 px-3 py-2 text-center text-xs font-medium text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300'>
-            🎉 You're all set — your MediQ experience begins now.
-          </p>
+          <div className='mb-3 rounded-md bg-emerald-50 px-3 py-2 text-center dark:bg-emerald-950/40'>
+            <p className='text-xs font-medium text-emerald-700 dark:text-emerald-300'>
+              🎉 You're all set — your MediQ experience begins now.
+            </p>
+            <button
+              type='button'
+              onClick={() => setDismissed(true)}
+              className='mt-1 text-xs text-emerald-600 underline hover:text-emerald-700'
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
+        {allDone && (
+          <button
+            type='button'
+            onClick={() => setCollapsed((v) => !v)}
+            className='mb-3 w-full text-xs text-muted-foreground hover:text-foreground'
+          >
+            {collapsed ? 'Show tasks' : 'Hide tasks'}
+          </button>
         )}
 
-        {/* Task list */}
-        <ul className='space-y-1'>
+        {/* Task list — collapsible when all done */}
+        {!collapsed && <ul className='space-y-1'>
           {TASKS.map((task) => {
             const done = isDone(task.id)
             const isClickable = !!task.href || task.id === 'queue'
@@ -306,7 +343,7 @@ export function GettingStartedChecklist() {
               </li>
             )
           })}
-        </ul>
+        </ul>}
       </CardContent>
     </Card>
   )
