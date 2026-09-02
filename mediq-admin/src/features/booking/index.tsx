@@ -5,7 +5,13 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link } from '@tanstack/react-router'
 import { type BookingResult } from '@/data'
-import { useBookAppointment, usePublicDoctors, useSignUp } from '@/data/hooks'
+import { type Appointment } from '@/features/appointments/schema'
+import {
+  useBookAppointment,
+  usePublicClinics,
+  usePublicDoctors,
+  useSignUp,
+} from '@/data/hooks'
 import {
   ArrowLeft,
   CalendarCheck2,
@@ -49,6 +55,7 @@ const formSchema = z.object({
     error: (iss) => (iss.input === '' ? 'Please enter your email.' : undefined),
   }),
   phone: z.string().min(7, 'Please enter a valid phone number.'),
+  clinicId: z.string().optional(),
   doctorId: z.string().optional(),
   date: z.date({ message: 'Please choose a date.' }),
   time: z.string().min(1, 'Please choose a time.'),
@@ -60,26 +67,15 @@ type FormValues = z.infer<typeof formSchema>
 export function Booking() {
   const [result, setResult] = useState<BookingResult | null>(null)
   const book = useBookAppointment()
-  // -----------------------------------------------------------------------
-  // Clinic scope for public booking
-  // -----------------------------------------------------------------------
-  // Public /book is anonymous (no ClinicProvider). We resolve the clinic
-  // from the URL query `?clinicId=<uuid>` when present. When absent,
-  // `clinicId` is undefined and both `usePublicDoctors` and the
-  // `book_appointment` RPC fall back to the default clinic (slug='default')
-  // — same resolution as the SQL functions `book_appointment` and
-  // `list_public_doctors` with `p_clinic_id DEFAULT NULL`.
-  //
-  // This fallback is intentional for single-tenant/demo deployments.
-  // Future multi-tenant booking via slug/custom domain should resolve the
-  // clinic server-side (or from the route param) and pass it explicitly
-  // instead of relying on the default.
-  const clinicId = useMemo(() => {
+  const clinicsQuery = usePublicClinics()
+
+  const urlClinicId = useMemo(() => {
     if (typeof window === 'undefined') return undefined
     const v = new URLSearchParams(window.location.search).get('clinicId')
     return v ?? undefined
   }, [])
-  const doctorsQuery = usePublicDoctors(clinicId)
+
+  const defaultClinicId = urlClinicId ?? clinicsQuery.data?.[0]?.id ?? ''
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -87,12 +83,16 @@ export function Booking() {
       patientName: '',
       email: '',
       phone: '',
+      clinicId: defaultClinicId,
       doctorId: 'no_preference',
       date: undefined,
       time: '',
       reason: '',
     },
   })
+
+  const selectedClinicId = form.watch('clinicId') || defaultClinicId
+  const doctorsQuery = usePublicDoctors(selectedClinicId || undefined)
 
   // Public RPC already filters to active doctors; keep a tolerant filter
   // so the same component works if the hook ever returns a status field.
@@ -153,10 +153,10 @@ export function Booking() {
         ? activeDoctors.find((d) => d.id === values.doctorId)
         : undefined
 
-    // TODO: This constructs the time in the user's local timezone. If the clinic
-    // operates in a specific timezone, we should explicitly construct it in that tz.
     const scheduledFor = new Date(values.date)
     scheduledFor.setHours(slot.hour, 0, 0, 0)
+
+    const chosenClinicId = values.clinicId || selectedClinicId || undefined
 
     book.mutate(
       {
@@ -167,7 +167,7 @@ export function Booking() {
         doctorName: doctor?.name,
         scheduledFor: scheduledFor.toISOString(),
         reason: values.reason || undefined,
-        clinicId: clinicId ?? undefined,
+        clinicId: chosenClinicId,
       },
       {
         onSuccess: (bookingResult) => {
@@ -183,19 +183,38 @@ export function Booking() {
             }
             localStorage.setItem('mediq_has_booked_at', String(now))
             // Clinic-scoped keys with email and expiry
-            if (clinicId && emailLower) {
+            if (chosenClinicId && emailLower) {
               localStorage.setItem(
-                `mediq_has_booked:${clinicId}`,
+                `mediq_has_booked:${chosenClinicId}`,
                 JSON.stringify({ email: emailLower, at: now })
               )
-              localStorage.setItem(`mediq_has_booked:${clinicId}:${emailLower}`, 'true')
-              localStorage.setItem(`mediq_has_booked_at:${clinicId}`, String(now))
-              localStorage.setItem(`mediq_has_booked_at:${clinicId}:${emailLower}`, String(now))
-              localStorage.setItem(`mediq_has_booked_email:${clinicId}`, emailLower)
-            } else if (emailLower) {
-              // No clinicId (default clinic) — still scope by email with timestamp
-              localStorage.setItem(`mediq_has_booked:${emailLower}`, 'true')
-              localStorage.setItem(`mediq_has_booked_at:${emailLower}`, String(now))
+              localStorage.setItem(`mediq_has_booked:${chosenClinicId}:${emailLower}`, 'true')
+              localStorage.setItem(`mediq_has_booked_at:${chosenClinicId}`, String(now))
+              localStorage.setItem(`mediq_has_booked_at:${chosenClinicId}:${emailLower}`, String(now))
+              localStorage.setItem(`mediq_has_booked_email:${chosenClinicId}`, emailLower)
+            }
+
+            const chosenClinicObj = (clinicsQuery.data ?? []).find((c: { id: string; name: string }) => c.id === chosenClinicId)
+            const chosenClinicName = chosenClinicObj ? chosenClinicObj.name : 'JUTH (Jos University Teaching Hospital)'
+            const doctorName = doctor ? doctor.name : 'Assigned Doctor (Pending Staff Assignment)'
+
+            const fullAppointment: Appointment = {
+              id: bookingResult?.appointment?.id ?? `apt-${Date.now()}`,
+              patientName: values.patientName,
+              patientEmail: emailLower,
+              doctorId: doctor?.id ?? '',
+              doctorName: bookingResult?.appointment?.doctorName || doctorName,
+              clinicId: chosenClinicId,
+              clinicName: chosenClinicName,
+              scheduledFor: scheduledFor.toISOString(),
+              status: 'pending',
+              reason: values.reason || 'General Medical Visit',
+            }
+
+            // Save appointment object locally for instant patient portal display
+            localStorage.setItem('mediq_last_booked_appointment', JSON.stringify(fullAppointment))
+            if (fullAppointment.id) {
+              localStorage.setItem(`mediq_patient_appointment:${fullAppointment.id}`, JSON.stringify(fullAppointment))
             }
           } catch {}
           setResult(bookingResult)
@@ -205,9 +224,17 @@ export function Booking() {
     )
   }
 
+  const selectedClinic = clinicsQuery.data?.find(
+    (c) => c.id === (form.watch('clinicId') || selectedClinicId)
+  )
+
   if (result) {
     return (
-      <BookingSuccess result={result} onBookAnother={() => setResult(null)} />
+      <BookingSuccess
+        result={result}
+        clinicName={selectedClinic?.name}
+        onBookAnother={() => setResult(null)}
+      />
     )
   }
 
@@ -246,7 +273,7 @@ export function Booking() {
         <Card>
           <CardHeader className='flex flex-row items-center gap-2 space-y-0 text-sm text-muted-foreground'>
             <CalendarCheck2 className='size-4' />
-            Choose your preferred doctor and time
+            Choose your preferred hospital, doctor and time
           </CardHeader>
           <CardContent>
             <Form {...form}>
@@ -294,6 +321,33 @@ export function Booking() {
                       <FormControl>
                         <Input placeholder='+234 800 000 0000' {...field} />
                       </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name='clinicId'
+                  render={({ field }) => (
+                    <FormItem className='sm:col-span-2'>
+                      <FormLabel>Hospital / Clinic</FormLabel>
+                      <SelectDropdown
+                        isControlled
+                        defaultValue={field.value || defaultClinicId}
+                        onValueChange={(val) => {
+                          field.onChange(val)
+                          form.setValue('doctorId', 'no_preference')
+                        }}
+                        placeholder={
+                          clinicsQuery.isPending
+                            ? 'Loading hospitals...'
+                            : 'Choose a hospital or clinic'
+                        }
+                        items={(clinicsQuery.data ?? []).map((c) => ({
+                          label: c.name,
+                          value: c.id,
+                        }))}
+                      />
                       <FormMessage />
                     </FormItem>
                   )}
@@ -425,9 +479,11 @@ type PasswordValues = z.infer<typeof passwordSchema>
 
 function BookingSuccess({
   result,
+  clinicName,
   onBookAnother,
 }: {
   result: BookingResult
+  clinicName?: string
   onBookAnother: () => void
 }) {
   const { appointment, hasAccount } = result
@@ -493,6 +549,12 @@ function BookingSuccess({
           </div>
 
           <dl className='space-y-2 rounded-lg border bg-muted/40 p-4 text-start text-sm'>
+            {clinicName && (
+              <div className='flex justify-between gap-4'>
+                <dt className='text-muted-foreground'>Hospital</dt>
+                <dd className='font-medium'>{clinicName}</dd>
+              </div>
+            )}
             <div className='flex justify-between gap-4'>
               <dt className='text-muted-foreground'>Patient</dt>
               <dd className='font-medium'>{appointment.patientName}</dd>
