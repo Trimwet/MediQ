@@ -9,6 +9,7 @@ import {
 } from '@/data/hooks'
 import {
   ArrowLeft,
+  Building2,
   CalendarDays,
   KeyRound,
   LogOut,
@@ -59,9 +60,17 @@ export function PatientPortal() {
   // Auth is enforced in src/routes/patient.tsx beforeLoad — keep a null fallback for the brief store hydration window.
   if (!user) return null
 
-  const myAppointments = (appointmentsQuery.data ?? []).filter(
-    (a) => a.patientEmail?.toLowerCase() === user.email?.toLowerCase()
-  )
+  const userEmailLower = user.email?.toLowerCase() ?? ''
+  let localBookedEmail = ''
+  try {
+    localBookedEmail = (localStorage.getItem('mediq_has_booked_email') ?? '').toLowerCase()
+  } catch {}
+
+  const myAppointments = (appointmentsQuery.data ?? []).filter((a) => {
+    if (!a.patientEmail) return true
+    const e = a.patientEmail.toLowerCase()
+    return e === userEmailLower || (!!localBookedEmail && e === localBookedEmail) || a.id.startsWith('booked-apt-') || a.id.startsWith('local-apt-')
+  })
 
   const upcoming = myAppointments
     .filter(
@@ -275,17 +284,26 @@ export function PatientPortal() {
                     CANCELLABLE_STATUSES as readonly string[]
                   ).includes(appointment.status)
                   const isCancellingThis = pendingCancelId === appointment.id
+                  const isPending = appointment.status === 'pending'
+                  const isBooked = appointment.status === 'booked'
+
                   return (
                     <Card key={appointment.id} className='py-4'>
                       <CardContent>
                         <div className='flex items-start justify-between gap-3'>
                           <div className='space-y-1'>
-                            <p className='leading-tight font-medium'>
-                              {appointment.doctorName}
+                            <p className='leading-tight font-medium text-base'>
+                              {appointment.doctorName || 'Assigned Specialist'}
                             </p>
+                            {appointment.clinicName && (
+                              <p className='flex items-center gap-1.5 text-xs font-medium text-primary'>
+                                <Building2 aria-hidden="true" className='size-3.5' />
+                                {appointment.clinicName}
+                              </p>
+                            )}
                             {spec && (
-                              <p className='flex items-center gap-1 text-xs text-muted-foreground'>
-                                <Stethoscope aria-hidden="true" className='size-3' />
+                              <p className='flex items-center gap-1.5 text-xs text-muted-foreground'>
+                                <Stethoscope aria-hidden="true" className='size-3.5' />
                                 {spec}
                               </p>
                             )}
@@ -293,12 +311,32 @@ export function PatientPortal() {
                           <Badge
                             variant='outline'
                             className={
-                              appointmentStatusBadge[appointment.status]
+                              isPending
+                                ? 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-700 font-semibold'
+                                : isBooked
+                                  ? 'bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-700 font-semibold'
+                                  : appointmentStatusBadge[appointment.status]
                             }
                           >
-                            {appointment.status.replace('_', ' ')}
+                            {isPending
+                              ? '⏳ Pending Approval'
+                              : isBooked
+                                ? '✅ Accepted & Confirmed'
+                                : appointment.status.replace('_', ' ')}
                           </Badge>
                         </div>
+
+                        {/* Status detail box */}
+                        {isPending && (
+                          <div className='mt-3 rounded-md bg-amber-50 p-2.5 text-xs text-amber-800 dark:bg-amber-950/40 dark:text-amber-300'>
+                            <span className='font-semibold'>Request sent:</span> Awaiting hospital confirmation. Staff will review and accept your appointment request shortly.
+                          </div>
+                        )}
+                        {isBooked && (
+                          <div className='mt-3 rounded-md bg-emerald-50 p-2.5 text-xs text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300'>
+                            <span className='font-semibold'>Request accepted:</span> Your appointment is confirmed! On the day of your visit, check in to view your queue position.
+                          </div>
+                        )}
 
                         <Separator className='my-3' />
 

@@ -17,6 +17,8 @@ export const appointmentSchema = z.object({
   patientName: z.string(),
   /** Set for self-service online bookings; links the appointment to a patient account. */
   patientEmail: z.string().optional(),
+  clinicId: z.string().optional(),
+  clinicName: z.string().optional(),
   doctorId: z.string(),
   doctorName: z.string(),
   scheduledFor: z.string(), // ISO 8601
