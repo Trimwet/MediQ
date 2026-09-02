@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { Check, Circle, PartyPopper } from 'lucide-react'
+import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/auth-store'
-import { useCurrentClinic } from '@/lib/clinic-context'
 import { useAppointments, useQueue } from '@/data/hooks'
 import { Card, CardContent } from '@/components/ui/card'
 
@@ -36,17 +36,8 @@ const TASKS: Task[] = [
   },
 ]
 
-function scrollToQueue() {
-  const el =
-    document.querySelector('[data-testid=\"patient-queue-banner\"]') ??
-    document.getElementById('patient-queue-waiting') ??
-    document.getElementById('patient-queue-inprogress') ??
-    document.getElementById('patient-queue-banner')
-  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  else window.scrollTo({ top: 0, behavior: 'smooth' })
-}
-
 export function GettingStartedChecklist() {
+  const navigate = useNavigate()
   const user = useAuthStore((state) => state.auth.user)
   const appointmentsQuery = useAppointments()
   const queueQuery = useQueue()
@@ -80,76 +71,51 @@ export function GettingStartedChecklist() {
 
   // Derive appointment status — email-only match (case-insensitive), consistent with PatientPortal.
   const userEmail = user?.email?.toLowerCase() ?? ''
-  const { clinicId } = useCurrentClinic()
   const allAppointments = appointmentsQuery.data ?? []
   const myAppointments = allAppointments.filter((a) => {
     return !!userEmail && a.patientEmail?.toLowerCase() === userEmail
   })
 
-  // C5: hasLocalBookingFlag must be clinic-scoped, reactive, and not read during render (SSR/hydration-safe).
-  const [hasLocalBookingFlag, setHasLocalBookingFlag] = useState(false)
-  useEffect(() => {
-    if (!clinicId || !userEmail) {
-      setHasLocalBookingFlag(false)
+  // Backend is the single source of truth — no localStorage fallback that varies per browser.
+  const hasAppointment = myAppointments.length > 0
+
+  function handleQueueClick() {
+    const el =
+      document.querySelector('[data-testid="patient-queue-banner"]') ??
+      document.getElementById('patient-queue-waiting') ??
+      document.getElementById('patient-queue-inprogress') ??
+      document.getElementById('patient-queue-banner')
+
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
       return
     }
-    const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000
 
-    function computeFlag(): boolean {
-      try {
-        const scopedKey = `mediq_has_booked:${clinicId}`
-        const raw = localStorage.getItem(scopedKey)
-        if (raw) {
-          try {
-            const obj = JSON.parse(raw)
-            if (obj && typeof obj.email === 'string' && typeof obj.at === 'number') {
-              if (obj.email.toLowerCase() !== userEmail) return false
-              if (Date.now() - obj.at > SEVEN_DAYS_MS) return false
-              return true
-            }
-          } catch {}
-          if (raw === 'true') {
-            const bookedEmail = localStorage.getItem(`mediq_has_booked_email:${clinicId}`)
-            if (bookedEmail && bookedEmail.toLowerCase() !== userEmail) return false
-            const atRaw = localStorage.getItem(`mediq_has_booked_at:${clinicId}`)
-            if (atRaw) {
-              const at = Number(atRaw)
-              if (!Number.isNaN(at) && Date.now() - at > SEVEN_DAYS_MS) return false
-            }
-            return true
-          }
-        }
-        const emailScopedKey = `mediq_has_booked:${clinicId}:${userEmail}`
-        if (localStorage.getItem(emailScopedKey) === 'true') {
-          const atRaw = localStorage.getItem(`mediq_has_booked_at:${clinicId}:${userEmail}`)
-          if (atRaw) {
-            const at = Number(atRaw)
-            if (!Number.isNaN(at) && Date.now() - at > SEVEN_DAYS_MS) return false
-          }
-          return true
-        }
-        return false
-      } catch {
-        return false
+    const upcomingApt = myAppointments.find(
+      (a) => !['completed', 'cancelled', 'no_show', 'rejected'].includes(a.status)
+    )
+
+    if (upcomingApt) {
+      if (upcomingApt.id) {
+        navigate({ to: '/check-in', search: { id: upcomingApt.id } })
+      } else {
+        toast.info(
+          `Your appointment with ${upcomingApt.doctorName} is registered. Queue status updates on the day of your visit once checked in.`
+        )
       }
+    } else {
+      toast.info('No upcoming appointment found. Book an appointment first to track your queue.', {
+        action: {
+          label: 'Book now',
+          onClick: () => navigate({ to: '/book' }),
+        },
+      })
     }
-
-    setHasLocalBookingFlag(computeFlag())
-
-    const handler = (e: StorageEvent) => {
-      if (e.key?.startsWith('mediq_has_booked')) {
-        setHasLocalBookingFlag(computeFlag())
-      }
-    }
-    window.addEventListener('storage', handler)
-    return () => window.removeEventListener('storage', handler)
-  }, [clinicId, userEmail])
-
-  const hasAppointment = hasLocalBookingFlag || myAppointments.length > 0
+  }
 
   // C3: Queue RLS has no patient branch — make appointment-status the primary signal, queue table the fallback.
   const hasQueuePrimary = myAppointments.some((a) =>
-    ['arrived', 'in_progress', 'waiting'].includes(a.status)
+    ['arrived', 'in_progress', 'waiting', 'booked', 'pending'].includes(a.status)
   )
   const hasQueueFromQueue = (queueQuery.data ?? []).some((entry) => {
     const entryName = entry.patientName?.toLowerCase()
@@ -287,7 +253,7 @@ export function GettingStartedChecklist() {
                         : ''
                   )}
                   onClick={() => {
-                    if (task.id === 'queue') scrollToQueue()
+                    if (task.id === 'queue') handleQueueClick()
                   }}
                 >
                   {/* Marker */}
@@ -312,13 +278,13 @@ export function GettingStartedChecklist() {
                     {task.label}
                   </span>
 
-                  {/* Action — queue row shows "View" that scrolls; others show Go */}
+                  {/* Action — queue row shows "View" that navigates or scrolls; others show Go */}
                   {task.id === 'queue' ? (
                     <button
                       type='button'
                       onClick={(e) => {
                         e.stopPropagation()
-                        scrollToQueue()
+                        handleQueueClick()
                       }}
                       className={cn(
                         'shrink-0 text-xs font-medium underline-offset-2 hover:underline',
