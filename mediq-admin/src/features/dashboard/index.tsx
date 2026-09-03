@@ -294,12 +294,20 @@ export function Dashboard() {
 
         {isPending ? (
           <DashboardSkeleton />
-        ) : isDoctor && doctor ? (
-          <DoctorToday
-            appointments={appointments}
-            queue={queue}
-            doctorName={doctor.name}
-          />
+        ) : isDoctor ? (
+          doctor ? (
+            <DoctorToday
+              appointments={appointments}
+              queue={queue}
+              doctorName={doctor.name}
+            />
+          ) : (
+            <Card>
+              <CardContent className='py-8 text-center'>
+                <p className='text-sm text-muted-foreground'>No doctor profile linked to this account.</p>
+              </CardContent>
+            </Card>
+          )
         ) : (
           <div className='space-y-4'>
             {/* Analytics KPI Cards */}
