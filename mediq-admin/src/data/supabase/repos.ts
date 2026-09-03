@@ -378,6 +378,12 @@ export const doctorsRepository: DoctorsRepository = {
         email: input.email,
         status: input.status,
         clinic_id: clinicId,
+        // TODO: The doctors table has a user_id column (added 20260825) to link
+        // a doctor record to an auth user. Currently the create input type
+        // (Omit<Doctor, 'id'>) does not include userId. Pass it through when
+        // the Doctor type and DoctorsRepository interface are extended.
+        // user_id: (input as any).userId ?? null,
+        user_id: null,
       })
       .select()
       .single()
@@ -431,6 +437,10 @@ export const staffRepository: StaffRepository = {
           status: input.status,
           clinic_id: clinicId,
         },
+        // TODO: In a multi-tenant system, staff email should be unique per clinic,
+        // not globally. Change to onConflict: 'clinic_id,email' once a composite
+        // unique index on (clinic_id, lower(email)) exists in the database.
+        // The clinic_id is already included in the upsert payload above.
         { onConflict: 'email' }
       )
       .select()
