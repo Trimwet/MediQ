@@ -55,10 +55,15 @@ export function DoctorUtilizationChart({
                   tickLine={false}
                   axisLine={false}
                   tickMargin={8}
-                  tick={{ fontSize: 12 }}
+                  tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }}
                   stroke='var(--muted-foreground)'
-                  interval='preserveStartEnd'
-                  minTickGap={24}
+                  interval={0}
+                  angle={-30}
+                  textAnchor='end'
+                  height={48}
+                  tickFormatter={(v: string) =>
+                    v.startsWith('Dr.') ? v.replace('Dr. ', '') : v.split(' ')[0]
+                  }
                 />
                 <YAxis
                   allowDecimals={false}

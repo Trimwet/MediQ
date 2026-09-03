@@ -75,7 +75,7 @@ export function StatusDonut({ data, isLoading }: StatusDonutProps) {
                     style={{ background: COLORS[i % COLORS.length] }}
                   />
                   <span className='text-muted-foreground capitalize'>
-                    {entry.name.replace('_', ' ')}
+                    {entry.name.replace(/_/g, ' ')}
                   </span>
                   <span className='font-medium'>{entry.value}</span>
                 </div>

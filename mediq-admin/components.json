@@ -19,6 +19,7 @@
   },
   "iconLibrary": "lucide",
   "registries": {
-    "@ui-layouts": "https://ui-layouts.com/r/{name}.json"
+    "@ui-layouts": "https://ui-layouts.com/r/{name}.json",
+    "@reui": "https://reui.io/r/{style}/{name}.json"
   }
 }

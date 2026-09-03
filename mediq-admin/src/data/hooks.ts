@@ -219,8 +219,11 @@ export function useUpdateAppointmentStatus() {
             doctor_name: apt.doctor_name ?? '',
             clinic_id: apt.clinic_id,
             status: 'waiting',
+            checked_in_at: new Date().toISOString(),
           })
-          if (insertErr) throw insertErr
+          // Log but don't throw — the status update must still go through
+          // even if the queue insert fails (e.g. duplicate or RLS edge case).
+          if (insertErr) console.error('[queue insert]', insertErr)
         }
       }
 

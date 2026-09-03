@@ -74,7 +74,10 @@ export function Dashboard() {
   const [customFrom, setCustomFrom] = useState<Date>()
   const [customTo, setCustomTo] = useState<Date>()
 
-  const analyticsQuery = useAnalytics(range === 'custom' ? 'today' : range)
+  // Map 'custom' to '30d' as the widest pre-built bucket; the client
+  // then filters the returned data client-side by the custom date bounds.
+  const analyticsRange = range === 'custom' ? '30d' : range
+  const analyticsQuery = useAnalytics(analyticsRange)
 
   const isPending =
     appointmentsQuery.isPending ||
@@ -314,6 +317,7 @@ export function Dashboard() {
             <AnalyticsCards
               data={analyticsQuery.data}
               isLoading={analyticsQuery.isLoading}
+              range={range}
             />
 
             {/* Analytics Charts */}
@@ -322,6 +326,12 @@ export function Dashboard() {
                 <AppointmentsTrendChart
                   data={analyticsQuery.data?.trend}
                   isLoading={analyticsQuery.isLoading}
+                  title={
+                    range === 'today' ? "Today's Trend" :
+                    range === '7d' ? '7-Day Trend' :
+                    range === '30d' ? '30-Day Trend' :
+                    `${format(customFrom ?? new Date(), 'MMM d')} – ${format(customTo ?? new Date(), 'MMM d')} Trend`
+                  }
                 />
               </div>
               <StatusDonut

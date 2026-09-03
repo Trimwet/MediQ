@@ -1,3 +1,4 @@
+import { format, parseISO } from 'date-fns'
 import {
   Area,
   AreaChart,
@@ -19,16 +20,26 @@ interface TrendData {
 interface AppointmentsTrendChartProps {
   data?: TrendData[]
   isLoading: boolean
+  title?: string
+}
+
+// Format YYYY-MM-DD → 'Aug 3'
+function fmtDate(d: string) {
+  try { return format(parseISO(d), 'MMM d') } catch { return d }
 }
 
 export function AppointmentsTrendChart({
   data,
   isLoading,
+  title = 'Appointment Trend',
 }: AppointmentsTrendChartProps) {
+  // Transform dates for display
+  const displayData = data?.map((row) => ({ ...row, date: fmtDate(row.date) }))
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>7-Day Trend</CardTitle>
+        <CardTitle>{title}</CardTitle>
       </CardHeader>
       <CardContent>
         {isLoading || !data ? (
@@ -41,7 +52,7 @@ export function AppointmentsTrendChart({
           <div className='h-64 w-full'>
             <ResponsiveContainer width='100%' height='100%'>
               <AreaChart
-                data={data}
+                data={displayData}
                 margin={{ top: 4, right: 4, bottom: 0, left: -20 }}
               >
                 <CartesianGrid

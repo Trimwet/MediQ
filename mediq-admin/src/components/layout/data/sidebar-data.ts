@@ -1,6 +1,7 @@
 import {
   Bell,
   Calendar,
+  CalendarRange,
   DoorOpen,
   LayoutDashboard,
   Settings,
@@ -37,6 +38,11 @@ export const sidebarData: SidebarData = {
           title: 'Appointments',
           url: '/admin/appointments',
           icon: Calendar,
+        },
+        {
+          title: 'Schedule',
+          url: '/admin/schedule',
+          icon: CalendarRange,
         },
         {
           title: 'Queue',

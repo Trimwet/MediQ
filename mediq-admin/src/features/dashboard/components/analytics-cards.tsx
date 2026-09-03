@@ -2,36 +2,69 @@ import { CalendarCheck, CheckCircle, Clock, Timer } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { AnalyticsSummary } from '@/data/supabase/repos'
+import type { DashboardRange } from './date-range'
 
 interface AnalyticsCardsProps {
   data?: AnalyticsSummary
   isLoading: boolean
+  range?: DashboardRange
 }
 
-const cards = [
-  {
-    key: 'booked' as const,
-    label: 'Today Booked',
-    icon: CalendarCheck,
-  },
-  {
-    key: 'completed' as const,
-    label: 'Completed',
-    icon: CheckCircle,
-  },
-  {
-    key: 'pending' as const,
-    label: 'Pending',
-    icon: Clock,
-  },
-  {
-    key: 'avgWait' as const,
-    label: 'Avg Wait',
-    icon: Timer,
-  },
-] as const
+export function AnalyticsCards({ data, isLoading, range = 'today' }: AnalyticsCardsProps) {
+  // For today: use today snapshot. For 7d/30d/custom: sum from the trend array
+  // (which covers the full range) so the numbers reflect the selected period.
+  const isToday = range === 'today'
 
-export function AnalyticsCards({ data, isLoading }: AnalyticsCardsProps) {
+  const totals = (() => {
+    if (!data) return { booked: 0, completed: 0, pending: 0 }
+    if (isToday) {
+      return {
+        booked: data.today.booked,
+        completed: data.today.completed,
+        pending: data.today.pending,
+      }
+    }
+    // Sum booked + completed across all trend days
+    const booked = data.trend.reduce((s, d) => s + d.booked, 0)
+    const completed = data.trend.reduce((s, d) => s + d.completed, 0)
+    // pending / cancelled / etc come from byStatus
+    const pendingEntry = data.byStatus.find((b) => b.name === 'pending')
+    return { booked, completed, pending: pendingEntry?.value ?? 0 }
+  })()
+
+  const periodLabel = isToday ? 'today' : range === '7d' ? 'last 7 days' : range === '30d' ? 'last 30 days' : 'period'
+
+  const cards = [
+    {
+      key: 'booked',
+      label: 'Booked',
+      subtext: periodLabel,
+      icon: CalendarCheck,
+      value: totals.booked,
+    },
+    {
+      key: 'completed',
+      label: 'Completed',
+      subtext: periodLabel,
+      icon: CheckCircle,
+      value: totals.completed,
+    },
+    {
+      key: 'pending',
+      label: 'Pending',
+      subtext: 'awaiting confirmation',
+      icon: Clock,
+      value: totals.pending,
+    },
+    {
+      key: 'avgWait',
+      label: 'Avg Wait',
+      subtext: 'minutes per patient',
+      icon: Timer,
+      value: data?.avgWaitMinutes != null ? `${data.avgWaitMinutes} min` : '--',
+    },
+  ] as const
+
   return (
     <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
       {cards.map((card) => (
@@ -41,6 +74,7 @@ export function AnalyticsCards({ data, isLoading }: AnalyticsCardsProps) {
               <div className='space-y-2'>
                 <Skeleton className='h-4 w-24' />
                 <Skeleton className='h-8 w-16' />
+                <Skeleton className='h-3 w-20' />
               </div>
             ) : (
               <>
@@ -49,16 +83,9 @@ export function AnalyticsCards({ data, isLoading }: AnalyticsCardsProps) {
                   <p className='text-sm text-muted-foreground'>{card.label}</p>
                 </div>
                 <p className='mt-1 text-3xl font-bold tracking-tight'>
-                  {card.key === 'avgWait'
-                    ? data.avgWaitMinutes != null
-                      ? `${data.avgWaitMinutes} min`
-                      : '--'
-                    : card.key === 'booked'
-                      ? data.today.booked
-                      : card.key === 'completed'
-                        ? data.today.completed
-                        : data.today.pending}
+                  {card.value}
                 </p>
+                <p className='mt-1 text-xs text-muted-foreground'>{card.subtext}</p>
               </>
             )}
           </CardContent>
