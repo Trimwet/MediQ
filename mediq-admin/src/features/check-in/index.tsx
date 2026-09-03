@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import {
@@ -79,8 +79,11 @@ export function CheckInPage() {
   const [state, setState] = useState<PageState>({ kind: 'loading' })
   const [isCheckingIn, setIsCheckingIn] = useState(false)
 
-  /* ---- Read appointment id from ?id= search param ---- */
-  const appointmentId = new URLSearchParams(window.location.search).get('id')
+  /* ---- Read appointment id from ?id= search param (SSR-safe) ---- */
+  const appointmentId = useMemo(() => {
+    if (typeof window === 'undefined') return null
+    return new URLSearchParams(window.location.search).get('id')
+  }, [])
 
   /* ---- Fetch appointment + existing queue entry ---- */
   useEffect(() => {

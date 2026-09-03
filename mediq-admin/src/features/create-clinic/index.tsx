@@ -39,6 +39,7 @@ import { PasswordInput } from '@/components/password-input'
 // ---------------------------------------------------------------------------
 
 function getInitialPlan(): 'free' | 'starter' | 'professional' | 'enterprise' {
+  if (typeof window === 'undefined') return 'free'
   const params = new URLSearchParams(window.location.search)
   const raw = params.get('plan')
   if (raw === 'free' || raw === 'starter' || raw === 'professional' || raw === 'enterprise') {

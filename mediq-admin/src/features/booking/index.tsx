@@ -153,8 +153,16 @@ export function Booking() {
         ? activeDoctors.find((d) => d.id === values.doctorId)
         : undefined
 
-    const scheduledFor = new Date(values.date)
-    scheduledFor.setHours(slot.hour, 0, 0, 0)
+    // NOTE: Clinic operates in Africa/Lagos (WAT, UTC+1).
+    // Construct the scheduled time in UTC so the server stores the correct
+    // instant. If date-fns-tz is added later, prefer tzToZonedTime /
+    // formatInTimeZone for explicit timezone handling.
+    const d = values.date
+    const scheduledFor = new Date(Date.UTC(
+      d.getFullYear(), d.getMonth(), d.getDate(),
+      slot.hour - 1, // WAT = UTC+1 → subtract 1 for UTC
+      0, 0, 0,
+    ))
 
     const chosenClinicId = values.clinicId || selectedClinicId || undefined
 
