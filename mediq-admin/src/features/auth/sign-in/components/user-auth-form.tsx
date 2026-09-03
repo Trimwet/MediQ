@@ -85,6 +85,9 @@ export function UserAuthForm({
         .single()
 
       if (profileError || !profile) {
+        // B-14: Clear the JWT that was just created and reset the store
+        await supabase.auth.signOut()
+        useAuthStore.getState().auth.reset()
         setIsLoading(false)
         toast.error('Could not load your profile. Please try again.')
         return
@@ -160,7 +163,7 @@ export function UserAuthForm({
             </FormItem>
           )}
         />
-        <Button className='mt-3' disabled={isLoading}>
+        <Button type='submit' className='mt-3' disabled={isLoading}>
           {isLoading ? <Loader2 className='animate-spin' /> : <LogIn />}
           Sign in
         </Button>

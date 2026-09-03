@@ -202,7 +202,7 @@ function useSlugField(
     if (!clinicName || isSlugTouched) return
     const generated = generateSlug(clinicName)
     setValue('slug', generated, { shouldValidate: false })
-  }, [clinicName, isSlugTouched])
+  }, [clinicName, isSlugTouched, setValue])
 
   // Cleanup on unmount
   useEffect(() => {
@@ -268,7 +268,7 @@ function useSlugField(
       controller.abort()
       if (debounceRef.current) clearTimeout(debounceRef.current)
     }
-  }, [slug])
+  }, [slug, schema])
 
   return { slugStatus, slug }
 }
@@ -372,7 +372,8 @@ function CombinedForm() {
       if (clinicError) {
         const msg =
           clinicError.message?.includes('duplicate') ||
-          clinicError.message?.includes('unique')
+          clinicError.message?.includes('unique') ||
+          (clinicError as unknown as Record<string, unknown>).code === '23505'
             ? 'This slug is already taken. Please choose another.'
             : clinicError.message ||
               'Failed to create clinic. Please try again.'
@@ -644,7 +645,7 @@ function ClinicOnlyForm() {
       localStorage.removeItem('mediq_pending_clinic')
       toast.info('Your clinic details were restored — review and submit to create it.')
     } catch {}
-  }, [])
+  }, [user?.email]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const isSlugTouched = !!methods.formState.touchedFields.slug
   const { slugStatus, slug } = useSlugField(
@@ -667,7 +668,8 @@ function ClinicOnlyForm() {
       if (error) {
         const msg =
           error.message?.includes('duplicate') ||
-          error.message?.includes('unique')
+          error.message?.includes('unique') ||
+          (error as unknown as Record<string, unknown>).code === '23505'
             ? 'This slug is already taken. Please choose another.'
             : error.message || 'Failed to create clinic. Please try again.'
         toast.error(msg)

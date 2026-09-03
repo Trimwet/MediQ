@@ -75,9 +75,13 @@ export function SignUpForm({
       },
       error: (error) => {
         setIsLoading(false)
-        return error instanceof Error
-          ? error.message
-          : 'Error creating account.'
+        if (error instanceof Error) {
+          const msg = error.message
+          return msg.includes('already')
+            ? 'An account already exists. Please sign in.'
+            : msg
+        }
+        return 'Error creating account.'
       },
     })
   }
@@ -158,7 +162,7 @@ export function SignUpForm({
             </FormItem>
           )}
         />
-        <Button className='mt-3' disabled={isLoading}>
+        <Button type='submit' className='mt-3' disabled={isLoading}>
           {isLoading ? <Loader2 className='animate-spin' /> : <UserPlus />}
           Create Account
         </Button>
