@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useCurrentClinic } from '@/lib/clinic-context'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -78,6 +79,7 @@ function formatDateTime(iso: string): string {
 export function CheckInPage() {
   const [state, setState] = useState<PageState>({ kind: 'loading' })
   const [isCheckingIn, setIsCheckingIn] = useState(false)
+  const { clinicId } = useCurrentClinic()
 
   /* ---- Read appointment id from ?id= search param (SSR-safe) ---- */
   const appointmentId = useMemo(() => {
@@ -87,6 +89,11 @@ export function CheckInPage() {
 
   /* ---- Fetch appointment + existing queue entry ---- */
   useEffect(() => {
+    if (!clinicId) {
+      setState({ kind: 'error', message: 'No clinic selected. Please select a clinic first.' })
+      return
+    }
+
     if (!appointmentId) {
       setState({ kind: 'error', message: 'No appointment ID provided.' })
       return
@@ -102,6 +109,7 @@ export function CheckInPage() {
         .from('appointments')
         .select('*')
         .eq('id', appointmentId!)
+        .eq('clinic_id', clinicId!)
         .single()
 
       if (cancelled) return
@@ -127,7 +135,7 @@ export function CheckInPage() {
         const { count } = await supabase
           .from('queue_entries')
           .select('id', { count: 'exact', head: true })
-          .eq('clinic_id', apt.clinic_id)
+          .eq('clinic_id', clinicId)
           .eq('status', 'waiting')
 
         if (cancelled) return
@@ -150,11 +158,15 @@ export function CheckInPage() {
     return () => {
       cancelled = true
     }
-  }, [appointmentId])
+  }, [appointmentId, clinicId])
 
   /* ---- Check-in handler ---- */
   const handleCheckIn = useCallback(async () => {
     if (state.kind !== 'detail') return
+    if (!clinicId) {
+      setState({ kind: 'error', message: 'No clinic selected.' })
+      return
+    }
     const apt = state.appointment
     setIsCheckingIn(true)
 
@@ -165,7 +177,7 @@ export function CheckInPage() {
         patient_name: apt.patient_name,
         appointment_time: apt.scheduled_for,
         doctor_name: apt.doctor_name ?? '',
-        clinic_id: apt.clinic_id,
+        clinic_id: clinicId,
         status: 'waiting',
       })
 
@@ -183,7 +195,7 @@ export function CheckInPage() {
       const { count } = await supabase
         .from('queue_entries')
         .select('id', { count: 'exact', head: true })
-        .eq('clinic_id', apt.clinic_id)
+        .eq('clinic_id', clinicId)
         .eq('status', 'waiting')
 
       setState({ kind: 'success', position: count ?? 1 })
@@ -194,7 +206,7 @@ export function CheckInPage() {
     } finally {
       setIsCheckingIn(false)
     }
-  }, [state])
+  }, [state, clinicId])
 
   /* ---- Render ---- */
 

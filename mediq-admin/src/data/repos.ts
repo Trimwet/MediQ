@@ -108,6 +108,8 @@ export interface SignUpInput {
   email: string
   password: string
   phone?: string
+  /** Optional — current clinic context for patient directory insert. */
+  clinicId?: string | null
 }
 
 export interface BookingInput {

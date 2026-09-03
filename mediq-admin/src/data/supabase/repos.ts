@@ -692,6 +692,7 @@ export const authRepository: AuthRepository = {
         phone: input.phone,
         email: input.email,
         visits: 0,
+        ...(input.clinicId ? { clinic_id: input.clinicId } : {}),
       })
       // Duplicate email is expected — the patient was already in the directory.
       if (patientErr && !patientErr.message?.includes('duplicate')) {
