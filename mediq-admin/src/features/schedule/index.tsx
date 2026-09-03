@@ -16,7 +16,6 @@ import {
   subDays,
   parseISO,
   getHours,
-  getMinutes,
   setHours,
   setMinutes,
   isToday,
