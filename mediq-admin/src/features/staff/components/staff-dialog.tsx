@@ -93,6 +93,13 @@ export function StaffDialog({
   const tempPassword = useMemo(generateTempPassword, [invite])
 
   async function onSubmit(values: StaffForm) {
+    const memberRole =
+      values.role === 'doctor'
+        ? 'doctor'
+        : values.role === 'admin'
+          ? 'admin'
+          : 'front_desk'
+
     // Create the Supabase Auth account with a temporary password.
     // The handle_new_user trigger auto-creates a profile with role 'patient';
     // in production the role is set via an Edge Function or admin action.
@@ -108,23 +115,37 @@ export function StaffDialog({
       },
     })
 
-    // If the user already exists in auth, that's fine — we still create
-    // the staff directory record. The existing account can sign in.
     if (authError && !authError.message?.includes('already been registered')) {
       toast.error(authError.message ?? 'Failed to create auth account.')
       return
     }
 
-    // Look up the auth user ID (new or existing) to create clinic_members link.
-    // For existing users we query by email; for new ones the signup response has the ID.
+    // New account: the sign-up response carries the user ID.
+    // Existing account: the anon client can't see the ID, so the server links
+    // membership + profile role + doctors.user_id via the link_clinic_member
+    // RPC (SECURITY DEFINER, migration 20260903).
+    const userAlreadyRegistered = Boolean(authError)
     let userId: string | null = null
-    if (!authError) {
+
+    if (!userAlreadyRegistered) {
       userId = authData?.user?.id ?? null
-    } else {
-      // User already exists — find them by email via admin lookup (not available
-      // from anon client). We'll create the clinic_members row via a function
-      // or skip for now; the user can be linked manually.
-      // For the mock flow this is fine — the user is already in the system.
+    } else if (clinicId) {
+      const { data: linkedUserId, error: linkError } = await supabase.rpc(
+        'link_clinic_member',
+        {
+          p_clinic_id: clinicId,
+          p_email: values.email,
+          p_role: memberRole,
+        }
+      )
+      if (linkError || !linkedUserId) {
+        toast.error(
+          linkError?.message ??
+            'This account already exists but could not be linked to the clinic.'
+        )
+        return
+      }
+      userId = linkedUserId
     }
 
     // Create the staff directory record.
@@ -136,14 +157,9 @@ export function StaffDialog({
       status: 'active',
     })
 
-    // Link the new user to this clinic via clinic_members.
-    if (userId && clinicId) {
-      const memberRole =
-        values.role === 'doctor'
-          ? 'doctor'
-          : values.role === 'admin'
-            ? 'admin'
-            : 'front_desk'
+    // Link a brand-new user to this clinic via clinic_members. Existing
+    // accounts were already linked server-side by link_clinic_member.
+    if (userId && clinicId && !userAlreadyRegistered) {
       const { error: memberErr } = await supabase
         .from('clinic_members')
         .insert({
@@ -157,7 +173,8 @@ export function StaffDialog({
     }
 
     // Doctors also need a directory record so their account can be matched
-    // to appointments (row-level scoping). Skip if one already exists.
+    // to appointments (row-level scoping). Skip if one already exists. Pass
+    // the auth user ID so doctors.user_id is set on the directory row too.
     if (values.role === 'doctor' && values.specialization) {
       const exists = doctorsQuery.data?.some(
         (d) => d.email?.toLowerCase() === values.email.toLowerCase()
@@ -169,8 +186,17 @@ export function StaffDialog({
           email: values.email,
           status: 'active',
           todayAppointments: 0,
+          userId,
         })
       }
+    }
+
+    if (userAlreadyRegistered) {
+      toast.success(
+        `${values.name} already has an account — linked to this clinic.`
+      )
+      closeDialog()
+      return
     }
 
     setInvite({

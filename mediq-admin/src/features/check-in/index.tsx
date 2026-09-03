@@ -104,10 +104,10 @@ export function CheckInPage() {
     async function load() {
       setState({ kind: 'loading' })
 
-      // 1. Fetch appointment
+      // 1. Fetch appointment — public QR flow, explicit column allowlist
       const { data: apt, error: aptErr } = await supabase
         .from('appointments')
-        .select('*')
+        .select('id, patient_name, patient_email, doctor_name, scheduled_for, status, clinic_id')
         .eq('id', appointmentId!)
         .eq('clinic_id', clinicId!)
         .single()

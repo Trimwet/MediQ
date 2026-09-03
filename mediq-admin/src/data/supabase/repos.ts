@@ -378,12 +378,11 @@ export const doctorsRepository: DoctorsRepository = {
         email: input.email,
         status: input.status,
         clinic_id: clinicId,
-        // TODO: The doctors table has a user_id column (added 20260825) to link
-        // a doctor record to an auth user. Currently the create input type
-        // (Omit<Doctor, 'id'>) does not include userId. Pass it through when
-        // the Doctor type and DoctorsRepository interface are extended.
-        // user_id: (input as any).userId ?? null,
-        user_id: null,
+        // Link an auth account to this doctor row when the invite flow knows it
+        // (new sign-ups). RLS user_is_this_doctor prefers user_id over its email
+        // fallback. Existing-account invites are linked server-side by the
+        // link_clinic_member RPC (migration 20260903).
+        user_id: input.userId ?? null,
       })
       .select()
       .single()
@@ -691,24 +690,9 @@ export const authRepository: AuthRepository = {
       .eq('id', data.user.id)
       .single()
 
-    // Also create a patient directory record so the patient appears in the
-    // admin Patients page immediately — not just after their first booking.
-    // Use a plain insert; if the patient already exists (duplicate email), we
-    // silently ignore the conflict rather than using onConflict which fails
-    // against a partial unique index on lower(email).
-    if (input.name && input.phone) {
-      const { error: patientErr } = await supabase.from('patients').insert({
-        name: input.name,
-        phone: input.phone,
-        email: input.email,
-        visits: 0,
-        ...(input.clinicId ? { clinic_id: input.clinicId } : {}),
-      })
-      // Duplicate email is expected — the patient was already in the directory.
-      if (patientErr && !patientErr.message?.includes('duplicate')) {
-        console.error('Failed to create patient record:', patientErr)
-      }
-    }
+    // NOTE: Do NOT insert a patients row here. The booking-created patient
+    // is the source of truth via book_appointment RPC which sets clinic_id.
+    // Inserting without clinic_id would create an orphan blocked by RLS.
 
     return {
       email: data.user.email ?? input.email,

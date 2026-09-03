@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { canCheckIn } from './helpers'
+import { canCheckIn, isPendingApproval } from './helpers'
 
 describe('canCheckIn', () => {
   it('allows check-in for booked appointments', () => {
@@ -22,8 +22,9 @@ describe('canCheckIn', () => {
     expect(canCheckIn({ status: 'no_show' })).toBe(false)
   })
 
-  it('allows check-in for pending appointments', () => {
-    expect(canCheckIn({ status: 'pending' })).toBe(true)
+  it('blocks check-in for pending appointments (awaiting staff approval)', () => {
+    expect(canCheckIn({ status: 'pending' })).toBe(false)
+    expect(isPendingApproval({ status: 'pending' })).toBe(true)
   })
 
   it('allows check-in for arrived appointments', () => {

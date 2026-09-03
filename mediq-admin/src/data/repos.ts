@@ -57,7 +57,15 @@ export interface PatientsRepository {
 
 export interface DoctorsRepository {
   list: (clinicId?: string) => Promise<Doctor[]>
-  create: (input: Omit<Doctor, 'id'>, clinicId?: string) => Promise<Doctor>
+  /**
+   * `userId` optionally links an auth account to the doctor row (doctors.user_id).
+   * Invite flows pass it when they know the account (new sign-ups); existing
+   * accounts are linked server-side by the link_clinic_member RPC instead.
+   */
+  create: (
+    input: Omit<Doctor, 'id'> & { userId?: string | null },
+    clinicId?: string
+  ) => Promise<Doctor>
   updateStatus: (id: string, status: DoctorStatus) => Promise<void>
   delete: (id: string) => Promise<void>
 }

@@ -1,9 +1,9 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { z } from 'zod'
 import { format, startOfDay, isSameDay } from 'date-fns'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Link } from '@tanstack/react-router'
+import { Link, useSearch } from '@tanstack/react-router'
 import { type BookingResult } from '@/data'
 import { type Appointment } from '@/features/appointments/schema'
 import {
@@ -69,11 +69,7 @@ export function Booking() {
   const book = useBookAppointment()
   const clinicsQuery = usePublicClinics()
 
-  const urlClinicId = useMemo(() => {
-    if (typeof window === 'undefined') return undefined
-    const v = new URLSearchParams(window.location.search).get('clinicId')
-    return v ?? undefined
-  }, [])
+  const urlClinicId = useSearch({ from: '/book' }).clinicId
 
   const defaultClinicId = urlClinicId ?? clinicsQuery.data?.[0]?.id ?? ''
 
@@ -90,6 +86,14 @@ export function Booking() {
       reason: '',
     },
   })
+
+  // B-09: Sync async defaultClinicId into the form once it resolves.
+  // Only writes if the field is still empty (avoids wiping user edits).
+  useEffect(() => {
+    if (defaultClinicId && !form.getValues('clinicId')) {
+      form.setValue('clinicId', defaultClinicId)
+    }
+  }, [defaultClinicId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const selectedClinicId = form.watch('clinicId') || defaultClinicId
   const doctorsQuery = usePublicDoctors(selectedClinicId || undefined)

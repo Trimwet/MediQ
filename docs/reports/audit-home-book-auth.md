@@ -97,7 +97,7 @@ Both forms explicitly use `FormProvider` (spec-compliant, unlike booking/sign-up
 | `PageState` | `check-in/index.tsx:31` | discriminated union `loading\|error\|not-found\|detail\|success\|already-checked-in` |
 | `getStatusBadgeClasses` | `check-in/index.tsx:43` | `switch(status)` → sky/amber/indigo/emerald/destructive |
 | `CheckInPage` | `check-in/index.tsx:78` | `useState PageState`, `useState isCheckingIn`, `appointmentId = new URLSearchParams(window.location.search).get('id')` at `check-in/index.tsx:83` |
-| Loading | `check-in/index.tsx:198` | `Card` + `div animate-spin border-4 border-t-primary` |
+| Loading | `check-in/index.tsx:198` | `Card` + `div animate-spin rounded-full border-4 border-t-primary` |
 | Error | `check-in/index.tsx:211` | `CardHeader CardTitle text-destructive` |
 | NotFound | `check-in/index.tsx:226` | `CardDescription` |
 | Already | `check-in/index.tsx:242` | `position: count ?? 1` |
@@ -139,7 +139,7 @@ Zero `Form`, zero `TimelineAnimation`, zero `Select` — read-only detail + sing
 | Patient directory insert `supabase.from('patients').insert({name,phone,email,visits:0})` | `repos.ts:690` — **no `clinic_id`** |
 | `useSignUp` in `BookingSuccess` `signUp.mutate({email,password})` | `booking/index.tsx:507` → `hooks.ts:372` `authRepository.signUp` — name/phone omitted (booking already has them) |
 
-**RLS:** `patients_insert` in `repos.ts:690` will be blocked when RLS requires `clinic_id` + `user_in_clinic` (see `supabase/migrations` tenancy). The insert is purposely without `onConflict lower(email)` handling — duplicate is the expected path (`authRepository` throws `An account already exists`). Duplicate patient insert is swallowed only if `msg.includes('duplicate')` (line 697). Missing `clinic_id` means the row lands as `clinic_id IS NULL` and is invisible to clinic staff (prior `INV-01`).
+**RLS:** `patients_insert` in `repos.ts:690` will be blocked when RLS requires `clinic_id` + `user_in_clinic` (see `supabase/migrations` tenancy). The insert is purposely without `onConflict lower(email)` handling — duplicate is the expected path (`authRepository` throws `An account already exists`). Duplicate patient insert is swallowed only if `msg.includes('duplicate')` (line 697). Missing `clinic_id` means the row lands as `clinic_id IS NULL` and is invisible to clinic staff (prior `INV-01`/`F03`).
 
 ### 2.3 `create_clinic` RPC + `supabase.auth`
 

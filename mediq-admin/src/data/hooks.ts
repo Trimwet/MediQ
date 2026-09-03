@@ -487,8 +487,9 @@ export function useQueue() {
     enabled: isPatient ? !!user?.email : !!clinicId,
     queryFn: async () => {
       if (isPatient) {
-        // Queue RLS has no patient branch yet — primary fallback is appointment status (see checklist).
-        // Try a clinic-less fetch so that when RLS gains a patient branch data appears without code change.
+        // RLS queue_entries_select_clinic has a patient branch since migration
+        // 20260829000000 (EXISTS over appointments.patient_email), so this
+        // clinic-less fetch returns only the patient's own queue entries.
         try {
           const { data, error } = await supabase
             .from('queue_entries')
@@ -634,7 +635,7 @@ export function useCreateDoctor() {
   const queryClient = useQueryClient()
   const { clinicId } = useCurrentClinic()
   return useMutation({
-    mutationFn: (input: Omit<Doctor, 'id'>) =>
+    mutationFn: (input: Omit<Doctor, 'id'> & { userId?: string | null }) =>
       doctorsRepository.create(input, clinicId ?? undefined),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['doctors'] }),
   })
