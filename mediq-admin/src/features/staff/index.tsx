@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useCreateStaff, useDeleteStaff, useStaff } from '@/data/hooks'
+import { useDeleteStaff, useStaff } from '@/data/hooks'
 import { UserPlus } from 'lucide-react'
 import { toast } from 'sonner'
 import { useRbac } from '@/hooks/use-rbac'
@@ -21,15 +21,14 @@ export function Staff() {
   const canManage = can('staff:manage')
 
   const staffQuery = useStaff()
-  const createStaff = useCreateStaff()
   const deleteStaff = useDeleteStaff()
   const [dialogOpen, setDialogOpen] = useState(false)
 
   function handleCreated(member: Omit<Staff, 'id'>) {
-    createStaff.mutate(member, {
-      onSuccess: (created) =>
-        toast.success(`${created.name} invited — share the invite link`),
-    })
+    // The Edge Function already inserted the record server-side;
+    // just refetch so the table reflects the new member.
+    void staffQuery.refetch()
+    toast.success(`Invite sent to ${member.name}`)
   }
 
   function handleDelete(id: string) {

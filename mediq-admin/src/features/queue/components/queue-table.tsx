@@ -47,9 +47,11 @@ export function QueueTable({ waiting, canManage, onMarkLeft }: QueueTableProps) 
           {waiting.map((entry, index) => (
             <TableRow key={entry.id}>
               <TableCell className='text-muted-foreground'>{index + 1}</TableCell>
-              <TableCell className='font-medium'>{entry.patientName}</TableCell>
-              <TableCell className='text-muted-foreground'>
-                {entry.doctorName}
+              <TableCell className='font-medium max-w-[160px]'>
+                <div className='truncate' title={entry.patientName}>{entry.patientName}</div>
+              </TableCell>
+              <TableCell className='text-muted-foreground max-w-[160px]'>
+                <div className='truncate' title={entry.doctorName}>{entry.doctorName}</div>
               </TableCell>
               <TableCell className='hidden text-muted-foreground sm:table-cell'>
                 {new Date(entry.appointmentTime).toLocaleTimeString([], {

@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.177.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3"
 
 function getCorsHeaders(req: Request): Record<string, string> {
-  const raw = Deno.env.get("ALLOWED_ORIGINS") ?? "https://getmediq.vercel.app,http://localhost:3000"
+  const raw = Deno.env.get("ALLOWED_ORIGINS") ?? "https://getmediq.vercel.app,http://localhost:3000,http://127.0.0.1:3000"
   const allowedOrigins = raw.split(",").map((s) => s.trim()).filter(Boolean)
   const origin = req.headers.get("Origin") ?? ""
   const allowOrigin = allowedOrigins.includes(origin) ? origin : allowedOrigins[0]
@@ -57,7 +57,7 @@ serve(async (req) => {
 
     // 3. Parse the request body (need clinic_id/slug early to resolve caller clinic)
     const body = await req.json().catch(() => ({}))
-    const { email, name, role, specialization, clinic_id: bodyClinicId, clinic_slug } = body
+    const { email, name, role, specialization, phone, clinic_id: bodyClinicId, clinic_slug } = body
 
     if (!email || !name || !role) {
       throw new Error("Missing required fields: email, name, role")
@@ -145,21 +145,23 @@ serve(async (req) => {
       }
     }
 
-    // 6. Generate the invite link (this creates the user in auth.users)
-    const { data: inviteData, error: inviteError } = await supabaseAdmin.auth.admin.generateLink({
-      type: "invite",
-      email: email.toLowerCase(),
-    })
+    // 6. Invite the user — creates the auth.users row AND sends the invite email.
+    const frontendUrl = Deno.env.get("FRONTEND_URL") ?? "https://getmediq.vercel.app"
+    const { data: inviteData, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(
+      email.toLowerCase(),
+      {
+        data: { name, role },
+        redirectTo: `${frontendUrl}/change-password`,
+      },
+    )
 
     if (inviteError) {
       throw inviteError
     }
 
     const newUser = inviteData.user
-    const inviteLink = inviteData.properties?.action_link
-
-    if (!newUser || !inviteLink) {
-      throw new Error("Failed to generate invite link")
+    if (!newUser) {
+      throw new Error("Failed to create invited user")
     }
 
     // 7. The handle_new_user trigger creates a profile with role 'patient'.
@@ -192,7 +194,7 @@ serve(async (req) => {
         name: name,
         email: email.toLowerCase(),
         role: role,
-        phone: "Pending",
+        phone: phone ?? "Pending",
         status: "active",
         clinic_id: callerClinicId,
       })
@@ -217,11 +219,10 @@ serve(async (req) => {
       }
     }
 
-    // 10. Return the invite link to the frontend
+    // 10. Return success — invite email was already sent by inviteUserByEmail
     return new Response(
       JSON.stringify({
         message: "Staff invited successfully",
-        inviteLink: inviteLink,
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },

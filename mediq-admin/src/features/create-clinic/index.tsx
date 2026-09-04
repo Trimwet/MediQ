@@ -280,6 +280,8 @@ function useSlugField(
 function CombinedForm() {
   const navigate = useNavigate()
   const setClinic = useAuthStore((s) => s.auth.setClinic)
+  const setUser = useAuthStore((s) => s.auth.setUser)
+  const setAccessToken = useAuthStore((s) => s.auth.setAccessToken)
   const [isLoading, setIsLoading] = useState(false)
 
   const methods = useForm<CombinedValues>({
@@ -382,9 +384,24 @@ function CombinedForm() {
         return
       }
 
-      // Step 4: Update auth store with clinic context
+      // Step 4: Hydrate the auth store — setClinic requires auth.user to be
+      // non-null, so we must call setUser first for brand-new registrations.
+      const session = sessionData.session
+      const exp = session?.expires_at
+        ? session.expires_at * 1000
+        : Date.now() + 24 * 60 * 60 * 1000
+
+      setUser({
+        accountNo: signUpData.user!.id,
+        email: signUpData.user!.email ?? data.email,
+        role: ['admin'],
+        exp,
+      })
+      setAccessToken(session?.access_token ?? '')
+
       if (clinicData && typeof clinicData === 'object') {
-        const clinicId = (clinicData as Record<string, unknown>).clinic_id
+        // create_clinic returns a clinics row — field is `id`, not `clinic_id`
+        const clinicId = (clinicData as Record<string, unknown>).id
         const clinicNameVal = (clinicData as Record<string, unknown>).name
         if (clinicId) {
           setClinic(
@@ -678,7 +695,8 @@ function ClinicOnlyForm() {
       }
 
       if (clinicData && typeof clinicData === 'object') {
-        const clinicId = (clinicData as Record<string, unknown>).clinic_id
+        // create_clinic returns a clinics row — field is `id`, not `clinic_id`
+        const clinicId = (clinicData as Record<string, unknown>).id
         const clinicNameVal = (clinicData as Record<string, unknown>).name
         if (clinicId) {
           setClinic(

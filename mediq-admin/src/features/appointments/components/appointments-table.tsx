@@ -44,7 +44,9 @@ export function AppointmentsTable({
           <DataTableColumnHeader column={column} title='Patient' />
         ),
         cell: ({ row }) => (
-          <span className='font-medium'>{row.getValue('patientName')}</span>
+          <div className='max-w-[160px] truncate font-medium' title={row.getValue('patientName')}>
+            {row.getValue('patientName')}
+          </div>
         ),
       },
       {
@@ -53,9 +55,9 @@ export function AppointmentsTable({
           <DataTableColumnHeader column={column} title='Doctor' />
         ),
         cell: ({ row }) => (
-          <span className='text-muted-foreground'>
+          <div className='max-w-[160px] truncate text-muted-foreground' title={row.getValue('doctorName')}>
             {row.getValue('doctorName')}
-          </span>
+          </div>
         ),
         filterFn: (row, id, value) =>
           (value as string[]).includes(row.getValue(id) as string),
@@ -115,7 +117,7 @@ export function AppointmentsTable({
         cell: ({ row }) => {
           const v = row.getValue<string | undefined>('reason')
           return v ? (
-            <span className='text-muted-foreground'>{v}</span>
+            <div className='max-w-[200px] truncate text-muted-foreground' title={v}>{v}</div>
           ) : (
             <span className='text-muted-foreground'>—</span>
           )

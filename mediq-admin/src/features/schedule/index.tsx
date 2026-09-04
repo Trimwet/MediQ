@@ -27,8 +27,10 @@ import {
   CalendarRange,
   LayoutGrid,
   CalendarPlus,
+  RefreshCw,
+  Trash2,
 } from 'lucide-react'
-import { useAppointments, useCreateAppointment } from '@/data/hooks'
+import { useAppointments, useCreateAppointment, useSyncToGoogleCalendar, useClearGoogleCalendar } from '@/data/hooks'
 import { useRbac } from '@/hooks/use-rbac'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -71,19 +73,20 @@ function ApptPill({ appt, compact = false }: { appt: Appointment; compact?: bool
   return (
     <div
       className={cn(
-        'flex items-center gap-1 rounded px-1.5 py-0.5 text-xs leading-tight',
+        // `min-w-0` + `overflow-hidden` on the container lets flex children
+        // shrink below their natural width so long names never push the box wider.
+        'flex items-center gap-1 rounded px-1.5 py-0.5 text-xs leading-tight min-w-0 overflow-hidden w-full',
         'bg-primary/8 border border-primary/15 hover:bg-primary/15 transition-colors cursor-default',
-        compact && 'truncate'
       )}
       title={`${appt.patientName} · ${appt.doctorName} · ${time}`}
     >
       <span className={cn('size-1.5 shrink-0 rounded-full', dot)} />
       {compact ? (
-        <span className='truncate font-medium'>{appt.patientName}</span>
+        <span className='truncate font-medium flex-1 min-w-0'>{appt.patientName}</span>
       ) : (
         <>
-          <span className='font-medium truncate'>{appt.patientName}</span>
-          <span className='text-muted-foreground shrink-0'>{time}</span>
+          <span className='font-medium truncate flex-1 min-w-0'>{appt.patientName}</span>
+          <span className='text-muted-foreground shrink-0 ml-auto pl-1'>{time}</span>
         </>
       )}
     </div>
@@ -134,7 +137,7 @@ function MonthView({ date, appointments }: { date: Date; appointments: Appointme
             <div
               key={key}
               className={cn(
-                'border-b border-r p-1 min-h-[80px] flex flex-col gap-0.5',
+                'border-b border-r p-1 min-h-[80px] flex flex-col gap-0.5 min-w-0 overflow-hidden',
                 !isCurrentMonth && 'bg-muted/30',
               )}
             >
@@ -215,7 +218,7 @@ function WeekView({ date, appointments }: { date: Date; appointments: Appointmen
               const key = `${format(day, 'yyyy-MM-dd')}-${hour}`
               const appts = byDayHour.get(key) ?? []
               return (
-                <div key={day.toISOString()} className='border-l px-0.5 py-0.5 flex flex-col gap-0.5'>
+                <div key={day.toISOString()} className='border-l px-0.5 py-0.5 flex flex-col gap-0.5 min-w-0 overflow-hidden'>
                   {appts.map((a) => (
                     <ApptPill key={a.id} appt={a} />
                   ))}
@@ -314,6 +317,8 @@ export function Schedule() {
 
   const appointmentsQuery = useAppointments()
   const createAppointment = useCreateAppointment()
+  const syncToGCal = useSyncToGoogleCalendar()
+  const clearGCal = useClearGoogleCalendar()
   const appointments = appointmentsQuery.data ?? []
 
   // Navigate
@@ -405,6 +410,53 @@ export function Schedule() {
                 Day
               </Button>
             </div>
+
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={() =>
+                syncToGCal.mutate(undefined, {
+                  onSuccess: (result) => {
+                    const { created, updated, skipped, errors } = result
+                    if (errors.length > 0) {
+                      toast.error(`Sync finished with ${errors.length} error(s)`)
+                    } else {
+                      toast.success(
+                        `Synced to Google Calendar — ${created} created, ${updated} updated, ${skipped} skipped`
+                      )
+                    }
+                  },
+                  onError: (err) => toast.error(err.message),
+                })
+              }
+              disabled={syncToGCal.isPending || clearGCal.isPending}
+            >
+              <RefreshCw className={cn('size-4', syncToGCal.isPending && 'animate-spin')} />
+              {syncToGCal.isPending ? 'Syncing…' : 'Sync to Google Calendar'}
+            </Button>
+
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={() =>
+                clearGCal.mutate(undefined, {
+                  onSuccess: (result) => {
+                    if (result.errors.length > 0) {
+                      toast.error(`Cleared with ${result.errors.length} error(s)`)
+                    } else if (result.deleted === 0) {
+                      toast.info('No MediQ events found in your calendar.')
+                    } else {
+                      toast.success(`Removed ${result.deleted} event${result.deleted !== 1 ? 's' : ''} from Google Calendar`)
+                    }
+                  },
+                  onError: (err) => toast.error(err.message),
+                })
+              }
+              disabled={clearGCal.isPending || syncToGCal.isPending}
+            >
+              <Trash2 className={cn('size-4', clearGCal.isPending && 'animate-pulse')} />
+              {clearGCal.isPending ? 'Clearing…' : 'Clear from Google Calendar'}
+            </Button>
 
             {canBook && (
               <Button size='sm' onClick={() => setDialogOpen(true)}>

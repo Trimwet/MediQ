@@ -831,3 +831,38 @@ export function useRealtimeNotifications() {
   const { clinicId } = useCurrentClinic()
   useRealtimeTable('notifications', ['notifications'], undefined, clinicId)
 }
+
+// ---- Google Calendar sync ----
+
+import {
+  syncAppointmentsToGoogleCalendar,
+  clearAppointmentsFromGoogleCalendar,
+  type SyncResult,
+  type ClearResult,
+} from '@/lib/google-calendar'
+
+/**
+ * Opens a Google OAuth popup, then pushes all confirmed appointments to
+ * the user's primary Google Calendar using the modern GIS token client.
+ * Appointments already synced are updated in-place; new ones are created.
+ */
+export function useSyncToGoogleCalendar() {
+  const appointmentsQuery = useAppointments()
+
+  return useMutation<SyncResult, Error>({
+    mutationFn: async () => {
+      const appointments = appointmentsQuery.data ?? []
+      return syncAppointmentsToGoogleCalendar(appointments)
+    },
+  })
+}
+
+/**
+ * Deletes all MediQ-synced events from the user's primary Google Calendar.
+ * Identifies events by the private `mediqId` extended property set during sync.
+ */
+export function useClearGoogleCalendar() {
+  return useMutation<ClearResult, Error>({
+    mutationFn: () => clearAppointmentsFromGoogleCalendar(),
+  })
+}
